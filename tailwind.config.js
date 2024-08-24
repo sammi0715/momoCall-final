@@ -27,6 +27,9 @@ module.exports = {
         },
         accent: '#FFF5D1',
       },
+      fontFamily: {
+        TC: ["Noto Sans TC", "sans-serif"],
+      },
     },
   },
   variants: {
