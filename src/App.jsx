@@ -1,7 +1,6 @@
-import "./App.css";
-
+import SearchPages from "./pages/Search";
 function App() {
-  return <></>;
+  return <SearchPages />;
 }
 
 export default App;
