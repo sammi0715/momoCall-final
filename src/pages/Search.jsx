@@ -4,7 +4,7 @@ import momoLogo from "/momocallLogo.png";
 
 const SearchPages = () => {
   return (
-    <div className="w-[375px] max-w-screen min-h-screen m-[auto] bg-white justify-center p-3 pt-0">
+    <div className="w-[375px] max-w-screen min-h-screen m-[auto] bg-white justify-center p-3 pt-0 font-TC">
       <header className="flex items-center h-[68px]">
         <button className="flex-shrink-0">
           <FiChevronLeft size={24} />
