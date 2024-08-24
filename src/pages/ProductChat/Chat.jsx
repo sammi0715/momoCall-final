@@ -5,7 +5,7 @@ import { FiAlertTriangle } from "react-icons/fi";
 function Chat() {
   return (
     <div className="mt-[160px] bg-black-600 h-full py-4 px-3 flex flex-col gap-4">
-      <p className="flex items-center bg-white rounded-[20px] text-center text-sm leading-5 py-1 ">
+      <p className="flex items-center bg-accent rounded-[20px] text-center text-sm leading-5 py-1 ">
         <FiAlertTriangle className="w-5 h-5 ml-6 mr-4" />
         提醒您，請勿透露個人資料及私下議價報價
       </p>
@@ -16,11 +16,11 @@ function Chat() {
           <small>商品編號</small>
           <h4 className="font-bold text-ellipsis line-clamp-2">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔</h4>
         </div>
-        <button className="col-span-2 text-xs text-primary/100 py-2 border-t">立即購買</button>
+        <button className="col-span-2 text-xs text-primary/100 py-2 border-t font-bold">立即購買</button>
       </div>
       <div className=" flex gap-1">
         <img src={happy} alt="" className="w-9 h-9" />
-        <p className="bg-white w-fit max-w-60 rounded-lg p-3 relative ml-2 after:absolute after:top-4 after:-left-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-r-[20px] after:border-r-white after:border-b-transparent">
+        <p className="bg-primary-600 w-fit max-w-60 rounded-lg p-3 relative ml-2 after:absolute after:top-4 after:-left-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-r-[20px] after:border-r-primary-600 after:border-b-transparent">
           一行最多放十三個字十三個字 十三個字十三個字十三個字
         </p>
         <small className="self-end">12:00</small>
@@ -33,17 +33,19 @@ function Chat() {
       </div>
       <div className=" flex gap-1">
         <img src={happy} alt="" className="w-9 h-9" />
-        <p className="bg-white w-fit max-w-60 rounded-lg p-3 relative ml-2 after:absolute after:top-4 after:-left-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-r-[20px] after:border-r-white after:border-b-transparent">一行最多放十三個字十三個字</p>
+        <p className="bg-primary-600 w-fit max-w-60 rounded-lg p-3 relative ml-2 after:absolute after:top-4 after:-left-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-r-[20px] after:border-r-primary-600 after:border-b-transparent">
+          一行最多放十三個字十三個字
+        </p>
         <small className="self-end">12:08</small>
       </div>
       <div className=" flex gap-1">
         <img src={happy} alt="" className="w-9 h-9" />
-        <div className="grid grid-cols-1 w-fit max-w-60 p-1 bg-white rounded-lg">
-          <img src={product} alt="" className=" mb-2 w-60 h-36 rounded-lg object-cover object-bottom" />
+        <div className="grid grid-cols-1 w-fit max-w-60 p-1 bg-primary-600 rounded-lg">
+          <img src={product} alt="" className=" mb-2 w-60 h-36 rounded object-cover object-bottom" />
           <small className="ml-2">商品編號</small>
           <h4 className="text-xs mb-2 ml-2">商品名稱商品名稱商品名稱十五字</h4>
         </div>
-        <small className="self-end">12:00</small>
+        <small className="self-end">12:08</small>
       </div>
     </div>
   );
