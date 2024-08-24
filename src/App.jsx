@@ -1,9 +1,6 @@
+import ProductChat from "./pages/ProductChat";
 function App() {
-  return (
-    <>
-      <h1 className="text-primary ">erw</h1>
-    </>
-  );
+  return <ProductChat></ProductChat>;
 }
 
 export default App;
