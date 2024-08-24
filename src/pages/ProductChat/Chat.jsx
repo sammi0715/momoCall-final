@@ -4,7 +4,7 @@ import { FiAlertTriangle } from "react-icons/fi";
 
 function Chat() {
   return (
-    <div className="mt-[160px] bg-black-600 h-full py-4 px-3 flex flex-col gap-4">
+    <div className="mt-[160px] mb-12 bg-black-600 h-full py-4 px-3 flex flex-col gap-4">
       <p className="flex items-center bg-accent rounded-[20px] text-center text-sm leading-5 py-1 ">
         <FiAlertTriangle className="w-5 h-5 ml-6 mr-4" />
         提醒您，請勿透露個人資料及私下議價報價
