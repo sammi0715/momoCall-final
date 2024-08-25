@@ -38,6 +38,11 @@ function Finish() {
             提醒您，請勿透露個人資料及私下議價報價
           </p>
         </div>
+        <div className="flex justify-center">
+          <div className="bg-black-0 rounded-large w-14">
+            <p className="text-xs leading-normal px-4">今天</p>
+          </div>
+        </div>
       </div>
     </div>
   );
