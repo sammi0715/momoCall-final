@@ -45,6 +45,9 @@ export default {
       borderWidth: {
         1: "1px",
       },
+      fontFamily: {
+        sans: ["Noto Sans TC", "sans-serif"],
+      },
     },
   },
   plugins: [],
