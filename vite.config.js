@@ -4,11 +4,11 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: "dist",
+    outDir: "public",
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        main: "public/index.html",
+        main: "index.html",
       },
     },
   },
