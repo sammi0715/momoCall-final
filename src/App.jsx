@@ -1,6 +1,6 @@
-import ProductChat from "./pages/ProductChat";
+import { Outlet } from "react-router-dom";
 function App() {
-  return <ProductChat></ProductChat>;
+  return <Outlet />;
 }
 
 export default App;
