@@ -1,5 +1,7 @@
 import { FiChevronLeft } from "react-icons/fi";
 import { FiAlertTriangle } from "react-icons/fi";
+import { FiImage } from "react-icons/fi";
+import { FiSend } from "react-icons/fi";
 import annoy from "../images/annoy.png";
 
 function Finish() {
@@ -121,6 +123,23 @@ function Finish() {
             12:08
           </p>
         </div>
+      </div>
+      <div className="bg-primary-600 w-container py-2 px-3 flex justify-between gap-x-2 fixed bottom-0 left-0 right-0 z-10 my-0 mx-auto">
+        <label className="bg-black-0 rounded-full p-1 cursor-pointer active:outline active:outline-primary active:outline-1 active:outline-offset-0">
+          <FiImage className="w-6 h-6 text-primary hover:text-primary-800 active:text-primary" />
+          <input type="file" className="hidden" />
+        </label>
+        <input
+          type="text"
+          className="rounded-large text-sm leading-normal bg-black-200 px-3 w-full placeholder:text-black hover:bg-black-0 focus:border-1 focus:bg-black-0 focus:border-primary focus:outline-none"
+          placeholder="輸入訊息"
+        />
+        <button
+          type="button"
+          className="bg-black-0 rounded-full p-1 cursor-pointer active:outline active:outline-primary active:outline-1 active:outline-offset-0"
+        >
+          <FiSend className="w-6 h-6 text-primary hover:text-primary-800 active:text-primary" />
+        </button>
       </div>
     </div>
   );
