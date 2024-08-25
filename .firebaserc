@@ -1,0 +1,17 @@
+{
+  "projects": {
+    "default": "momocall"
+  },
+  "targets": {
+    "momocall": {
+      "hosting": {
+        "default": [
+          "momocall"
+        ],
+        "finished": [
+          "momocall"
+        ]
+      }
+    }
+  }
+}

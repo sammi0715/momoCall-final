@@ -1,7 +1,7 @@
-import "./App.css";
+import Finish from "./pages/Finish";
 
 function App() {
-  return <></>;
+  return <Finish></Finish>;
 }
 
 export default App;
