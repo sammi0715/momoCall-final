@@ -1,6 +1,7 @@
 {
   "projects": {
-    "default": "momocall"
+    "default": "momocall",
+    "test": "momocall"
   },
   "targets": {
     "momocall": {
