@@ -32,11 +32,12 @@ export default {
         notice: "21px",
       },
       height: {
+        large: "70px",
         middle: "60px",
         small: "36px",
         notice: "21px",
       },
-      rounded: {
+      borderRadius: {
         large: "20px",
       },
     },
