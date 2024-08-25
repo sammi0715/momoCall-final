@@ -4,7 +4,7 @@ import TypeIn from "./TypeIn";
 
 function ProductChat() {
   return (
-    <div className=" font-TC ">
+    <div className=" font-TC w-[375px] mx-auto">
       <Header />
       <Chat />
       <TypeIn />
