@@ -31,6 +31,14 @@ function Finish() {
           <p>訂單編號：20240823153700</p>
         </div>
       </div>
+      <div className="px-3 py-4 space-y-4 mt-[188px] mb-12">
+        <div className="bg-accent flex justify-between items-center h-8 px-6 rounded-large">
+          <FiAlertTriangle className="w-notice h-notice" />
+          <p className="text-sm leading-normal">
+            提醒您，請勿透露個人資料及私下議價報價
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
