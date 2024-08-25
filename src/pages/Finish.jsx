@@ -12,7 +12,7 @@ function Finish() {
           </h1>
         </div>
       </div>
-      <div className="bg-black-0 w-custom py-2 px-3 grid grid-cols-4 gap-6 fixed top-[68px] left-0 right-0 z-10 my-0 mx-auto">
+      <div className="bg-black-0 w-container py-2 px-3 grid grid-cols-4 gap-6 fixed top-[68px] left-0 right-0 z-10 my-0 mx-auto">
         <div className="flex flex-col items-center gap-y-2 col-span-1">
           <img
             src="https://images.unsplash.com/photo-1635865933730-e5817b5680cd?q=80&w=2864&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
@@ -41,6 +41,26 @@ function Finish() {
         <div className="flex justify-center">
           <div className="bg-black-0 rounded-large w-14">
             <p className="text-xs leading-normal px-4">今天</p>
+          </div>
+        </div>
+        <div>
+          <div className="bg-black-0 p-4 rounded-t-large flex justify-between border-b-1 border-black-400">
+            <img
+              src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="product-image"
+              className="w-middle h-middle rounded-lg mr-3"
+            />
+            <div className="flex flex-col justify-between">
+              <p className="text-xs leading-normal">商品編號</p>
+              <p className="text-xs leading-normal font-bold">
+                商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔
+              </p>
+            </div>
+          </div>
+          <div className="bg-black-0 py-2 rounded-b-lg">
+            <p className="text-center text-xs leading-normal font-bold text-primary cursor-pointer">
+              立即購買
+            </p>
           </div>
         </div>
       </div>
