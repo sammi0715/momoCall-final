@@ -9,6 +9,7 @@ export default {
           600: "#D9D9D9",
           300: "#eeeeee",
           60: "#919191",
+          20: "F2F2F2",
         },
         primary: {
           DEFAULT: "#E30681",
