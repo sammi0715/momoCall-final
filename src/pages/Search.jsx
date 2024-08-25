@@ -30,21 +30,19 @@ const SearchPages = () => {
               src={momoLogo}
             ></img>
 
-            <div className="flex grow pl-4 justify-between">
-              <div className="flex flex-col justify-between">
-                <div className="flex justify-between">
-                  <h2 className="text-base font-bold text-primary">
-                    商家名稱最多也十二個字喔
-                  </h2>
-                  <p className="text-xs text-gray-500 ml-[30px]">08/23</p>
-                </div>
-                <div className="flex justify-between mt-1.5">
-                  <p className="text-sm text-gray-500">
-                    聊天內容最多十二個字喔哈
-                  </p>
-                  <div className="bg-primary-800 text-black-0 text-base w-6 h-6 rounded-full flex items-center justify-center ml-2 ">
-                    2
-                  </div>
+            <div className="flex grow pl-4 flex-col justify-between">
+              <div className="flex justify-between">
+                <h2 className="text-base font-bold text-primary">
+                  商家名稱最多也十二個字喔
+                </h2>
+                <p className="text-xs text-gray-500 ml-[30px]">08/23</p>
+              </div>
+              <div className="flex justify-between mt-1.5">
+                <p className="text-sm text-gray-500">
+                  聊天內容最多十二個字喔哈
+                </p>
+                <div className="bg-primary-800 text-black-0 text-base w-6 h-6 rounded-full flex items-center justify-center ml-2 ">
+                  2
                 </div>
               </div>
             </div>
