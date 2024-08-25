@@ -1,5 +1,6 @@
 import { FiChevronLeft } from "react-icons/fi";
 import { FiAlertTriangle } from "react-icons/fi";
+import annoy from "../images/annoy.png";
 
 function Finish() {
   return (
@@ -62,6 +63,63 @@ function Finish() {
               立即購買
             </p>
           </div>
+        </div>
+        <div className="flex gap-x-1">
+          <img
+            src={annoy}
+            alt="shopper-profile-image"
+            className="w-small h-small rounded-full mr-1 bg-primary-600"
+          />
+          <p className="bg-primary-600 w-chatBox rounded-lg text-sm leading-normal p-3 relative ml-2 after:absolute after:top-4 after:-left-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-r-[20px] after:border-r-primary-600 after:border-b-transparent">
+            一行最多放十三個字十三個字十三個字十三個字十三個字
+          </p>
+          <p className="text-xs leading-normal text-black-800 self-end">
+            12:00
+          </p>
+        </div>
+        <div className="flex flex-row-reverse gap-1">
+          <p className="bg-black-0 w-chatBox rounded-lg text-sm leading-normal p-3 relative mr-3 after:absolute after:top-4 after:-right-3 after:content-[''] after:w-0 after:h-0 after:block after:border-b-[20px] after:border-l-[20px] after:border-l-black-0 after:border-b-transparent">
+            一行最多放十三個字十三個字 十三個字十三個字十三個字
+          </p>
+          <p className="text-xs leading-normal text-black-800 self-end">
+            12:05
+          </p>
+        </div>
+        <div className="flex gap-x-1">
+          <img
+            src={annoy}
+            alt="shopper-profile-image"
+            className="w-9 h-9 rounded-full mr-1 bg-primary-600"
+          />
+          <p className="bg-primary-600 w-chatBox rounded-lg text-sm leading-normal p-3 relative ml-2 after:absolute after:top-4 after:-left-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-r-[20px] after:border-r-primary-600 after:border-b-transparent">
+            一行最多放十三個字十三個字
+          </p>
+          <p className="text-xs leading-normal text-black-800 self-end">
+            12:08
+          </p>
+        </div>
+        <div className="flex gap-x-1">
+          <img
+            src={annoy}
+            alt="shopper-profile-image"
+            className="w-9 h-9 rounded-full mr-3 bg-primary-600"
+          />
+          <div className="bg-primary-600 w-chatBox rounded-lg p-1">
+            <img
+              src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="product-image"
+              className="w-uploadImage h-uploadImage rounded mb-1"
+            />
+            <div className="p-1">
+              <p className="text-xs leading-normal">商品編號</p>
+              <p className="text-xs leading-normal">
+                商品名稱商品名稱商品名稱十五字
+              </p>
+            </div>
+          </div>
+          <p className="text-xs leading-normal text-black-800 self-end">
+            12:08
+          </p>
         </div>
       </div>
     </div>
