@@ -7,8 +7,27 @@ import happy from "./img/happy.png";
 import { database, storage } from "../utils/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { useReducer } from "react";
 
+const initialState = {
+  purchase: false,
+  checkout: false,
+  count: 0,
+};
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "purchase": {
+      return { ...state, purchase: !state.purchase };
+    }
+    case "checkout": {
+      return { ...state, checkout: !state.checkout };
+    }
+    default:
+      return state;
+  }
+};
 function Finish() {
+  const [state, dispatch] = useReducer(reducer, initialState);
   const setChats = async (url) => {
     try {
       const messagesRef = collection(database, "chatroom", "chat1", "messages");
@@ -102,7 +121,9 @@ function Finish() {
             </div>
           </div>
           <div className="bg-black-0 rounded-b-lg flex justify-center">
-            <button className="w-full py-2 text-xs leading-normal font-bold text-primary cursor-pointer">立即購買</button>
+            <button className="w-full py-2 text-xs leading-normal font-bold text-primary cursor-pointer" onClick={() => dispatch({ type: "purchase" })}>
+              立即購買
+            </button>
           </div>
         </div>
 
@@ -138,6 +159,72 @@ function Finish() {
           <p className="text-xs leading-normal text-black-800 self-end">12:08</p>
         </div>
       </div>
+
+      <div className={`${state.purchase ? "flex" : "hidden"} justify-center items-center bg-black-800/80 w-container h-full  fixed top-0`}>
+        <div className="w-64 h-2/5 bg-white mx-auto py-2 px-4 flex flex-col gap-4 text-sm rounded-xl">
+          <h4 className="text-center font-bold leading-normal text-base text-primary-800">請選擇規格數量</h4>
+          <div className="bg-black-0 p-1 rounded-t-large flex justify-center items-center">
+            <img src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="product-image" className="w-small h-small rounded-lg mr-3" />
+            <div className="flex flex-col justify-between">
+              <p className="text-xs leading-normal">123456</p>
+              <p className="text-xs leading-normal font-bold">商品名稱商品名稱商品名稱</p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-around items-center">
+              <label htmlFor="spec">規格</label>
+              <select name="spec" id="spec" className="w-2/4 border-1 border-black-600 rounded-md text-center">
+                <option value="yellow">黃色</option>
+              </select>
+            </div>
+            <div className="flex justify-around items-center ">
+              <label htmlFor="number">數量</label>
+              <div className="flex justify-around w-2/4 border-1 border-black-600 rounded-md">
+                <button onClick={() => dispatch({ type: "" })}>-</button>
+                <p className="leading-normal">1</p>
+                <button onClick={() => dispatch({ type: "" })}>+</button>
+              </div>
+            </div>
+            <div className="flex justify-around items-center">
+              <p>總金額：</p>
+              <p className="text-black-600 w-2/4 text-center">1000元</p>
+            </div>
+          </div>
+          <div className="flex justify-around items-center">
+            <button onClick={() => dispatch({ type: "purchase" })}>取消</button>
+            <button onClick={() => dispatch({ type: "checkout" })} className="text-primary-800 font-bold">
+              下一步
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className={`${state.checkout ? "flex" : "hidden"} justify-center items-center  w-container h-full  fixed top-0`}>
+        <div className="w-64 h-2/5 bg-white mx-auto py-2 px-4 flex flex-col gap-4 text-sm rounded-xl">
+          <h4 className="text-center font-bold leading-normal text-base text-primary-800">訂單即將送出</h4>
+          <p className="text-center font-bold">已確認品項、數量並前往結帳嗎？</p>
+          <div className="flex flex-col gap-1">
+            <div className="flex justify-between items-center">
+              <p>產品名稱：</p>
+              <p className="text-black-600">我是產品</p>
+            </div>
+            <div className="flex justify-between items-center">
+              <p>數量：</p>
+              <p className="text-black-600">2</p>
+            </div>
+            <div className="flex justify-between items-center">
+              <p>訂單金額：</p>
+              <p className="text-black-600">1000元</p>
+            </div>
+          </div>
+          <small className="text-center text-black-600">提醒您，請於十分鐘內進行結帳</small>
+          <div className="flex justify-around items-center">
+            <button onClick={() => dispatch({ type: "checkout" })}>上一步</button>
+            <button className="text-primary-800 font-bold">確認</button>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-primary-600 w-container py-2 px-3 flex justify-between gap-x-2 fixed bottom-0 left-0 right-0 z-10 my-0 mx-auto">
         <label className="bg-black-0 rounded-full p-1 cursor-pointer active:outline active:outline-primary active:outline-1 active:outline-offset-0">
           <FiImage className="w-6 h-6 text-primary hover:text-primary-800 active:text-primary" />
