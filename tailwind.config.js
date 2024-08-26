@@ -26,14 +26,34 @@ module.exports = {
           0: "#FFFFFF",
         },
       },
+      width: {
+        container: "375px",
+        chatBox: "206px",
+        uploadImage: "198px",
+        large: "70px",
+        middle: "60px",
+        small: "36px",
+        notice: "21px",
+      },
+      height: {
+        uploadImage: "136px",
+        large: "70px",
+        middle: "60px",
+        small: "36px",
+        notice: "21px",
+      },
+      borderRadius: {
+        large: "20px",
+      },
+      borderWidth: {
+        1: "1px",
+      },
       fontFamily: {
-        TC: ["Noto Sans TC", "sans-serif"],
+        sans: ["Noto Sans TC", "sans-serif"],
       },
     },
   },
-  variants: {
 
-  },
   plugins: [],
 };
 
