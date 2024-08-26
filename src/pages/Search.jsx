@@ -145,33 +145,76 @@ const SearchPages = () => {
 export default SearchPages;
 
 const searchFirestore = async (searchTerm) => {
-  const collections = ["chatroom", "orders", "shops"];
   let results = [];
 
-  for (const collectionName of collections) {
-    const q = query(
-      collection(db, collectionName),
-      where("shopName", "==", searchTerm)
+  // 搜尋 chatroom 集合中的 shopName
+  const chatroomQuery = query(
+    collection(db, "chatroom"),
+    where("shopName", "==", searchTerm)
+  );
+  const chatroomSnapshot = await getDocs(chatroomQuery);
+  for (const doc of chatroomSnapshot.docs) {
+    let data = { id: doc.id, ...doc.data(), collectionName: "chatroom" };
+    results.push(data);
+    console.log(results);
+  }
+
+  // 搜尋 orders 集合中的 orderName
+  const ordersQuery = query(
+    collection(db, "orders"),
+    where("orderNumber", "==", searchTerm)
+  );
+  const ordersSnapshot = await getDocs(ordersQuery);
+  for (const doc of ordersSnapshot.docs) {
+    const orderData = doc.data();
+    const shopId = orderData.shopId;
+
+    // 根據 shopId 搜尋 chatroom
+    const chatroomByShopIdQuery = query(
+      collection(db, "chatroom"),
+      where("shopId", "==", shopId)
     );
-    const querySnapshot = await getDocs(q);
-    for (const doc of querySnapshot.docs) {
-      let data = { id: doc.id, ...doc.data(), collectionName };
-
-      if (collectionName === "chatroom") {
-        const messagesRef = collection(db, `chatroom/${doc.id}/messages`);
-        const messagesQuery = query(
-          messagesRef,
-          orderBy("created_time", "desc"),
-          limit(1)
-        );
-        const messagesSnapshot = await getDocs(messagesQuery);
-        if (!messagesSnapshot.empty) {
-          const latestMessage = messagesSnapshot.docs[0].data();
-          data.latestMessage = latestMessage;
-        }
-      }
-
+    const chatroomByShopIdSnapshot = await getDocs(chatroomByShopIdQuery);
+    for (const chatroomDoc of chatroomByShopIdSnapshot.docs) {
+      let data = {
+        id: chatroomDoc.id,
+        ...chatroomDoc.data(),
+        collectionName: "chatroom",
+      };
       results.push(data);
+      console.log(results);
+    }
+  }
+
+  // 搜尋 shops 集合中的 products 集合
+  const shopsSnapshot = await getDocs(collection(db, "shops"));
+  for (const shopDoc of shopsSnapshot.docs) {
+    const shopIdentifier = shopDoc.id;
+    const productsRef = collection(db, `shops/${shopIdentifier}/products`);
+    const productsQuery = query(
+      productsRef,
+      where("productName", "==", searchTerm)
+    );
+    const productsSnapshot = await getDocs(productsQuery);
+
+    if (!productsSnapshot.empty) {
+      // 根據 shopId 搜尋 chatroom
+      const shopData = shopDoc.data();
+      const shopId = shopData.shopId; // 自定義的 shopId
+      const chatroomByShopIdQuery = query(
+        collection(db, "chatroom"),
+        where("shopId", "==", shopId)
+      );
+      const chatroomByShopIdSnapshot = await getDocs(chatroomByShopIdQuery);
+      for (const chatroomDoc of chatroomByShopIdSnapshot.docs) {
+        let data = {
+          id: chatroomDoc.id,
+          ...chatroomDoc.data(),
+          collectionName: "chatroom",
+        };
+        results.push(data);
+        console.log(results);
+      }
     }
   }
 
