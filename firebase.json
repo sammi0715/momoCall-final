@@ -1,6 +1,7 @@
 {
   "hosting": [
     {
+      "site": "momocall",
       "public": "build",
       "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
       "rewrites": [
@@ -9,17 +10,7 @@
           "destination": "/index.html"
         }
       ]
-    },
-    {
-      "site": "momocall-finished",
-      "public": "public",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-      "rewrites": [
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
-      ]
     }
+    
   ]
 }

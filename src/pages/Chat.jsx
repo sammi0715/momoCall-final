@@ -4,8 +4,55 @@ import { FiImage } from "react-icons/fi";
 import { FiSend } from "react-icons/fi";
 import annoy from "../images/annoy.png";
 import happy from "./img/happy.png";
+import { database, storage } from "../utils/firebase";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
 
 function Finish() {
+  const setChats = async (url) => {
+    try {
+      const messagesRef = collection(database, "chatroom", "chat1", "messages");
+      const messageRef = doc(messagesRef);
+      setDoc(messageRef, {
+        content: url,
+        created_time: serverTimestamp(),
+        from: "user1",
+      })
+        .then(() => console.log("Document successfully written!"))
+        .catch((error) => console.error("Error writing document: ", error));
+    } catch (error) {
+      console.error("Error getting random document:", error);
+    }
+  };
+  const sendImage = (event) => {
+    console.log(event.target.files);
+
+    const file = event.target.files[0];
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
+    if (!file) return;
+    if (!allowedTypes.includes(file.type)) {
+      alert("請選擇一個有效的圖片文件（JPEG, PNG, GIF）。");
+      event.target.value = "";
+      return;
+    }
+    const storageRef = ref(storage, `images/${file.name}`);
+
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {},
+      (error) => {
+        console.error("Upload failed:", error);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          setChats(downloadURL);
+        });
+      }
+    );
+  };
+
   return (
     <div className="bg-black-200 w-container h-100 my-0 mx-auto relative font-sans">
       <div className="bg-black-200 w-container px-3 fixed top-0 left-0 right-0 z-10 my-0 mx-auto">
@@ -94,7 +141,7 @@ function Finish() {
       <div className="bg-primary-600 w-container py-2 px-3 flex justify-between gap-x-2 fixed bottom-0 left-0 right-0 z-10 my-0 mx-auto">
         <label className="bg-black-0 rounded-full p-1 cursor-pointer active:outline active:outline-primary active:outline-1 active:outline-offset-0">
           <FiImage className="w-6 h-6 text-primary hover:text-primary-800 active:text-primary" />
-          <input type="file" className="hidden" />
+          <input type="file" className="hidden" accept="image/jpg,image/jpeg,image/png,image/gif" onChange={sendImage} />
         </label>
         <input type="text" className="rounded-large text-sm leading-normal bg-black-200 px-3 w-full placeholder:text-black hover:bg-black-0 focus:border-1 focus:bg-black-0 focus:border-primary focus:outline-none" placeholder="輸入訊息" />
         <button type="button" className="bg-black-0 rounded-full p-1 cursor-pointer active:outline active:outline-primary active:outline-1 active:outline-offset-0">
