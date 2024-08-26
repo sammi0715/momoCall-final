@@ -12,7 +12,7 @@ dist
 dist-ssr
 *.local
 public/
-*.cache
+.firebase/
 
 # Editor directories and files
 .vscode/*
