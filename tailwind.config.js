@@ -29,7 +29,7 @@ module.exports = {
       width: {
         container: "375px",
         chatBox: "206px",
-        uploadImage: "198px",
+        uploadImage: "198xp",
         large: "70px",
         middle: "60px",
         small: "36px",
@@ -49,11 +49,8 @@ module.exports = {
         1: "1px",
       },
       fontFamily: {
-
         sans: ["Noto Sans TC", "sans-serif"],
-
         TC: ["Noto Sans TC", "sans-serif"],
-
       },
     },
   },

@@ -72,3 +72,29 @@ build/
 # dataconnect generated files
 .dataconnect
 
+<<<<<<< HEAD
+=======
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+public/
+.firebase/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+.env
+/build
+>>>>>>> main
