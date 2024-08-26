@@ -26,7 +26,7 @@ export default {
       width: {
         container: "375px",
         chatBox: "206px",
-        uploadImage: "198px",
+        uploadImage: "198xp",
         large: "70px",
         middle: "60px",
         small: "36px",
@@ -46,7 +46,7 @@ export default {
         1: "1px",
       },
       fontFamily: {
-        TC: ["Noto Sans TC", "sans-serif"],
+        sans: ["Noto Sans TC", "sans-serif"],
       },
     },
   },
