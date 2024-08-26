@@ -1,0 +1,17 @@
+{
+  "projects": {
+    "default": "momocall",
+    "test": "momocall"
+  },
+  "targets": {
+    "momocall": {
+      "hosting": {
+        "staging": [
+          "momocall"
+        ]
+      }
+    }
+  },
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
+}
