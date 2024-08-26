@@ -167,7 +167,7 @@ const SearchPages = () => {
           state.results
             .filter((result) => result.collectionName === "chatroom")
             .map((result, index) => {
-              let urlParam = "";
+              let urlParam = "member";
               if (result.type === "member") {
                 urlParam = "member";
               } else if (result.type === "order") {
