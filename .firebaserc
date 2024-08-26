@@ -1,7 +1,6 @@
 {
   "projects": {
-    "default": "momocall",
-    "test": "momocall"
+    "default": "momocall"
   },
   "etags": {},
   "dataconnectEmulatorConfig": {}

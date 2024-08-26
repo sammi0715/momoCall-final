@@ -65,9 +65,15 @@ node_modules/
 # dotenv environment variables file
 .env
 
+.firebase/
+build/
+
+
 # dataconnect generated files
 .dataconnect
 
+<<<<<<< HEAD
+=======
 pnpm-debug.log*
 lerna-debug.log*
 
@@ -91,3 +97,4 @@ public/
 
 .env
 /build
+>>>>>>> main
