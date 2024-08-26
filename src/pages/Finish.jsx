@@ -60,10 +60,10 @@ function Finish() {
               </p>
             </div>
           </div>
-          <div className="bg-black-0 py-2 rounded-b-lg">
-            <p className="text-center text-xs leading-normal font-bold text-primary cursor-pointer">
+          <div className="bg-black-0 rounded-b-lg flex justify-center">
+            <button className="w-full py-2 text-xs leading-normal font-bold text-primary cursor-pointer">
               立即購買
-            </p>
+            </button>
           </div>
         </div>
         <div className="flex gap-x-1">
