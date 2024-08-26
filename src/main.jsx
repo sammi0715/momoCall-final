@@ -1,17 +1,20 @@
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { StrictMode } from "react";
-import App from "./App.jsx";
+import App from "./App";
 import ProductChat from "./pages/ProductChat";
 import SearchPages from "./pages/Search.jsx";
 import Finish from "./pages/Finish.jsx";
+import Chat from "./pages/Chat.jsx";
 import "./index.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<SearchPages />}>
+        <Route path="/" element={<App />}>
+          <Route index element={<SearchPages />} />
+          <Route path="chat" element={<Chat />} />
           <Route path="productChat" element={<ProductChat />} />
           <Route path="finishPage" element={<Finish />} />
           <Route path="*" element={<Navigate to="/" replace />} />
