@@ -49,7 +49,11 @@ module.exports = {
         1: "1px",
       },
       fontFamily: {
+
         sans: ["Noto Sans TC", "sans-serif"],
+
+        TC: ["Noto Sans TC", "sans-serif"],
+
       },
     },
   },

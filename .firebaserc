@@ -2,15 +2,6 @@
   "projects": {
     "default": "momocall"
   },
-  "targets": {
-    "momocall": {
-      "hosting": {
-        "search": [
-          "momocall"
-        ]
-      }
-    }
-  },
   "etags": {},
   "dataconnectEmulatorConfig": {}
 }
