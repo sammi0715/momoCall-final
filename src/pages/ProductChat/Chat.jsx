@@ -41,7 +41,7 @@ function Chat() {
       <div className=" flex gap-1">
         <img src={happy} alt="" className="w-9 h-9" />
         <div className="grid grid-cols-1 w-fit max-w-middle p-1 bg-primary-600 rounded-lg">
-          <img src={product} alt="" className=" mb-2 w-middle h-small rounded object-cover object-bottom" />
+          <img src={product} alt="" className=" mb-2 w-uploadImage h-uploadImage rounded object-cover object-bottom" />
           <small className="ml-2">商品編號</small>
           <h4 className="text-xs mb-2 ml-2">商品名稱商品名稱商品名稱十五字</h4>
         </div>

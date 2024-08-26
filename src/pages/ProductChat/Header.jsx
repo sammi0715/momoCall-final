@@ -12,8 +12,8 @@ function Header() {
       </div>
       <div className="product bg-white flex justify-center gap-6 py-2 items-center">
         <img src={happy} alt="camera" className="w-20 rounded-full" />
-        <div className="my-2">
-          <h4 className="text-base font-bold mb-1.5 leading-6">商家名稱最多也十六個字十六個字</h4>
+        <div className="my-2 flex flex-col py-2 justify-between">
+          <h4 className="text-base font-bold leading-6">商家名稱最多也十六個字十六個字</h4>
           <p className="text-base leading-6 text-secondary">momoCall 回應率：100%</p>
         </div>
       </div>
