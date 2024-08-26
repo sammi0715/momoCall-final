@@ -1,17 +1,8 @@
 {
   "projects": {
-    "default": "momocall"
+    "default": "momocall",
+    "test": "momocall"
   },
-  "targets": {
-    "momocall": {
-      "hosting": {
-        "default": [
-          "momocall"
-        ],
-        "finished": [
-          "momocall"
-        ]
-      }
-    }
-  }
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
 }
