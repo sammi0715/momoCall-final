@@ -17,7 +17,7 @@ const SearchPages = () => {
       <input
         type="text"
         placeholder="請輸入商店名稱, 商品名稱或商品編號"
-        className="w-[351px] h-[32px] text-sm text-black-100 text-center bg-black-40 placeholder-black-100 rounded-full mb-4 hover:bg-black-20 focus:outline outline-black-60"
+        className="w-[351px] h-[32px] text-sm text-black-100 text-center bg-black-400 placeholder-black rounded-full mb-4 hover:bg-black-200 focus:outline outline-black-600"
       />
       <div>
         {[1, 2, 3, 4, 5].map((item) => (
