@@ -4,19 +4,19 @@ import { FiAlertTriangle } from "react-icons/fi";
 
 function Chat() {
   return (
-    <div className="mt-[160px] mb-12 bg-black-600 h-full py-4 px-3 flex flex-col gap-4">
+    <div className="mt-[160px] mb-12 bg-black-200 h-full py-4 px-3 flex flex-col gap-4">
       <p className="flex items-center bg-accent rounded-[20px] text-center text-sm leading-normal py-1 ">
         <FiAlertTriangle className="w-5 h-5 ml-6 mr-4" />
         提醒您，請勿透露個人資料及私下議價報價
       </p>
       <p className=" bg-white rounded-[20px] text-center  mx-auto w-14 ">今天</p>
-      <div className="bg-slate-50 rounded-lg grid gap-x-3 grid-cols-[60px_1fr] items-center ">
+      <div className="bg-white rounded-lg grid gap-x-3 grid-cols-[60px_1fr] items-center ">
         <img src={product} alt="product" className="w-[60px] ml-4" />
         <div className="text-xs leading-[18px] my-4 mx-4">
           <small>商品編號</small>
           <h4 className="font-bold text-ellipsis line-clamp-2">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔</h4>
         </div>
-        <button className="col-span-2 text-xs text-primary/100 py-2 border-t font-bold">立即購買</button>
+        <button className="col-span-2 text-xs text-primary py-2 border-t font-bold">立即購買</button>
       </div>
       <div className=" flex gap-1">
         <img src={happy} alt="" className="w-9 h-9" />

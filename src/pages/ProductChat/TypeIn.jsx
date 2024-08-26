@@ -7,7 +7,7 @@ function TypeIn() {
       <button className="bg-white w-8 h-8 rounded-full active:border-primary active:border">
         <FiImage className="w-6 h-6 mx-auto text-primary hover:text-primary " />
       </button>
-      <input type="text" placeholder="輸入訊息" className="bg-black-20 grow rounded-3xl pl-3  focus:outline-primary focus:outline focus:bg-white hover:bg-white" />
+      <input type="text" placeholder="輸入訊息" className="bg-black-200 grow rounded-3xl pl-3  focus:outline-primary focus:outline focus:bg-white hover:bg-white" />
       <button className="bg-white w-8 h-8 rounded-full active:border-primary active:border">
         <FiSend className="w-5 h-5 mx-auto text-primary hover:text-primary" />
       </button>

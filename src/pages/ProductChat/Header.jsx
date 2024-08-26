@@ -3,10 +3,10 @@ import { FiChevronLeft } from "react-icons/fi";
 
 function Header() {
   return (
-    <div className="fixed bg-black-900 top-0 left-1/2 -translate-x-1/2 w-[375px] z-10">
-      <div className="py-4 bg-black-300">
+    <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[375px] z-10">
+      <div className="py-4 bg-black-200">
         <p className="text-center font-bold text-2xl relative text-primary">
-          <FiChevronLeft className="absolute w-6 h-6 top-1 left-3 text-black-900" />
+          <FiChevronLeft className="absolute w-6 h-6 top-1 left-3 text-black" />
           對話紀錄
         </p>
       </div>
