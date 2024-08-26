@@ -10,6 +10,7 @@ import {
   orderBy,
   limit,
 } from "firebase/firestore";
+import { Link } from "react-router-dom";
 
 const initialState = {
   searchTerm: "",
@@ -74,11 +75,11 @@ const SearchPages = () => {
 
   return (
     <div className="w-container max-w-screen min-h-screen m-[auto] bg-white justify-center p-3 pt-0 font-sans">
-      <header className="flex items-center h-[68px]">
-        <button className="flex-shrink-0">
+      <header className="flex items-center py-4">
+        <button className="mr-3">
           <FiChevronLeft className="w-6 h-6" />
         </button>
-        <h1 className="text-2xl leading-normal font-bold flex-grow text-center text-primary">
+        <h1 className="text-2xl leading-normal font-bold text-primary ml-20">
           momoCall
         </h1>
       </header>
@@ -91,7 +92,8 @@ const SearchPages = () => {
       />
       <div>
         {state.results.map((result) => (
-          <div
+          <Link
+            to={"/chat"}
             key={result.id}
             className="w-full py-4 flex items-center border-t border-gray-300"
           >
@@ -124,7 +126,7 @@ const SearchPages = () => {
                 )}
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
