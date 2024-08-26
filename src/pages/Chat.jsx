@@ -1,7 +1,4 @@
-import { FiChevronLeft } from "react-icons/fi";
-import { FiAlertTriangle } from "react-icons/fi";
-import { FiImage } from "react-icons/fi";
-import { FiSend } from "react-icons/fi";
+import { FiChevronLeft, FiAlertTriangle, FiImage, FiSend } from "react-icons/fi";
 import annoy from "../images/annoy.png";
 import happy from "./img/happy.png";
 import { database, storage } from "../utils/firebase";
