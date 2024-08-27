@@ -187,9 +187,9 @@ const SearchPages = () => {
               if (result.type === "member") {
                 urlParam = `member=${result.id}`;
               } else if (result.type === "order") {
-                urlParam = `member=${result.id}?order=${result.myOrderNumber}`;
+                urlParam = `member=${result.id}&order=${result.myOrderNumber}`;
               } else if (result.type === "product") {
-                urlParam = `member=${result.id}?product=${result.myProductNumber}`;
+                urlParam = `member=${result.id}&product=${result.myProductNumber}`;
               }
 
               return (
