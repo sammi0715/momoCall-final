@@ -22,6 +22,12 @@ const reducer = (state, action) => {
     case "checkout": {
       return { ...state, checkout: !state.checkout };
     }
+    case "addProduct": {
+      return { ...state, count: state.count + 1 };
+    }
+    case "subProduct": {
+      return { ...state, count: state.count - 1 };
+    }
     default:
       return state;
   }
@@ -180,9 +186,9 @@ function Finish() {
             <div className="flex justify-around items-center ">
               <label htmlFor="number">數量</label>
               <div className="flex justify-around w-2/4 border-1 border-black-600 rounded-md">
-                <button onClick={() => dispatch({ type: "" })}>-</button>
-                <p className="leading-normal">1</p>
-                <button onClick={() => dispatch({ type: "" })}>+</button>
+                <button onClick={() => dispatch({ type: "subProduct" })}>-</button>
+                <p className="leading-normal">{state.count}</p>
+                <button onClick={() => dispatch({ type: "addProduct" })}>+</button>
               </div>
             </div>
             <div className="flex justify-around items-center">
@@ -210,7 +216,7 @@ function Finish() {
             </div>
             <div className="flex justify-between items-center">
               <p>數量：</p>
-              <p className="text-black-600">2</p>
+              <p className="text-black-600">{state.count}</p>
             </div>
             <div className="flex justify-between items-center">
               <p>訂單金額：</p>
