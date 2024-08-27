@@ -26,7 +26,7 @@ export default {
       width: {
         container: "375px",
         chatBox: "206px",
-        uploadImage: "198xp",
+        uploadImage: "198px",
         messageContent: "192px",
         large: "70px",
         middle: "60px",
