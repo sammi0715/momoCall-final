@@ -1,7 +1,6 @@
-
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "firebase/firestore";
-
+import { getStorage } from "firebase/storage";
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: "momocall.firebaseapp.com",
@@ -15,5 +14,6 @@ const firebaseConfig = {
 
 
 const app = initializeApp(firebaseConfig);
+const storage = getStorage(app);
 const db = getFirestore(app);
-export { db, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp };
+export { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp };
