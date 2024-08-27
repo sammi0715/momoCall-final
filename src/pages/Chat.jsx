@@ -202,7 +202,7 @@ function Finish() {
         {state.messages.map((message, index) => (
           <div
             key={index}
-            className={`flex gap-1 ${
+            className={`flex gap-1 mr-3 ${
               message.from === "user1" ? "justify-end" : ""
             }`}
           >
