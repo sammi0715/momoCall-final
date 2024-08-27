@@ -1,11 +1,16 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  setDoc,
+  doc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+} from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "momocall.firebaseapp.com",
@@ -17,7 +22,18 @@ const firebaseConfig = {
   measurementId: "G-X76J3G62JR",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const storage = getStorage(app);
 const db = getFirestore(app);
-export default db;
+export {
+  db,
+  storage,
+  collection,
+  addDoc,
+  doc,
+  setDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+};
