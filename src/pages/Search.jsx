@@ -175,7 +175,9 @@ const SearchPages = () => {
               );
             })}
         {state.isSearching && state.results.length === 0 && (
-          <p className="text-2xl text-black text-center">Not found</p>
+          <p className="text-base leading-normal text-black text-center">
+            找不到您搜尋的內容
+          </p>
         )}
         {state.isSearching &&
           state.results
