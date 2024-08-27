@@ -289,7 +289,7 @@ function Finish() {
         </label>
         <input
           type="text"
-          className="rounded-large text-sm leading-normal bg-black-200 px-3 w-full placeholder:text-black hover:bg-black-0 focus:border-1 focus:bg-black-0 focus:border-primary focus:outline-none"
+          className="bg-black-200 grow rounded-3xl pl-3  focus:outline-primary focus:outline focus:bg-white hover:bg-white"
           placeholder="輸入訊息"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
