@@ -4,13 +4,15 @@ import happy from "./img/happy.png";
 import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc } from "../utils/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
+import tappay from "../utils/tappay";
 
 const initialState = {
   messages: [],
   inputValue: "",
   showOrderInfo: false,
   showProductInfo: false,
-  isPurchase: false,
+  isChoose: false,
+  isPerchase: false,
   isCheckout: false,
   count: 0,
 };
@@ -28,12 +30,21 @@ function reducer(state, action) {
     case "RESET_INPUT_VALUE":
       return { ...state, inputValue: "" };
     case "TO_PURCHASE":
-      return { ...state, purchase: !state.purchase };
+      return { ...state, isChoose: !state.isChoose };
     case "TO_CHECKOUT":
-      return { ...state, checkout: !state.checkout };
+      if (state.count === 0) {
+        alert("請選擇數量");
+        return state;
+      }
+      return { ...state, isPerchase: !state.isPerchase };
+    case "FINISH_CHECKOUT":
+      return { ...state, isCheckout: !state.isCheckout, isChoose: false, isPerchase: false };
     case "ADD_PRODUCT_NUM":
       return { ...state, count: state.count + 1 };
     case "SUB_PRODUCT_NUM":
+      if (state.count === 0) {
+        return state;
+      }
       return { ...state, count: state.count - 1 };
 
     default:
@@ -64,6 +75,14 @@ function Finish() {
     });
 
     return () => unsubscribe(); // 清理快照監聽器
+  }, []);
+
+  useEffect(() => {
+    const setupTappay = async () => {
+      await tappay.setupSDK();
+      tappay.setupCard();
+    };
+    setupTappay();
   }, []);
 
   const predefinedResponses = [
@@ -141,6 +160,23 @@ function Finish() {
     );
   };
 
+  async function checkout() {
+    try {
+      if (!tappay.canGetPrime()) {
+        window.alert("付款資料輸入有誤");
+        return;
+      }
+
+      const result = await tappay.getPrime();
+      if (result.status !== 0) {
+        window.alert("付款資料輸入有誤");
+        return;
+      }
+      dispatch({ type: "FINISH_CHECKOUT" });
+    } catch (err) {
+      console.log(err);
+    }
+  }
   return (
     <div className="bg-black-200 w-container h-100 my-0 mx-auto relative font-sans">
       <div className="bg-black-200 w-container px-3 fixed top-0 left-0 right-0 z-10 my-0 mx-auto">
@@ -159,17 +195,17 @@ function Finish() {
           <p className="text-xs leading-normal text-center w-large bg-secondary-400 text-secondary rounded-lg">訂單成立</p>
         </div>
         <div className="flex flex-col gap-y-1 col-span-3">
-          <p className="font-bold">商品名稱一行最多十七個字商品名稱一行最多十七個字</p>
+          <p className="font-bold line-clamp-2">商品名稱一行最多十七個字商品名稱一行最多十七個字</p>
           <p className="text-primary">NT. 499</p>
           <p>訂單編號：20240823153700</p>
         </div>
       </div>
 
       {/* 這裡要做選擇，hidden or flex */}
-      <div className={`product bg-white ${state.showProductInfo ? "flex" : "hidden"} justify-center gap-6 py-2 mt-[68px] items-center`}>
+      <div className={`w-full product bg-white ${state.showProductInfo ? "flex" : "hidden"} justify-center gap-6 py-2 mt-[68px] items-center`}>
         <img src={happy} alt="camera" className="w-20 rounded-full" />
-        <div className="my-2 flex flex-col py-2 justify-between">
-          <h4 className="text-base font-bold leading-normal">商家名稱最多也十六個字十六個字</h4>
+        <div className="w-4/6 my-2 flex flex-col py-2 justify-between">
+          <h4 className="w-fit text-base font-bold leading-normal line-clamp-1">商家名稱最多也十六個字十六個字</h4>
           <p className="text-base leading-normal text-secondary">momoCall 回應率：100%</p>
         </div>
       </div>
@@ -189,7 +225,7 @@ function Finish() {
             <img src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="product-image" className="w-middle h-middle rounded-lg mr-3" />
             <div className="flex flex-col justify-between">
               <p className="text-xs leading-normal">商品編號</p>
-              <p className="text-xs leading-normal font-bold">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔</p>
+              <p className="w-full text-xs leading-normal font-bold line-clamp-2">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔vsss</p>
             </div>
           </div>
 
@@ -214,77 +250,16 @@ function Finish() {
             <small className={`self-end ${message.from === "user1" ? "order-1 mr-3" : "order-2 ml-2"}`}>{message.created_time?.toDate().toLocaleTimeString() || "Loading..."}</small>
           </div>
         ))}
-
-        {/* 注解掉的區塊 */}
-        {/* 
-        <div className="flex gap-x-1">
-          <img
-            src={annoy}
-            alt="shopper-profile-image"
-            className="w-small h-small rounded-full mr-1 bg-primary-600"
-          />
-          <p className="bg-primary-600 w-chatBox rounded-lg text-sm leading-normal p-3 relative ml-2 after:absolute after:top-4 after:-left-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-r-[20px] after:border-r-primary-600 after:border-b-transparent">
-            一行最多放十三個字十三個字十三個字十三個字十三個字
-          </p>
-          <p className="text-xs leading-normal text-black-800 self-end">
-            12:00
-          </p>
-        </div>
-        <div className="flex flex-row-reverse gap-1">
-          <p className="bg-black-0 w-chatBox rounded-lg text-sm leading-normal p-3 relative mr-3 after:absolute after:top-4 after:-right-3 after:content-[''] after:w-0 after:h-0 after:block after:border-b-[20px] after:border-l-[20px] after:border-l-black-0 after:border-b-transparent">
-            一行最多放十三個字十三個字 十三個字十三個字十三個字
-          </p>
-          <p className="text-xs leading-normal text-black-800 self-end">
-            12:05
-          </p>
-        </div>
-        <div className="flex gap-x-1">
-          <img
-            src={annoy}
-            alt="shopper-profile-image"
-            className="w-9 h-9 rounded-full mr-1 bg-primary-600"
-          />
-          <p className="bg-primary-600 w-chatBox rounded-lg text-sm leading-normal p-3 relative ml-2 after:absolute after:top-4 after:-left-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-r-[20px] after:border-r-primary-600 after:border-b-transparent">
-            一行最多放十三個字十三個字
-          </p>
-          <p className="text-xs leading-normal text-black-800 self-end">
-            12:08
-          </p>
-        </div>
-        <div className="flex gap-x-1">
-          <img
-            src={annoy}
-            alt="shopper-profile-image"
-            className="w-9 h-9 rounded-full mr-3 bg-primary-600"
-          />
-          <div className="bg-primary-600 w-chatBox rounded-lg p-1">
-            <img
-              src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-              alt="product-image"
-              className="w-uploadImage h-uploadImage rounded mb-1"
-            />
-            <div className="p-1">
-              <p className="text-xs leading-normal">商品編號</p>
-              <p className="text-xs leading-normal">
-                商品名稱商品名稱商品名稱十五字
-              </p>
-            </div>
-          </div>
-          <p className="text-xs leading-normal text-black-800 self-end">
-            12:08
-          </p>
-        </div> 
-        */}
       </div>
 
-      <div className={`${state.purchase ? "flex" : "hidden"} justify-center items-center bg-black-800/80 w-container h-full  fixed top-0`}>
-        <div className="w-64 h-2/5 bg-white mx-auto py-2 px-4 flex flex-col gap-4 text-sm rounded-xl">
+      <div className={`${state.isChoose ? "flex" : "hidden"} justify-center items-center bg-black-800/80 w-container h-full  fixed top-0`}>
+        <div className="w-64 h-60 bg-white mx-auto py-2 px-4 flex flex-col gap-3 text-sm rounded-xl">
           <h4 className="text-center font-bold leading-normal text-base text-primary-800">請選擇規格數量</h4>
           <div className="bg-black-0 p-1 rounded-t-large flex justify-center items-center">
             <img src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="product-image" className="w-small h-small rounded-lg mr-3" />
             <div className="flex flex-col justify-between">
               <p className="text-xs leading-normal">123456</p>
-              <p className="text-xs leading-normal font-bold">商品名稱商品名稱商品名稱</p>
+              <p className="text-xs leading-normal font-bold line-clamp-1">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔vsss</p>
             </div>
           </div>
           <div className="flex flex-col gap-2">
@@ -308,22 +283,24 @@ function Finish() {
             </div>
           </div>
           <div className="flex justify-around items-center">
-            <button onClick={() => dispatch({ type: "TO_PURCHASE" })}>取消</button>
-            <button onClick={() => dispatch({ type: "TO_CHECKOUT" })} className="text-primary-800 font-bold">
+            <button className="block w-full h-8" onClick={() => dispatch({ type: "TO_PURCHASE" })}>
+              取消
+            </button>
+            <button onClick={() => dispatch({ type: "TO_CHECKOUT" })} className="text-primary-800 font-bold block w-full h-8">
               下一步
             </button>
           </div>
         </div>
       </div>
 
-      <div className={`${state.checkout ? "flex" : "hidden"} justify-center items-center  w-container h-full  fixed top-0`}>
-        <div className="w-64 h-2/5 bg-white mx-auto py-2 px-4 flex flex-col gap-4 text-sm rounded-xl">
-          <h4 className="text-center font-bold leading-normal text-base text-primary-800">訂單即將送出</h4>
-          <p className="text-center font-bold">已確認品項、數量並前往結帳嗎？</p>
+      <div className={`${state.isPerchase ? "flex" : "hidden"} justify-center items-center  w-container h-full  fixed top-0`}>
+        <div className="w-64 h-84 bg-white mx-auto py-2 px-4 flex flex-col gap-4 text-sm rounded-xl">
+          <h4 className="text-center font-bold leading-normal text-lg text-primary-800 mt-2">訂單即將送出</h4>
+          <p className="text-center font-bold">已確認品項、數量並進行結帳嗎？</p>
           <div className="flex flex-col gap-1">
             <div className="flex justify-between items-center">
               <p>產品名稱：</p>
-              <p className="text-black-600">我是產品</p>
+              <p className="text-black-600 line-clamp-1 w-3/5">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔vsss</p>
             </div>
             <div className="flex justify-between items-center">
               <p>數量：</p>
@@ -334,11 +311,35 @@ function Finish() {
               <p className="text-black-600">1000元</p>
             </div>
           </div>
-          <small className="text-center text-black-600">提醒您，請於十分鐘內進行結帳</small>
-          <div className="flex justify-around items-center">
-            <button onClick={() => dispatch({ type: "checkout" })}>上一步</button>
-            <button className="text-primary-800 font-bold">確認</button>
+
+          <h4 className="text-center font-bold leading-normal text-base text-primary-800">請輸入付款資訊</h4>
+          <div className="flex flex-col gap-5">
+            <div className="h-6 border-b-1 border-black-600 " id="card-number"></div>
+            <div className="flex gap-4">
+              <div className=" h-6 border-b-1 border-black-600 " id="card-expiration-date"></div>
+              <div className="h-6 border-b-1 border-black-600 " id="card-ccv"></div>
+            </div>
           </div>
+
+          <div className="flex justify-around items-center ">
+            <button className="block w-full h-9 text-black-600" onClick={() => dispatch({ type: "TO_CHECKOUT" })}>
+              上一步
+            </button>
+            <button onClick={checkout} className="block w-full h-9 text-primary-800 font-bold ">
+              確認
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className={`${state.isCheckout ? "flex" : "hidden"} justify-center items-center  w-container h-full  fixed top-0 bg-black-800/80`}>
+        <div className="w-64 h-32 bg-white mx-auto py-2 px-4 flex flex-col gap-3 text-sm rounded-xl">
+          <h4 className="text-center font-bold leading-normal text-lg text-primary-800 mt-2">付款成功，即將為您出貨</h4>
+          <p className="text-center font-bold">訂單編號：20240827000001</p>
+
+          <button onClick={() => dispatch({ type: "FINISH_CHECKOUT" })} className="block w-full h-8 text-primary-800 font-bold ">
+            確認
+          </button>
         </div>
       </div>
 
