@@ -110,7 +110,7 @@ function ProductChat() {
           messages: [
             {
               role: "system",
-              content: "你是一個全程使用繁體中文並且非常人性化回覆「已登入」的使用者提問富邦媒體電商客服相關問題的富邦媒體電商客服人員",
+              content: "你是一個全程使用繁體中文並且非常人性化回覆「已登入」的使用者提問MOMO電商客服相關問題的富邦媒體電商客服人員",
             },
             {
               role: "user",
@@ -123,12 +123,9 @@ function ProductChat() {
 
       if (res.ok) {
         const data = await res.json();
-        const contentMarkdown = data.choices[0].message.content;
-        const content = marked(contentMarkdown);
-        console.log(content);
 
         await addDoc(collection(db, "chatroom", "chat1", "messages"), {
-          content: content,
+          content: data.choices[0].message.content,
           created_time: serverTimestamp(),
           from: "shop",
         });
@@ -235,7 +232,6 @@ function ProductChat() {
         </div>
       </div>
 
-      {/* 這裡要做選擇，hidden or grid */}
       <div className={`${state.showOrderInfo ? "grid" : "hidden"}  bg-black-0 w-container py-2 px-3  grid-cols-4 gap-6  top-[68px] mt-[68px] left-0 right-0 z-10 my-0 mx-auto`}>
         <div className="flex flex-col items-center gap-y-2 col-span-1">
           <img src="https://images.unsplash.com/photo-1635865933730-e5817b5680cd?q=80&w=2864&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="product-image" className="rounded-full w-large h-large" />
@@ -248,7 +244,6 @@ function ProductChat() {
         </div>
       </div>
 
-      {/* 這裡要做選擇，hidden or flex */}
       <div className={`w-full product bg-white ${state.showProductInfo ? "flex" : "hidden"} justify-center gap-6 py-2 mt-[68px] items-center`}>
         <img src={happy} alt="camera" className="w-20 rounded-full" />
         <div className="w-4/6 my-2 flex flex-col py-2 justify-between">
@@ -282,6 +277,7 @@ function ProductChat() {
             </button>
           </div>
         </div>
+
         {state.messages.map((message, index) => (
           <div key={index} className={`flex gap-1 mr-3 ${message.from === "user1" ? "justify-end" : ""}`}>
             {message.from !== "user1" && <img src={happy} alt="" className="w-9 h-9" />}
