@@ -1,6 +1,11 @@
 import happy from "./img/happy.png";
 import product from "./img/product.jpg";
-import { FiChevronLeft, FiAlertTriangle, FiImage, FiSend } from "react-icons/fi";
+import {
+  FiChevronLeft,
+  FiAlertTriangle,
+  FiImage,
+  FiSend,
+} from "react-icons/fi";
 
 function ProductChat() {
   return (
@@ -15,8 +20,12 @@ function ProductChat() {
         <div className="product bg-white flex justify-center gap-6 py-2 items-center">
           <img src={happy} alt="camera" className="w-20 rounded-full" />
           <div className="my-2 flex flex-col py-2 justify-between">
-            <h4 className="text-base font-bold leading-normal">商家名稱最多也十六個字十六個字</h4>
-            <p className="text-base leading-normal text-secondary">momoCall 回應率：100%</p>
+            <h4 className="text-base font-bold leading-normal">
+              商家名稱最多也十六個字十六個字
+            </h4>
+            <p className="text-base leading-normal text-secondary">
+              momoCall 回應率：100%
+            </p>
           </div>
         </div>
       </div>
@@ -25,14 +34,20 @@ function ProductChat() {
           <FiAlertTriangle className="w-notice h-notice ml-6 mr-4" />
           提醒您，請勿透露個人資料
         </p>
-        <p className=" bg-white rounded-large text-center  mx-auto w-14 ">今天</p>
+        <p className=" bg-white rounded-large text-center  mx-auto w-14 ">
+          今天
+        </p>
         <div className="bg-white rounded-lg grid gap-x-3 grid-cols-[60px_1fr] items-center ">
           <img src={product} alt="product" className="w-middle ml-4" />
           <div className="text-xs leading-normal my-4 mx-4">
             <small>商品編號</small>
-            <h4 className="font-bold text-ellipsis line-clamp-2">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔</h4>
+            <h4 className="font-bold text-ellipsis line-clamp-2">
+              商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔
+            </h4>
           </div>
-          <button className="col-span-2 text-xs text-primary py-2 border-t font-bold">立即購買</button>
+          <button className="col-span-2 text-xs text-primary py-2 border-t font-bold">
+            立即購買
+          </button>
         </div>
         <div className=" flex gap-1">
           <img src={happy} alt="" className="w-9 h-9" />
@@ -57,9 +72,15 @@ function ProductChat() {
         <div className=" flex gap-1">
           <img src={happy} alt="" className="w-9 h-9" />
           <div className="grid grid-cols-1 w-fit max-w-middle p-1 bg-primary-600 rounded-lg">
-            <img src={product} alt="" className=" mb-2 w-uploadImage h-uploadImage rounded object-cover object-bottom" />
+            <img
+              src={product}
+              alt=""
+              className=" mb-2 w-uploadImage h-uploadImage rounded object-cover object-bottom"
+            />
             <small className="ml-2">商品編號</small>
-            <h4 className="text-xs mb-2 ml-2">商品名稱商品名稱商品名稱十五字</h4>
+            <h4 className="text-xs mb-2 ml-2">
+              商品名稱商品名稱商品名稱十五字
+            </h4>
           </div>
           <small className="self-end">12:08</small>
         </div>
@@ -68,7 +89,11 @@ function ProductChat() {
         <button className="bg-white w-8 h-8 rounded-full active:border-primary active:border">
           <FiImage className="w-6 h-6 mx-auto text-primary hover:text-primary " />
         </button>
-        <input type="text" placeholder="輸入訊息" className="bg-black-200 grow rounded-3xl pl-3  focus:outline-primary focus:outline focus:bg-white hover:bg-white" />
+        <input
+          type="text"
+          placeholder="輸入訊息"
+          className="bg-black-200 grow rounded-3xl pl-3  focus:outline-primary focus:outline focus:bg-white hover:bg-white"
+        />
         <button className="bg-white w-8 h-8 rounded-full active:border-primary active:border">
           <FiSend className="w-5 h-5 mx-auto text-primary hover:text-primary" />
         </button>
