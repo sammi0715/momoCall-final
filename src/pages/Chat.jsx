@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import {
   FiChevronLeft,
   FiAlertTriangle,
@@ -17,20 +17,40 @@ import {
   serverTimestamp,
 } from "../utils/firebase";
 
+const initialState = {
+  messages: [],
+  inputValue: "",
+  showOrderInfo: false,
+  showProductInfo: false,
+};
+function reducer(state, action) {
+  switch (action.type) {
+    case "SET_MESSAGES":
+      return { ...state, messages: action.payload };
+    case "SET_INPUT_VALUE":
+      return { ...state, inputValue: action.payload };
+    case "TOGGLE_ORDER_INFO":
+      return { ...state, showOrderInfo: action.payload };
+    case "TOGGLE_PRODUCT_INFO":
+      return { ...state, showProductInfo: action.payload };
+    case "RESET_INPUT_VALUE":
+      return { ...state, inputValue: "" };
+    default:
+      return state;
+  }
+}
+
 function Finish() {
-  const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState("");
-  const [showOrderInfo, setShowOrderInfo] = useState(false);
-  const [showProductInfo, setShowProductInfo] = useState(false);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     if (!queryParams.has("member")) {
       if (queryParams.has("order")) {
-        setShowOrderInfo(true);
+        dispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
       }
       if (queryParams.has("product")) {
-        setShowProductInfo(true);
+        dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
       }
     }
 
@@ -43,7 +63,7 @@ function Finish() {
       querySnapshot.forEach((doc) => {
         msgs.push(doc.data());
       });
-      setMessages(msgs);
+      dispatch({ type: "SET_MESSAGES", payload: msgs });
     });
 
     return () => unsubscribe(); // 清理快照監聽器
@@ -62,22 +82,23 @@ function Finish() {
   ];
 
   const sendMessage = async () => {
-    if (inputValue.trim() !== "") {
+    if (state.inputValue.trim() !== "") {
       await addDoc(collection(db, "chatroom", "chat1", "messages"), {
-        content: inputValue,
+        content: state.inputValue,
         created_time: serverTimestamp(),
         from: "user1",
       });
       const response =
-        predefinedResponses.find(({ pattern }) => pattern.test(inputValue))
-          ?.response || "抱歉，我不太明白您的問題！";
+        predefinedResponses.find(({ pattern }) =>
+          pattern.test(state.inputValue)
+        )?.response || "抱歉，我不太明白您的問題！";
 
       await addDoc(collection(db, "chatroom", "chat1", "messages"), {
         content: response,
         created_time: serverTimestamp(),
         from: "shop",
       });
-      setInputValue(""); // 清空輸入框
+      dispatch({ type: "RESET_INPUT_VALUE" }); // 清空輸入框
     }
   };
 
@@ -97,7 +118,7 @@ function Finish() {
       {/* 這裡要做選擇，hidden or grid */}
       <div
         className={`${
-          showOrderInfo ? "grid" : "hidden"
+          state.showOrderInfo ? "grid" : "hidden"
         }  bg-black-0 w-container py-2 px-3  grid-cols-4 gap-6  top-[68px] mt-[68px] left-0 right-0 z-10 my-0 mx-auto`}
       >
         <div className="flex flex-col items-center gap-y-2 col-span-1">
@@ -122,7 +143,7 @@ function Finish() {
       {/* 這裡要做選擇，hidden or flex */}
       <div
         className={`product bg-white ${
-          showProductInfo ? "flex" : "hidden"
+          state.showProductInfo ? "flex" : "hidden"
         } justify-center gap-6 py-2 mt-[68px] items-center`}
       >
         <img src={happy} alt="camera" className="w-20 rounded-full" />
@@ -138,7 +159,7 @@ function Finish() {
 
       <div
         className={`px-3 py-4 space-y-4 ${
-          !showOrderInfo && !showProductInfo ? "mt-[68px]" : ""
+          !state.showOrderInfo && !state.showProductInfo ? "mt-[68px]" : ""
         } mb-12`}
       >
         <div className="bg-accent flex justify-center items-center h-8 px-6 rounded-large">
@@ -152,8 +173,8 @@ function Finish() {
         </div>
         <div>
           <div
-            className={`bg-black-0 p-4 rounded-t-large ${
-              showOrderInfo ? "hidden" : "flex"
+            className={`bg-black-0 p-4 rounded-t-lg ${
+              state.showOrderInfo ? "hidden" : "flex"
             } justify-between border-b-1 border-black-400`}
           >
             <img
@@ -170,7 +191,7 @@ function Finish() {
           </div>
           <div
             className={`bg-black-0 rounded-b-lg ${
-              showOrderInfo ? "hidden" : "flex"
+              state.showOrderInfo ? "hidden" : "flex"
             } justify-center`}
           >
             <button className="w-full py-2 text-xs leading-normal font-bold text-primary cursor-pointer">
@@ -178,7 +199,7 @@ function Finish() {
             </button>
           </div>
         </div>
-        {messages.map((message, index) => (
+        {state.messages.map((message, index) => (
           <div
             key={index}
             className={`flex gap-1 ${
@@ -291,8 +312,10 @@ function Finish() {
           type="text"
           className="bg-black-200 grow rounded-3xl pl-3  focus:outline-primary focus:outline focus:bg-white hover:bg-white"
           placeholder="輸入訊息"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          value={state.inputValue}
+          onChange={(e) =>
+            dispatch({ type: "SET_INPUT_VALUE", payload: e.target.value })
+          }
         />
         <button
           className="bg-white w-8 h-8 rounded-full active:border-primary active:border"
