@@ -192,7 +192,7 @@ const SearchPages = () => {
 
               return (
                 <Link
-                  to={`/chat?${urlParam}`}
+                  to={`/chat?${urlParam}=${result.id}`}
                   key={result.id}
                   className={`w-full py-4 flex items-center border-t border-gray-300 cursor-pointer ${
                     index === state.results.length - 1
