@@ -145,7 +145,7 @@ const SearchPages = () => {
 
                   <div className="flex ml-4 flex-col py-2 justify-between w-full h-large">
                     <div className="flex justify-between items-center">
-                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent h-6">
+                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent h-6 line-clamp-1">
                         {result.shopName}
                       </h2>
                       <p className="text-xs text-gray-500 leading-normal">
@@ -161,7 +161,7 @@ const SearchPages = () => {
                       </p>
                     </div>
                     <div className="flex justify-between">
-                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-6 overflow-hidden text-ellipsis">
+                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-6 line-clamp-1">
                         {latestMessages[result.id]?.content || ""}
                       </p>
                       {latestMessages[result.id] && result.unreadCount > 0 && (
@@ -207,7 +207,7 @@ const SearchPages = () => {
 
                   <div className="flex ml-4 flex-col py-2 justify-between w-full h-large">
                     <div className="flex justify-between items-center">
-                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent h-6">
+                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent h-6 line-clamp-1">
                         {result.shopName}
                       </h2>
                       <p className="text-xs text-gray-500 leading-normal">
@@ -223,7 +223,7 @@ const SearchPages = () => {
                       </p>
                     </div>
                     <div className="flex justify-between">
-                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-6 overflow-hidden text-ellipsis">
+                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-6 line-clamp-1">
                         {latestMessages[result.id]?.content || ""}
                       </p>
                       {latestMessages[result.id] && result.unreadCount > 0 && (
