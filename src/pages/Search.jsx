@@ -183,18 +183,18 @@ const SearchPages = () => {
           state.results
             .filter((result) => result.collectionName === "chatroom")
             .map((result, index) => {
-              let urlParam = "member";
+              let urlParam = `member=${result.id}`;
               if (result.type === "member") {
-                urlParam = "member";
+                urlParam = `member=${result.id}`;
               } else if (result.type === "order") {
-                urlParam = "order";
+                urlParam = `member=${result.id}?order=${result.myOrderNumber}`;
               } else if (result.type === "product") {
-                urlParam = "product";
+                urlParam = `member=${result.id}?product=${result.myProductNumber}`;
               }
 
               return (
                 <Link
-                  to={`/chat?${urlParam}=${result.id}`}
+                  to={`/chat?${urlParam}`}
                   key={result.id}
                   className={`w-full py-4 flex items-center border-t border-gray-300 cursor-pointer ${
                     index === state.results.length - 1
@@ -281,6 +281,7 @@ const searchFirestore = async (searchTerm) => {
   for (const doc of ordersSnapshot.docs) {
     const orderData = doc.data();
     const shopId = orderData.shopId;
+    const myOrderNumber = orderData.orderNumber;
 
     const chatroomByShopIdQuery = query(
       collection(db, "chatroom"),
@@ -293,6 +294,7 @@ const searchFirestore = async (searchTerm) => {
         ...chatroomDoc.data(),
         collectionName: "chatroom",
         type: "order",
+        myOrderNumber,
       };
       results.push(data);
     }
@@ -311,6 +313,9 @@ const searchFirestore = async (searchTerm) => {
     if (!productsSnapshot.empty) {
       const shopData = shopDoc.data();
       const shopId = shopData.shopId;
+      const productData = productsSnapshot.docs[0].data();
+      const myProductNumber = productData.productNumber;
+
       const chatroomByShopIdQuery = query(
         collection(db, "chatroom"),
         where("shopId", "==", shopId)
@@ -322,6 +327,7 @@ const searchFirestore = async (searchTerm) => {
           ...chatroomDoc.data(),
           collectionName: "chatroom",
           type: "product",
+          myProductNumber,
         };
         results.push(data);
       }
