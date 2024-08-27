@@ -10,7 +10,7 @@ import {
   orderBy,
   limit,
 } from "firebase/firestore";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const initialState = {
   searchTerm: "",
@@ -26,6 +26,8 @@ const reducer = (state, action) => {
       return { ...state, results: action.payload, isSearching: true };
     case "RESET_SEARCH":
       return { ...state, isSearching: false };
+    case "CLEAR_SEARCH_TERM":
+      return { ...state, searchTerm: "" };
     default:
       return state;
   }
@@ -34,6 +36,7 @@ const reducer = (state, action) => {
 const SearchPages = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [latestMessages, setLatestMessages] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -79,15 +82,26 @@ const SearchPages = () => {
     }
   };
 
+  const handleLinkClick = async () => {
+    dispatch({ type: "CLEAR_SEARCH_TERM" });
+    const fetchedResults = await fetchAllChatrooms();
+    dispatch({ type: "SET_RESULTS", payload: fetchedResults });
+    navigate("/");
+  };
+
   return (
     <div className="w-container max-w-screen min-h-screen m-[auto] bg-white justify-center p-3 pt-0 font-sans">
       <header className="flex items-center py-4">
-        <button className="mr-3">
-          <FiChevronLeft className="w-6 h-6" />
-        </button>
-        <h1 className="text-2xl leading-normal font-bold text-primary ml-20">
-          momoCall
-        </h1>
+        <Link to="/" onClick={handleLinkClick}>
+          <button className="mr-3">
+            <FiChevronLeft className="w-6 h-6" />
+          </button>
+        </Link>
+        <Link to="/" onClick={handleLinkClick}>
+          <h1 className="text-2xl leading-normal font-bold text-primary ml-20">
+            momoCall
+          </h1>
+        </Link>
       </header>
       <input
         type="text"
