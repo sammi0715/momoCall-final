@@ -309,19 +309,22 @@ function Finish() {
   };
 
   const imageFormats = [".jpeg", ".jpg", ".png", ".gif"];
+
   const setChats = async (url) => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
+    const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
     try {
-      const messagesRef = collection(db, "chatroom", "chat1", "messages");
-      const messageRef = doc(messagesRef);
-      setDoc(messageRef, {
+      // 等待 addDoc 完成
+      await addDoc(messagesCollectionRef, {
         content: url,
         created_time: serverTimestamp(),
         from: "user1",
-      })
-        .then(() => console.log("Document successfully written!"))
-        .catch((error) => console.error("Error writing document: ", error));
+      });
+
+      console.log("Document successfully written!");
     } catch (error) {
-      console.error("Error getting random document:", error);
+      console.error("Error writing document: ", error);
     }
   };
   const sendImage = (event) => {
@@ -348,6 +351,7 @@ function Finish() {
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           setChats(downloadURL);
+
           // scrollToBottom();
         });
       }
