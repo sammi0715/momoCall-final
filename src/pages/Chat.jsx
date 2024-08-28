@@ -434,12 +434,10 @@ function Finish() {
           </div>
         </div>
         {state.messages.map((message, index) => (
-          <div key={index} className={`flex gap-1 mr-3 ${message.from === "user1" ? "justify-end" : ""}`}>
+          <div key={index} className={`flex gap-1 mr-3 ${message.from === "user1" ? "items-end flex-col" : "max-w-[258px] flex-wrap"}`}>
             {message.from !== "user1" && <img src={happy} alt="" className="w-9 h-9" />}
             <div
-              className={`w-fit max-w-[65%]  text-black break-words rounded-lg p-3 relative ${message.from === "user1" ? "bg-white" : "bg-primary-600"} ${
-                message.from === "user1" ? "order-2" : "order-1 ml-2"
-              } ${
+              className={`w-fit max-w-52 text-black break-words rounded-lg p-3 relative ${message.from === "user1" ? "bg-white" : "bg-primary-600"} ${message.from === "user1" ? "" : "ml-2"} ${
                 message.from === "user1"
                   ? "after:absolute after:top-4 after:-right-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-l-[20px] after:border-l-white after:border-b-transparent"
                   : "after:absolute after:top-4 after:-left-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-r-[20px] after:border-r-primary-600 after:border-b-transparent"
@@ -451,9 +449,7 @@ function Finish() {
                 <p dangerouslySetInnerHTML={{ __html: marked(message.content) }}></p>
               )}
             </div>
-            <small className={`self-end ${message.from === "user1" ? "order-1 mr-3" : "order-2 ml-2"}`}>
-              {message.created_time?.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "Loading..."}
-            </small>
+            <small className={`${message.from === "user1" ? "" : "ml-12"}`}>{message.created_time?.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "Loading..."}</small>
           </div>
         ))}
       </div>
