@@ -8,6 +8,8 @@ import { Link } from "react-router-dom";
 import tappay from "../utils/tappay";
 import { marked } from "marked";
 import useGoogleVisionAPI from "../utils/useGoogleVisionAPI";
+import { PhotoProvider, PhotoView } from "react-photo-view";
+import "react-photo-view/dist/react-photo-view.css";
 
 const initialState = {
   messages: [],
@@ -461,7 +463,11 @@ function Finish() {
               }`}
             >
               {imageFormats.some((format) => message.content.includes(format)) ? (
-                <img src={message.content} alt="Sent" className="rounded-lg max-w-full h-auto" />
+                <PhotoProvider maskOpacity={0.5}>
+                  <PhotoView src={message.content}>
+                    <img src={message.content} alt="Sent" className="rounded-lg max-w-full h-auto" />
+                  </PhotoView>
+                </PhotoProvider>
               ) : (
                 <p dangerouslySetInnerHTML={{ __html: marked(message.content) }}></p>
               )}
