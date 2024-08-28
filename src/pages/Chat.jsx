@@ -280,9 +280,8 @@ function Finish() {
     const queryParams = new URLSearchParams(window.location.search);
     const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
     const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
-    console.log(url);
+
     if (url !== undefined) {
-      console.log(url);
       await addDoc(messagesCollectionRef, {
         content: url,
         created_time: serverTimestamp(),
@@ -367,7 +366,7 @@ function Finish() {
       const queryParams = new URLSearchParams(window.location.search);
       const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
       const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
-      fetchCustomGPTResponse(`圖片內容如下${labels}`, messagesCollectionRef);
+      fetchCustomGPTResponse(`圖片相關如下${labels}`, messagesCollectionRef);
     }
   }, [labels]);
 
