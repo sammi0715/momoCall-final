@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import tappay from "../utils/tappay";
 import { useState } from "react";
 import { marked } from "marked";
+import useGoogleVisionAPI from "../utils/useGoogleVisionAPI";
 
 const initialState = {
   messages: [],
@@ -56,7 +57,7 @@ function reducer(state, action) {
 
 function ProductChat() {
   const [error, setError] = useState("");
-
+  const { labels, handleAnalyzeImage } = useGoogleVisionAPI();
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -90,51 +91,8 @@ function ProductChat() {
     setupTappay();
   }, []);
 
-  const [labels, setLabels] = useState([]);
-
-  const handleAnalyzeImage = async () => {
-    const apiKey = import.meta.env.VITE_GOOGLE_CLOUD_API_KEY; // 請替換為你的 API 金鑰
-    const endpoint = `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`;
-
-    const requestBody = {
-      requests: [
-        {
-          image: {
-            source: {
-              imageUri: "https://api.appworks-school.tw/assets/201807202157/main.jpg",
-            },
-          },
-          features: [
-            {
-              type: "LABEL_DETECTION",
-              maxResults: 30,
-            },
-          ],
-        },
-      ],
-    };
-
-    try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      const data = await response.json();
-      const labels = data.responses[0].labelAnnotations;
-      setLabels(labels.map((label) => label.description));
-      console.log(labels.map((label) => label.description).toString());
-    } catch (err) {
-      setError("Failed to analyze image");
-      console.error(err);
-    }
+  const handleAnalyzeClick = () => {
+    handleAnalyzeImage(imageUrl);
   };
 
   const fetchCustomGPTResponse = async (inputText, document) => {
@@ -170,11 +128,11 @@ function ProductChat() {
         const data = await res.json();
         console.log(data);
 
-        /*await addDoc(document, {
+        await addDoc(document, {
           content: data.choices[0].message.content,
           created_time: serverTimestamp(),
           from: "shop",
-        });*/
+        });
 
         setError("");
       } else if (res.status === 429) {
@@ -456,7 +414,7 @@ function ProductChat() {
           <FiImage className="w-6 h-6 text-primary hover:text-primary-800 active:text-primary" />
           <input type="file" className="hidden" accept="image/jpg,image/jpeg,image/png,image/gif" onChange={sendImage} />
         </label>
-        <button onClick={handleAnalyzeImage}>取label</button>
+        <button onClick={handleAnalyzeClick}>取label</button>
         <input
           type="text"
           className="bg-black-200 grow rounded-3xl pl-3  focus:outline-primary focus:outline focus:bg-white hover:bg-white"
