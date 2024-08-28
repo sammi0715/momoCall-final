@@ -93,7 +93,7 @@ const SearchPages = () => {
       <input
         type="text"
         placeholder="請輸入商店名稱、商品名稱或商品編號"
-        className="leading-normal w-full h-8 text-sm text-black-100 text-center bg-black-400 placeholder-black rounded-full mb-4 hover:bg-black-200 focus:outline outline-black-600 focus:bg-black-200"
+        className="leading-normal w-full h-8 text-sm text-black-100 text-center bg-black-200 placeholder-black-600 rounded-full mb-4 hover:bg-black-200 focus:outline outline-black-600 focus:bg-black-200"
         value={state.searchTerm}
         onChange={handleInputChange}
         onKeyPress={handleKeyPress}
@@ -125,9 +125,9 @@ const SearchPages = () => {
                 >
                   <img className="w-large h-large rounded-full" src={momoLogo}></img>
 
-                  <div className="flex ml-4 flex-col py-2 justify-between w-full h-large">
+                  <div className="flex ml-4 flex-col py-2 justify-between w-full">
                     <div className="flex justify-between items-center">
-                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent h-6 line-clamp-1">{result.shopName}</h2>
+                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent line-clamp-2">{result.shopName}</h2>
                       <p className="text-xs text-gray-500 leading-normal">
                         {latestMessages[result.id]?.created_time
                           ? new Date(latestMessages[result.id].created_time.seconds * 1000).toLocaleDateString("zh-TW", {
@@ -138,7 +138,7 @@ const SearchPages = () => {
                       </p>
                     </div>
                     <div className="flex justify-between">
-                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-6 line-clamp-1">{latestMessages[result.id]?.content || ""}</p>
+                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-[42px] line-clamp-2">{latestMessages[result.id]?.content || ""}</p>
                       {latestMessages[result.id] && result.unreadCount > 0 && (
                         <div className="bg-primary-800 text-black-0 text-base w-6 h-6 rounded-full flex items-center justify-center ml-2">{result.unreadCount}</div>
                       )}
@@ -174,9 +174,9 @@ const SearchPages = () => {
                 >
                   <img className="w-large h-large rounded-full" src={momoLogo}></img>
 
-                  <div className="flex ml-4 flex-col py-2 justify-between w-full h-large">
+                  <div className="flex ml-4 flex-col py-2 justify-between w-full">
                     <div className="flex justify-between items-center">
-                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent h-6 line-clamp-1">{result.shopName}</h2>
+                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent line-clamp-2">{result.shopName}</h2>
                       <p className="text-xs text-gray-500 leading-normal">
                         {latestMessages[result.id]?.created_time
                           ? new Date(latestMessages[result.id].created_time.seconds * 1000).toLocaleDateString("zh-TW", {
@@ -187,7 +187,7 @@ const SearchPages = () => {
                       </p>
                     </div>
                     <div className="flex justify-between">
-                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-6 line-clamp-1">{latestMessages[result.id]?.content || ""}</p>
+                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-[42px] line-clamp-2">{latestMessages[result.id]?.content || ""}</p>
                       {latestMessages[result.id] && result.unreadCount > 0 && (
                         <div className="bg-primary-800 text-black-0 text-base w-6 h-6 rounded-full flex items-center justify-center ml-2">{result.unreadCount}</div>
                       )}
