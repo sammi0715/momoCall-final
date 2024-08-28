@@ -17,6 +17,7 @@ const initialState = {
   isPerchase: false,
   isCheckout: false,
   count: 0,
+  spec: "",
   divHeightClass: "h-screen",
   productInfo: null,
   shopName: "",
@@ -56,7 +57,8 @@ function reducer(state, action) {
         return state;
       }
       return { ...state, count: state.count - 1 };
-
+    case "SELECT_SPEC":
+      return { ...state, spec: action.payload };
     case "SET_DIV_HEIGHT":
       return {
         ...state,
@@ -427,14 +429,14 @@ function Finish() {
           <div className="bg-black-0 p-1 rounded-t-large flex justify-center items-center">
             <img src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="product-image" className="w-small h-small rounded-lg mr-3" />
             <div className="flex flex-col justify-between">
-              <p className="text-xs leading-normal">123456</p>
-              <p className="text-xs leading-normal font-bold line-clamp-1">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔vsss</p>
+              <p className="text-xs leading-normal">{state.productInfo?.productNumber}</p>
+              <p className="text-xs leading-normal font-bold line-clamp-1">{state.productInfo?.productName || "商品名稱未找到"}</p>
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <div className="flex justify-around items-center">
               <label htmlFor="spec">規格</label>
-              <select name="spec" id="spec" className="w-2/4 border-1 border-black-600 rounded-md text-center">
+              <select name="spec" id="spec" className="w-2/4 border-1 border-black-600 rounded-md text-center" onChange={(e) => dispatch({ type: "SELECT_SPEC", payload: e.target.value })}>
                 <option value="yellow">黃色</option>
               </select>
             </div>
@@ -448,7 +450,7 @@ function Finish() {
             </div>
             <div className="flex justify-around items-center">
               <p>總金額：</p>
-              <p className="text-black-600 w-2/4 text-center">{state.count * 200}</p>
+              <p className="text-black-600 w-2/4 text-center">{state.productInfo?.price * state.count}</p>
             </div>
           </div>
           <div className="flex justify-around items-center">
@@ -469,15 +471,19 @@ function Finish() {
           <div className="flex flex-col gap-1">
             <div className="flex justify-between items-center">
               <p>產品名稱：</p>
-              <p className="text-black-600 line-clamp-1 w-3/5">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔vsss</p>
+              <p className="text-black-600 line-clamp-1 w-3/5 text-end">{state.productInfo?.productName || "商品名稱未找到"}</p>
             </div>
             <div className="flex justify-between items-center">
               <p>數量：</p>
               <p className="text-black-600">{state.count}</p>
             </div>
             <div className="flex justify-between items-center">
+              <p>規格：</p>
+              <p className="text-black-600">{state.spec}</p>
+            </div>
+            <div className="flex justify-between items-center">
               <p>訂單金額：</p>
-              <p className="text-black-600">{state.count * 200}</p>
+              <p className="text-black-600">{state.productInfo?.price * state.count || 0}</p>
             </div>
           </div>
 
