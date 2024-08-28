@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 const useGoogleVisionAPI = () => {
-  const [labels, setLabels] = useState([]);
+  const [labels, setLabels] = useState("");
   const [error, setError] = useState("");
   const handleAnalyzeImage = async (imageUrl) => {
     const apiKey = import.meta.env.VITE_GOOGLE_CLOUD_API_KEY; // 請替換為你的 API 金鑰
@@ -18,7 +18,7 @@ const useGoogleVisionAPI = () => {
           features: [
             {
               type: "LABEL_DETECTION",
-              maxResults: 30,
+              maxResults: 50,
             },
           ],
         },
@@ -40,7 +40,8 @@ const useGoogleVisionAPI = () => {
 
       const data = await response.json();
       const labels = data.responses[0].labelAnnotations;
-      setLabels(labels.map((label) => label.description));
+      setLabels(labels.map((label) => label.description).toString());
+      console.log(labels.map((label) => label.description).toString());
     } catch (err) {
       setError("Failed to analyze image");
       console.error(err);

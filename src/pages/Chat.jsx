@@ -7,6 +7,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
 import tappay from "../utils/tappay";
 import { marked } from "marked";
+import useGoogleVisionAPI from "../utils/useGoogleVisionAPI";
 
 const initialState = {
   messages: [],
@@ -87,6 +88,7 @@ function reducer(state, action) {
 }
 function Finish() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { labels, handleAnalyzeImage } = useGoogleVisionAPI();
 
   const fetchOrderInfo = async (shopId, orderNumber) => {
     try {
@@ -239,7 +241,7 @@ function Finish() {
           messages: [
             {
               role: "system",
-              content: "你是一個全程使用繁體中文並且非常人性化回覆「已登入」的使用者提問MOMO電商客服相關問題的富邦媒體電商客服人員",
+              content: "你是一個全程使用繁體中文並且非常人性化回覆「已登入」的使用者提問MOMO電商客服相關問題，且不會提到「關鍵字」三個字的富邦媒體電商客服人員",
             },
             {
               role: "user",
@@ -290,17 +292,23 @@ function Finish() {
         created_time: serverTimestamp(),
         from: "user1",
       });
+
       let response = "";
       const matchedResponse = predefinedResponses.find(({ pattern }) => pattern.test(state.inputValue));
 
       if (matchedResponse) {
+        console.log("se");
         response = matchedResponse.response;
         await addDoc(messagesCollectionRef, {
           content: response,
           created_time: serverTimestamp(),
           from: "shop",
         });
+      } else if (url !== undefined) {
+        console.log("test");
+        fetchCustomGPTResponse(labels, messagesCollectionRef);
       } else {
+        console.log("sste");
         fetchCustomGPTResponse(state.inputValue, messagesCollectionRef);
       }
 
@@ -339,13 +347,27 @@ function Finish() {
         console.error("Upload failed:", error);
       },
       () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+        getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
           sendMessage(downloadURL);
+          try {
+            await handleAnalyzeImage(downloadURL);
+          } catch (error) {
+            console.error("handleAnalyzeClick 發生錯誤：", error);
+          }
+
           // scrollToBottom();
         });
       }
     );
   };
+  useEffect(() => {
+    if (labels.length > 0) {
+      const queryParams = new URLSearchParams(window.location.search);
+      const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
+      const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
+      fetchCustomGPTResponse(`圖片內容如下${labels}`, messagesCollectionRef);
+    }
+  }, [labels]);
 
   async function checkout() {
     try {
