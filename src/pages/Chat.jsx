@@ -12,6 +12,7 @@ const initialState = {
   messages: [],
   inputValue: "",
   showOrderInfo: false,
+  showShopInfo: false,
   showProductInfo: false,
   isChoose: false,
   isPerchase: false,
@@ -33,6 +34,8 @@ function reducer(state, action) {
       return { ...state, inputValue: action.payload };
     case "TOGGLE_ORDER_INFO":
       return { ...state, showOrderInfo: action.payload };
+    case "TOGGLE_SHOP_INFO":
+      return { ...state, showShopInfo: action.payload };
     case "TOGGLE_PRODUCT_INFO":
       return { ...state, showProductInfo: action.payload };
     case "RESET_INPUT_VALUE":
@@ -49,7 +52,13 @@ function reducer(state, action) {
       if (state.isCheckout == true) {
         window.location.reload();
       }
-      return { ...state, isCheckout: !state.isCheckout, isChoose: false, isPerchase: false, count: 0 };
+      return {
+        ...state,
+        isCheckout: !state.isCheckout,
+        isChoose: false,
+        isPerchase: false,
+        count: 0,
+      };
     case "ADD_PRODUCT_NUM":
       return { ...state, count: state.count + 1 };
     case "SUB_PRODUCT_NUM":
@@ -68,7 +77,7 @@ function reducer(state, action) {
       return { ...state, productInfo: action.payload };
     case "SET_SHOP_NAME":
       return { ...state, shopName: action.payload };
-    case "SET_ORDER_INFO": // 处理订单信息的状态更新
+    case "SET_ORDER_INFO":
       return { ...state, orderInfo: action.payload };
     case "SET_GPT_ERROR":
       return { ...state, errorMsg: action.payload };
@@ -103,19 +112,29 @@ function Finish() {
         const shopDoc = shopSnapshot.docs[0];
         const shopDocId = shopDoc.id;
         const shopName = shopDoc.data().shopName;
+
         dispatch({ type: "SET_SHOP_NAME", payload: shopName });
 
-        const productsCollectionRef = collection(doc(db, "shops", shopDocId), "products");
-        const productQuery = query(productsCollectionRef, where("productNumber", "==", productNumber));
-        const productSnapshot = await getDocs(productQuery);
-        if (!productSnapshot.empty) {
-          const productDoc = productSnapshot.docs[0];
-          dispatch({ type: "SET_PRODUCT_INFO", payload: productDoc.data() });
+        if (productNumber) {
+          const productsCollectionRef = collection(doc(db, "shops", shopDocId), "products");
+          const productQuery = query(productsCollectionRef, where("productNumber", "==", productNumber));
+          const productSnapshot = await getDocs(productQuery);
+          if (!productSnapshot.empty) {
+            const productDoc = productSnapshot.docs[0];
+            dispatch({ type: "SET_PRODUCT_INFO", payload: productDoc.data() });
+          } else {
+            console.log("No matching product found!");
+            dispatch({ type: "SET_PRODUCT_INFO", payload: null });
+          }
         } else {
-          console.log("No matching product found!");
+          dispatch({ type: "SET_PRODUCT_INFO", payload: null });
         }
+
+        dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
       } else {
         console.log("No matching shop found for the given shopId!");
+        dispatch({ type: "SET_SHOP_NAME", payload: "商家名稱未找到" });
+        dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
       }
     } catch (error) {
       console.error("Error getting product documents:", error);
@@ -137,17 +156,22 @@ function Finish() {
     const orderNumber = queryParams.get("order");
     const productNumber = queryParams.get("product");
 
-    if (shopId && orderNumber) {
-      dispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
-      fetchOrderInfo(shopId, orderNumber);
+    if (shopId) {
+      dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
+      fetchProductInfo(shopId, productNumber);
+      if (orderNumber) {
+        dispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
+        fetchOrderInfo(shopId, orderNumber);
+      } else if (productNumber) {
+        dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
+        dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
+        fetchProductInfo(shopId, productNumber);
+      } else if (!orderNumber && !productNumber) {
+        dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: false });
+        dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
+      }
     } else {
       dispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
-    }
-
-    if (shopId && productNumber) {
-      dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
-      fetchProductInfo(shopId, productNumber);
-    } else {
       dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: false });
     }
 
@@ -162,7 +186,6 @@ function Finish() {
       dispatch({ type: "SET_MESSAGES", payload: msgs });
     });
 
-    // 處理頁面高度
     const handleScroll = () => {
       const height = document.documentElement.scrollHeight;
       dispatch({
@@ -174,7 +197,6 @@ function Finish() {
     handleScroll();
     window.addEventListener("scroll", handleScroll);
 
-    // 清理工作
     return () => {
       unsubscribe();
       window.removeEventListener("scroll", handleScroll);
@@ -368,31 +390,25 @@ function Finish() {
             alt="product-image"
             className="rounded-full w-large h-large"
           />
-          <p className="text-xs leading-normal text-center w-large bg-secondary-400 text-secondary rounded-lg">
-            {state.orderInfo?.status} {/* 顯示狀態 */}
-          </p>
+          <p className="text-xs leading-normal text-center w-large bg-secondary-400 text-secondary rounded-lg">{state.orderInfo?.status}</p>
         </div>
         <div className="flex flex-col gap-y-1 col-span-3">
-          <p className="font-bold">
-            {state.orderInfo?.shopName || "商家名稱未找到"} {/* 使用 shopName */}
-          </p>
-          <p className="text-primary">NT. {state.orderInfo?.totalPrice}</p> {/* 顯示價格 */}
-          <p>訂單編號：{state.orderInfo?.orderNumber}</p> {/* 顯示訂單編號 */}
+          <p className="font-bold">{state.orderInfo?.shopName || "商家名稱未找到"}</p>
+          <p className="text-primary">NT. {state.orderInfo?.totalPrice}</p>
+          <p>訂單編號：{state.orderInfo?.orderNumber}</p>
         </div>
       </div>
 
       {/* 這裡要做選擇，hidden or flex */}
-      <div className={`w-full product bg-white ${state.showProductInfo ? "flex" : "hidden"} justify-center gap-6 py-2 mt-[68px] items-center`}>
+      <div className={`w-full product bg-white ${state.showShopInfo ? "flex" : "hidden"} justify-center gap-6 py-2 mt-[68px] items-center`}>
         <img src={happy} alt="camera" className="w-20 rounded-full" />
         <div className="w4/6 my-2 flex flex-col py-2 justify-between">
-          <h4 className="w-fit text-base font-bold leading-normal line-clamp-1">
-            {state.shopName || "商家名稱未找到"} {/* 使用 shopName */}
-          </h4>
+          <h4 className="w-fit text-base font-bold leading-normal line-clamp-1">{state.shopName || "商家名稱未找到"}</h4>
           <p className="text-base leading-normal text-secondary">momoCall 回應率：100%</p>
         </div>
       </div>
 
-      <div className={`px-3 py-4 space-y-4 ${state.divHeightClass} ${!state.showOrderInfo && !state.showProductInfo ? "mt-[68px]" : ""} mb-12`}>
+      <div className={`px-3 py-4 space-y-4 ${state.divHeightClass} ${!state.showOrderInfo && !state.showProductInfo ? "mt-[68px]" : ""} mb-[56px]`}>
         <div className="bg-accent flex justify-center items-center h-8 px-6 rounded-large">
           <FiAlertTriangle className="w-notice h-notice mr-4" />
           <p className="text-sm leading-normal">提醒您，請勿透露個人資料</p>
@@ -403,14 +419,14 @@ function Finish() {
           </div>
         </div>
         <div>
-          <div className={`bg-black-0 p-4 rounded-t-lg ${state.showOrderInfo ? "hidden" : "flex"} justify-between border-b-1 border-black-400`}>
+          <div className={`bg-black-0 p-4 rounded-t-lg ${state.showProductInfo ? "flex" : "hidden"} justify-between border-b-1 border-black-400`}>
             <img src={state.productInfo?.image} alt="product-image" className="w-middle h-middle rounded-lg mr-3" />
             <div className="flex flex-col grow justify-between">
               <p className="text-xs leading-normal">商品編號 {state.productInfo?.productNumber}</p>
               <p className="w-full h-[36px] text-xs leading-normal font-bold line-clamp-2">{state.productInfo?.productName || "商品名稱未找到"}</p>
             </div>
           </div>
-          <div className={`bg-black-0 rounded-b-lg  ${state.showOrderInfo ? "hidden" : "flex"} justify-center`}>
+          <div className={`bg-black-0 rounded-b-lg  ${state.showProductInfo ? "flex" : "hidden"} justify-center`}>
             <button className="w-full py-2 text-xs leading-normal font-bold text-primary cursor-pointer" onClick={() => dispatch({ type: "TO_PURCHASE" })}>
               立即購買
             </button>
@@ -540,14 +556,14 @@ function Finish() {
         </div>
       </div>
 
-      <div className="bg-primary-600 w-container py-2 px-3 flex justify-between gap-x-2 fixed bottom-0 left-0 right-0 z-10 my-0 mx-auto">
+      <div className="bg-primary-600 w-container py-3 px-3 flex justify-between gap-x-2 fixed bottom-0 left-0 right-0 z-10 my-0 mx-auto">
         <label className="bg-black-0 rounded-full p-1 cursor-pointer active:outline active:outline-primary active:outline-1 active:outline-offset-0">
           <FiImage className="w-6 h-6 text-primary hover:text-primary-800 active:text-primary" />
           <input type="file" className="hidden" accept="image/jpg,image/jpeg,image/png,image/gif" onChange={sendImage} />
         </label>
         <input
           type="text"
-          className="bg-black-200 grow rounded-3xl pl-3  focus:outline-primary focus:outline focus:bg-white hover:bg-white"
+          className="w-[271px] bg-black-200 grow rounded-3xl pl-3 border-0 focus:outline-primary focus:outline focus:outline-1 focus:outline-offset-0 focus:bg-white hover:bg-white"
           placeholder="輸入訊息"
           value={state.inputValue}
           onChange={(e) => dispatch({ type: "SET_INPUT_VALUE", payload: e.target.value })}

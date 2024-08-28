@@ -102,6 +102,11 @@ const SearchPages = () => {
         {!state.isSearching &&
           state.results
             .filter((result, index, self) => index === self.findIndex((r) => r.shopId === result.shopId))
+            .sort((a, b) => {
+              const aTime = latestMessages[a.id]?.created_time?.seconds || 0;
+              const bTime = latestMessages[b.id]?.created_time?.seconds || 0;
+              return bTime - aTime;
+            })
             .map((result, index) => {
               let urlParam = "";
               if (result.type === "member") {
@@ -113,7 +118,11 @@ const SearchPages = () => {
               }
 
               return (
-                <Link to={`/chat?${urlParam}`} key={result.id} className={`w-full py-4 flex items-center border-t border-gray-300 cursor-pointer ${index === state.results.length - 1 ? "border-b border-gray-300" : ""}`}>
+                <Link
+                  to={`/chat?${urlParam}`}
+                  key={result.id}
+                  className={`w-full py-4 flex items-center border-t border-gray-300 cursor-pointer ${index === state.results.length - 1 ? "border-b border-gray-300" : ""}`}
+                >
                   <img className="w-large h-large rounded-full" src={momoLogo}></img>
 
                   <div className="flex ml-4 flex-col py-2 justify-between w-full h-large">
@@ -130,7 +139,9 @@ const SearchPages = () => {
                     </div>
                     <div className="flex justify-between">
                       <p className="text-sm text-gray-500 leading-normal w-messageContent h-6 line-clamp-1">{latestMessages[result.id]?.content || ""}</p>
-                      {latestMessages[result.id] && result.unreadCount > 0 && <div className="bg-primary-800 text-black-0 text-base w-6 h-6 rounded-full flex items-center justify-center ml-2">{result.unreadCount}</div>}
+                      {latestMessages[result.id] && result.unreadCount > 0 && (
+                        <div className="bg-primary-800 text-black-0 text-base w-6 h-6 rounded-full flex items-center justify-center ml-2">{result.unreadCount}</div>
+                      )}
                     </div>
                   </div>
                 </Link>
@@ -140,6 +151,11 @@ const SearchPages = () => {
         {state.isSearching &&
           state.results
             .filter((result) => result.collectionName === "chatroom")
+            .sort((a, b) => {
+              const aTime = latestMessages[a.id]?.created_time?.seconds || 0;
+              const bTime = latestMessages[b.id]?.created_time?.seconds || 0;
+              return bTime - aTime;
+            })
             .map((result, index) => {
               let urlParam = `member=${result.id}`;
               if (result.type === "member") {
@@ -151,7 +167,11 @@ const SearchPages = () => {
               }
 
               return (
-                <Link to={`/chat?${urlParam}`} key={result.id} className={`w-full py-4 flex items-center border-t border-gray-300 cursor-pointer ${index === state.results.length - 1 ? "border-b border-gray-300" : ""}`}>
+                <Link
+                  to={`/chat?${urlParam}`}
+                  key={result.id}
+                  className={`w-full py-4 flex items-center border-t border-gray-300 cursor-pointer ${index === state.results.length - 1 ? "border-b border-gray-300" : ""}`}
+                >
                   <img className="w-large h-large rounded-full" src={momoLogo}></img>
 
                   <div className="flex ml-4 flex-col py-2 justify-between w-full h-large">
@@ -168,7 +188,9 @@ const SearchPages = () => {
                     </div>
                     <div className="flex justify-between">
                       <p className="text-sm text-gray-500 leading-normal w-messageContent h-6 line-clamp-1">{latestMessages[result.id]?.content || ""}</p>
-                      {latestMessages[result.id] && result.unreadCount > 0 && <div className="bg-primary-800 text-black-0 text-base w-6 h-6 rounded-full flex items-center justify-center ml-2">{result.unreadCount}</div>}
+                      {latestMessages[result.id] && result.unreadCount > 0 && (
+                        <div className="bg-primary-800 text-black-0 text-base w-6 h-6 rounded-full flex items-center justify-center ml-2">{result.unreadCount}</div>
+                      )}
                     </div>
                   </div>
                 </Link>
