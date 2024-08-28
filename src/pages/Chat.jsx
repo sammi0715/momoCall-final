@@ -1,30 +1,11 @@
 import { useEffect, useReducer } from "react";
-import {
-  FiChevronLeft,
-  FiAlertTriangle,
-  FiImage,
-  FiSend,
-} from "react-icons/fi";
+import { FiChevronLeft, FiAlertTriangle, FiImage, FiSend } from "react-icons/fi";
 import happy from "./img/happy.png";
 import responses from "./responses.json";
-import {
-  db,
-  storage,
-  collection,
-  addDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  serverTimestamp,
-  doc,
-  setDoc,
-  getDocs,
-  where,
-} from "../utils/firebase";
+import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, getDocs, where } from "../utils/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
 import tappay from "../utils/tappay";
-import { count } from "firebase/firestore";
 
 const initialState = {
   messages: [],
@@ -92,7 +73,7 @@ function reducer(state, action) {
       return { ...state, productInfo: action.payload };
     case "SET_SHOP_NAME":
       return { ...state, shopName: action.payload };
-    case "SET_ORDER_INFO": // 处理订单信息的状态更新
+    case "SET_ORDER_INFO":
       return { ...state, orderInfo: action.payload };
     default:
       return state;
@@ -103,11 +84,7 @@ function Finish() {
   const fetchOrderInfo = async (shopId, orderNumber) => {
     try {
       const ordersCollectionRef = collection(db, "orders");
-      const orderQuery = query(
-        ordersCollectionRef,
-        where("shopId", "==", shopId),
-        where("orderNumber", "==", orderNumber)
-      );
+      const orderQuery = query(ordersCollectionRef, where("shopId", "==", shopId), where("orderNumber", "==", orderNumber));
       const querySnapshot = await getDocs(orderQuery);
       if (!querySnapshot.empty) {
         const orderDoc = querySnapshot.docs[0];
@@ -122,10 +99,7 @@ function Finish() {
 
   const fetchProductInfo = async (shopId, productNumber) => {
     try {
-      const shopQuery = query(
-        collection(db, "shops"),
-        where("shopId", "==", shopId)
-      );
+      const shopQuery = query(collection(db, "shops"), where("shopId", "==", shopId));
       const shopSnapshot = await getDocs(shopQuery);
       if (!shopSnapshot.empty) {
         const shopDoc = shopSnapshot.docs[0];
@@ -135,14 +109,8 @@ function Finish() {
         dispatch({ type: "SET_SHOP_NAME", payload: shopName });
 
         if (productNumber) {
-          const productsCollectionRef = collection(
-            doc(db, "shops", shopDocId),
-            "products"
-          );
-          const productQuery = query(
-            productsCollectionRef,
-            where("productNumber", "==", productNumber)
-          );
+          const productsCollectionRef = collection(doc(db, "shops", shopDocId), "products");
+          const productQuery = query(productsCollectionRef, where("productNumber", "==", productNumber));
           const productSnapshot = await getDocs(productQuery);
           if (!productSnapshot.empty) {
             const productDoc = productSnapshot.docs[0];
@@ -152,11 +120,9 @@ function Finish() {
             dispatch({ type: "SET_PRODUCT_INFO", payload: null });
           }
         } else {
-          // 当没有 productNumber 时，只设置商店名称
           dispatch({ type: "SET_PRODUCT_INFO", payload: null });
         }
 
-        // 显示商店信息
         dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
       } else {
         console.log("No matching shop found for the given shopId!");
@@ -184,6 +150,8 @@ function Finish() {
     const productNumber = queryParams.get("product");
 
     if (shopId) {
+      dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
+      fetchProductInfo(shopId, productNumber);
       if (orderNumber) {
         dispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
         fetchOrderInfo(shopId, orderNumber);
@@ -196,17 +164,13 @@ function Finish() {
         dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
       }
     } else {
-      // 如果没有 shopId，不显示订单信息和产品信息
       dispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
       dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: false });
     }
 
     // Firebase 查詢消息
     const chatroomName = shopId || " ";
-    const q = query(
-      collection(db, "chatroom", chatroomName, "messages"),
-      orderBy("created_time")
-    );
+    const q = query(collection(db, "chatroom", chatroomName, "messages"), orderBy("created_time"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const msgs = [];
       querySnapshot.forEach((doc) => {
@@ -215,7 +179,6 @@ function Finish() {
       dispatch({ type: "SET_MESSAGES", payload: msgs });
     });
 
-    // 處理頁面高度
     const handleScroll = () => {
       const height = document.documentElement.scrollHeight;
       dispatch({
@@ -227,7 +190,6 @@ function Finish() {
     handleScroll();
     window.addEventListener("scroll", handleScroll);
 
-    // 清理工作
     return () => {
       unsubscribe();
       window.removeEventListener("scroll", handleScroll);
@@ -254,12 +216,7 @@ function Finish() {
   const sendMessage = async () => {
     const queryParams = new URLSearchParams(window.location.search);
     const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
-    const messagesCollectionRef = collection(
-      db,
-      "chatroom",
-      shopId,
-      "messages"
-    );
+    const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
 
     if (state.inputValue.trim() !== "") {
       await addDoc(messagesCollectionRef, {
@@ -268,9 +225,7 @@ function Finish() {
         from: "user1",
       });
       let response = "抱歉，我不太明白您的問題！";
-      const matchedResponse = predefinedResponses.find(({ pattern }) =>
-        pattern.test(state.inputValue)
-      );
+      const matchedResponse = predefinedResponses.find(({ pattern }) => pattern.test(state.inputValue));
 
       if (matchedResponse) {
         response = matchedResponse.response;
@@ -357,53 +312,33 @@ function Finish() {
           <Link to={"/"}>
             <FiChevronLeft className="w-6 h-6 mr-3 cursor-pointer" />
           </Link>
-          <h1 className="font-sans font-bold text-2xl leading-normal text-primary ml-20">
-            對話紀錄
-          </h1>
+          <h1 className="font-sans font-bold text-2xl leading-normal text-primary ml-20">對話紀錄</h1>
         </div>
       </div>
 
       {/* 這裡要做選擇，hidden or grid */}
-      <div
-        className={`${
-          state.showOrderInfo ? "grid" : "hidden"
-        }  bg-black-0 w-container py-2 px-3  grid-cols-4 gap-6  top-[68px] mt-[68px] left-0 right-0 z-10 my-0 mx-auto`}
-      >
+      <div className={`${state.showOrderInfo ? "grid" : "hidden"}  bg-black-0 w-container py-2 px-3  grid-cols-4 gap-6  top-[68px] mt-[68px] left-0 right-0 z-10 my-0 mx-auto`}>
         <div className="flex flex-col items-center gap-y-2 col-span-1">
           <img
             src="https://images.unsplash.com/photo-1635865933730-e5817b5680cd?q=80&w=2864&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt="product-image"
             className="rounded-full w-large h-large"
           />
-          <p className="text-xs leading-normal text-center w-large bg-secondary-400 text-secondary rounded-lg">
-            {state.orderInfo?.status} {/* 顯示狀態 */}
-          </p>
+          <p className="text-xs leading-normal text-center w-large bg-secondary-400 text-secondary rounded-lg">{state.orderInfo?.status}</p>
         </div>
         <div className="flex flex-col gap-y-1 col-span-3">
-          <p className="font-bold">
-            {state.orderInfo?.shopName || "商家名稱未找到"}{" "}
-            {/* 使用 shopName */}
-          </p>
-          <p className="text-primary">NT. {state.orderInfo?.totalPrice}</p>{" "}
-          {/* 顯示價格 */}
-          <p>訂單編號：{state.orderInfo?.orderNumber}</p> {/* 顯示訂單編號 */}
+          <p className="font-bold">{state.orderInfo?.shopName || "商家名稱未找到"}</p>
+          <p className="text-primary">NT. {state.orderInfo?.totalPrice}</p>
+          <p>訂單編號：{state.orderInfo?.orderNumber}</p>
         </div>
       </div>
 
       {/* 這裡要做選擇，hidden or flex */}
-      <div
-        className={`w-full product bg-white ${
-          state.showShopInfo ? "flex" : "hidden"
-        } justify-center gap-6 py-2 mt-[68px] items-center`}
-      >
+      <div className={`w-full product bg-white ${state.showShopInfo ? "flex" : "hidden"} justify-center gap-6 py-2 mt-[68px] items-center`}>
         <img src={happy} alt="camera" className="w-20 rounded-full" />
         <div className="w4/6 my-2 flex flex-col py-2 justify-between">
-          <h4 className="w-fit text-base font-bold leading-normal line-clamp-1">
-            {state.shopName || "商家名稱未找到"} {/* 使用 shopName */}
-          </h4>
-          <p className="text-base leading-normal text-secondary">
-            momoCall 回應率：100%
-          </p>
+          <h4 className="w-fit text-base font-bold leading-normal line-clamp-1">{state.shopName || "商家名稱未找到"}</h4>
+          <p className="text-base leading-normal text-secondary">momoCall 回應率：100%</p>
         </div>
       </div>
 
@@ -421,90 +356,41 @@ function Finish() {
           </div>
         </div>
         <div>
-          <div
-            className={`bg-black-0 p-4 rounded-t-lg ${
-              state.showProductInfo ? "flex" : "hidden"
-            } justify-between border-b-1 border-black-400`}
-          >
-            <img
-              src={state.productInfo?.image}
-              alt="product-image"
-              className="w-middle h-middle rounded-lg mr-3"
-            />
+          <div className={`bg-black-0 p-4 rounded-t-lg ${state.showProductInfo ? "flex" : "hidden"} justify-between border-b-1 border-black-400`}>
+            <img src={state.productInfo?.image} alt="product-image" className="w-middle h-middle rounded-lg mr-3" />
             <div className="flex flex-col grow justify-between">
-              <p className="text-xs leading-normal">
-                商品編號 {state.productInfo?.productNumber}
-              </p>
-              <p className="w-full h-[36px] text-xs leading-normal font-bold line-clamp-2">
-                {state.productInfo?.productName || "商品名稱未找到"}
-              </p>
+              <p className="text-xs leading-normal">商品編號 {state.productInfo?.productNumber}</p>
+              <p className="w-full h-[36px] text-xs leading-normal font-bold line-clamp-2">{state.productInfo?.productName || "商品名稱未找到"}</p>
             </div>
           </div>
-          <div
-            className={`bg-black-0 rounded-b-lg  ${
-              state.showProductInfo ? "flex" : "hidden"
-            } justify-center`}
-          >
-            <button
-              className="w-full py-2 text-xs leading-normal font-bold text-primary cursor-pointer"
-              onClick={() => dispatch({ type: "TO_PURCHASE" })}
-            >
+          <div className={`bg-black-0 rounded-b-lg  ${state.showProductInfo ? "flex" : "hidden"} justify-center`}>
+            <button className="w-full py-2 text-xs leading-normal font-bold text-primary cursor-pointer" onClick={() => dispatch({ type: "TO_PURCHASE" })}>
               立即購買
             </button>
           </div>
         </div>
         {state.messages.map((message, index) => (
-          <div
-            key={index}
-            className={`flex gap-1 mr-3 ${
-              message.from === "user1" ? "justify-end" : ""
-            }`}
-          >
-            {message.from !== "user1" && (
-              <img src={happy} alt="" className="w-9 h-9" />
-            )}
+          <div key={index} className={`flex gap-1 mr-3 ${message.from === "user1" ? "justify-end" : ""}`}>
+            {message.from !== "user1" && <img src={happy} alt="" className="w-9 h-9" />}
             <div
-              className={`w-fit max-w-[65%]  text-black break-words rounded-lg p-3 relative ${
-                message.from === "user1" ? "bg-white" : "bg-primary-600"
-              } ${message.from === "user1" ? "order-2" : "order-1 ml-2"} ${
+              className={`w-fit max-w-[65%]  text-black break-words rounded-lg p-3 relative ${message.from === "user1" ? "bg-white" : "bg-primary-600"} ${
+                message.from === "user1" ? "order-2" : "order-1 ml-2"
+              } ${
                 message.from === "user1"
                   ? "after:absolute after:top-4 after:-right-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-l-[20px] after:border-l-white after:border-b-transparent"
                   : "after:absolute after:top-4 after:-left-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-r-[20px] after:border-r-primary-600 after:border-b-transparent"
               }`}
             >
-              {imageFormats.some((format) =>
-                message.content.includes(format)
-              ) ? (
-                <img
-                  src={message.content}
-                  alt="Sent"
-                  className="rounded-lg max-w-full h-auto"
-                />
-              ) : (
-                <p>{message.content}</p>
-              )}
+              {imageFormats.some((format) => message.content.includes(format)) ? <img src={message.content} alt="Sent" className="rounded-lg max-w-full h-auto" /> : <p>{message.content}</p>}
             </div>
-            <small
-              className={`self-end ${
-                message.from === "user1" ? "order-1 mr-3" : "order-2 ml-2"
-              }`}
-            >
-              {message.created_time?.toDate().toLocaleTimeString() ||
-                "Loading..."}
-            </small>
+            <small className={`self-end ${message.from === "user1" ? "order-1 mr-3" : "order-2 ml-2"}`}>{message.created_time?.toDate().toLocaleTimeString() || "Loading..."}</small>
           </div>
         ))}
       </div>
 
-      <div
-        className={`${
-          state.isChoose ? "flex" : "hidden"
-        } justify-center items-center bg-black-800/80 w-container h-full  fixed top-0`}
-      >
+      <div className={`${state.isChoose ? "flex" : "hidden"} justify-center items-center bg-black-800/80 w-container h-full  fixed top-0`}>
         <div className="w-64 h-60 bg-white mx-auto py-2 px-4 flex flex-col gap-3 text-sm rounded-xl">
-          <h4 className="text-center font-bold leading-normal text-base text-primary-800">
-            請選擇規格數量
-          </h4>
+          <h4 className="text-center font-bold leading-normal text-base text-primary-800">請選擇規格數量</h4>
           <div className="bg-black-0 p-1 rounded-t-large flex justify-center items-center">
             <img
               src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
@@ -513,76 +399,48 @@ function Finish() {
             />
             <div className="flex flex-col justify-between">
               <p className="text-xs leading-normal">123456</p>
-              <p className="text-xs leading-normal font-bold line-clamp-1">
-                商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔vsss
-              </p>
+              <p className="text-xs leading-normal font-bold line-clamp-1">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔vsss</p>
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <div className="flex justify-around items-center">
               <label htmlFor="spec">規格</label>
-              <select
-                name="spec"
-                id="spec"
-                className="w-2/4 border-1 border-black-600 rounded-md text-center"
-              >
+              <select name="spec" id="spec" className="w-2/4 border-1 border-black-600 rounded-md text-center">
                 <option value="yellow">黃色</option>
               </select>
             </div>
             <div className="flex justify-around items-center ">
               <label htmlFor="number">數量</label>
               <div className="flex justify-around w-2/4 border-1 border-black-600 rounded-md">
-                <button onClick={() => dispatch({ type: "SUB_PRODUCT_NUM" })}>
-                  -
-                </button>
+                <button onClick={() => dispatch({ type: "SUB_PRODUCT_NUM" })}>-</button>
                 <p className="leading-normal">{state.count}</p>
-                <button onClick={() => dispatch({ type: "ADD_PRODUCT_NUM" })}>
-                  +
-                </button>
+                <button onClick={() => dispatch({ type: "ADD_PRODUCT_NUM" })}>+</button>
               </div>
             </div>
             <div className="flex justify-around items-center">
               <p>總金額：</p>
-              <p className="text-black-600 w-2/4 text-center">
-                {state.count * 200}
-              </p>
+              <p className="text-black-600 w-2/4 text-center">{state.count * 200}</p>
             </div>
           </div>
           <div className="flex justify-around items-center">
-            <button
-              className="block w-full h-8"
-              onClick={() => dispatch({ type: "TO_PURCHASE" })}
-            >
+            <button className="block w-full h-8" onClick={() => dispatch({ type: "TO_PURCHASE" })}>
               取消
             </button>
-            <button
-              onClick={() => dispatch({ type: "TO_CHECKOUT" })}
-              className="text-primary-800 font-bold block w-full h-8"
-            >
+            <button onClick={() => dispatch({ type: "TO_CHECKOUT" })} className="text-primary-800 font-bold block w-full h-8">
               下一步
             </button>
           </div>
         </div>
       </div>
 
-      <div
-        className={`${
-          state.isPerchase ? "flex" : "hidden"
-        } justify-center items-center  w-container h-full  fixed top-0`}
-      >
+      <div className={`${state.isPerchase ? "flex" : "hidden"} justify-center items-center  w-container h-full  fixed top-0`}>
         <div className="w-64 h-84 bg-white mx-auto py-2 px-4 flex flex-col gap-4 text-sm rounded-xl">
-          <h4 className="text-center font-bold leading-normal text-lg text-primary-800 mt-2">
-            訂單即將送出
-          </h4>
-          <p className="text-center font-bold">
-            已確認品項、數量並進行結帳嗎？
-          </p>
+          <h4 className="text-center font-bold leading-normal text-lg text-primary-800 mt-2">訂單即將送出</h4>
+          <p className="text-center font-bold">已確認品項、數量並進行結帳嗎？</p>
           <div className="flex flex-col gap-1">
             <div className="flex justify-between items-center">
               <p>產品名稱：</p>
-              <p className="text-black-600 line-clamp-1 w-3/5">
-                商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔vsss
-              </p>
+              <p className="text-black-600 line-clamp-1 w-3/5">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔vsss</p>
             </div>
             <div className="flex justify-between items-center">
               <p>數量：</p>
@@ -594,58 +452,32 @@ function Finish() {
             </div>
           </div>
 
-          <h4 className="text-center font-bold leading-normal text-base text-primary-800">
-            請輸入付款資訊
-          </h4>
+          <h4 className="text-center font-bold leading-normal text-base text-primary-800">請輸入付款資訊</h4>
           <div className="flex flex-col gap-5">
-            <div
-              className="h-6 border-b-1 border-black-600 "
-              id="card-number"
-            ></div>
+            <div className="h-6 border-b-1 border-black-600 " id="card-number"></div>
             <div className="flex gap-4">
-              <div
-                className=" h-6 border-b-1 border-black-600 "
-                id="card-expiration-date"
-              ></div>
-              <div
-                className="h-6 border-b-1 border-black-600 "
-                id="card-ccv"
-              ></div>
+              <div className=" h-6 border-b-1 border-black-600 " id="card-expiration-date"></div>
+              <div className="h-6 border-b-1 border-black-600 " id="card-ccv"></div>
             </div>
           </div>
 
           <div className="flex justify-around items-center ">
-            <button
-              className="block w-full h-9 text-black-600"
-              onClick={() => dispatch({ type: "TO_CHECKOUT" })}
-            >
+            <button className="block w-full h-9 text-black-600" onClick={() => dispatch({ type: "TO_CHECKOUT" })}>
               上一步
             </button>
-            <button
-              onClick={checkout}
-              className="block w-full h-9 text-primary-800 font-bold "
-            >
+            <button onClick={checkout} className="block w-full h-9 text-primary-800 font-bold ">
               確認
             </button>
           </div>
         </div>
       </div>
 
-      <div
-        className={`${
-          state.isCheckout ? "flex" : "hidden"
-        } justify-center items-center  w-container h-full  fixed top-0 bg-black-800/80`}
-      >
+      <div className={`${state.isCheckout ? "flex" : "hidden"} justify-center items-center  w-container h-full  fixed top-0 bg-black-800/80`}>
         <div className="w-64 h-32 bg-white mx-auto py-2 px-4 flex flex-col gap-3 text-sm rounded-xl">
-          <h4 className="text-center font-bold leading-normal text-lg text-primary-800 mt-2">
-            付款成功，即將為您出貨
-          </h4>
+          <h4 className="text-center font-bold leading-normal text-lg text-primary-800 mt-2">付款成功，即將為您出貨</h4>
           <p className="text-center font-bold">訂單編號：20240827000001</p>
 
-          <button
-            onClick={() => dispatch({ type: "FINISH_CHECKOUT" })}
-            className="block w-full h-8 text-primary-800 font-bold "
-          >
+          <button onClick={() => dispatch({ type: "FINISH_CHECKOUT" })} className="block w-full h-8 text-primary-800 font-bold ">
             確認
           </button>
         </div>
@@ -654,26 +486,16 @@ function Finish() {
       <div className="bg-primary-600 w-container py-2 px-3 flex justify-between gap-x-2 fixed bottom-0 left-0 right-0 z-10 my-0 mx-auto">
         <label className="bg-black-0 rounded-full p-1 cursor-pointer active:outline active:outline-primary active:outline-1 active:outline-offset-0">
           <FiImage className="w-6 h-6 text-primary hover:text-primary-800 active:text-primary" />
-          <input
-            type="file"
-            className="hidden"
-            accept="image/jpg,image/jpeg,image/png,image/gif"
-            onChange={sendImage}
-          />
+          <input type="file" className="hidden" accept="image/jpg,image/jpeg,image/png,image/gif" onChange={sendImage} />
         </label>
         <input
           type="text"
           className="bg-black-200 grow rounded-3xl pl-3  focus:outline-primary focus:outline focus:bg-white hover:bg-white"
           placeholder="輸入訊息"
           value={state.inputValue}
-          onChange={(e) =>
-            dispatch({ type: "SET_INPUT_VALUE", payload: e.target.value })
-          }
+          onChange={(e) => dispatch({ type: "SET_INPUT_VALUE", payload: e.target.value })}
         />
-        <button
-          className="bg-white w-8 h-8 rounded-full active:border-primary active:border"
-          onClick={sendMessage}
-        >
+        <button className="bg-white w-8 h-8 rounded-full active:border-primary active:border" onClick={sendMessage}>
           <FiSend className="w-5 h-5 mx-auto text-primary hover:text-primary" />
         </button>
       </div>
