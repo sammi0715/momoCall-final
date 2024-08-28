@@ -15,7 +15,11 @@ function Finish() {
       </div>
       <div className="bg-black-0 w-container py-2 px-3 grid grid-cols-4 gap-6 fixed top-[68px] left-0 right-0 z-10 my-0 mx-auto">
         <div className="flex flex-col items-center gap-y-2 col-span-1">
-          <img src="https://images.unsplash.com/photo-1635865933730-e5817b5680cd?q=80&w=2864&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="product-image" className="rounded-full w-large h-large" />
+          <img
+            src="https://images.unsplash.com/photo-1635865933730-e5817b5680cd?q=80&w=2864&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            alt="product-image"
+            className="rounded-full w-large h-large"
+          />
           <p className="text-xs leading-normal text-center w-large bg-secondary-400 text-secondary rounded-lg">訂單成立</p>
         </div>
         <div className="flex flex-col gap-y-1 col-span-3">
@@ -36,7 +40,11 @@ function Finish() {
         </div>
         <div>
           <div className="bg-black-0 p-4 rounded-t-large flex justify-between border-b-1 border-black-400">
-            <img src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="product-image" className="w-middle h-middle rounded-lg mr-3" />
+            <img
+              src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="product-image"
+              className="w-middle h-middle rounded-lg mr-3"
+            />
             <div className="flex flex-col justify-between">
               <p className="text-xs leading-normal">商品編號</p>
               <p className="text-xs leading-normal font-bold">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔</p>
@@ -69,7 +77,11 @@ function Finish() {
         <div className="flex gap-x-1">
           <img src={annoy} alt="shopper-profile-image" className="w-9 h-9 rounded-full mr-3 bg-primary-600" />
           <div className="bg-primary-600 w-chatBox rounded-lg p-1">
-            <img src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="product-image" className="w-uploadImage h-uploadImage rounded mb-1" />
+            <img
+              src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="product-image"
+              className="w-uploadImage h-uploadImage rounded mb-1"
+            />
             <div className="p-1">
               <p className="text-xs leading-normal">商品編號</p>
               <p className="text-xs leading-normal">商品名稱商品名稱商品名稱十五字</p>
@@ -83,7 +95,11 @@ function Finish() {
           <FiImage className="w-6 h-6 text-primary hover:text-primary-800 active:text-primary" />
           <input type="file" className="hidden" />
         </label>
-        <input type="text" className="rounded-large text-sm leading-normal bg-black-200 px-3 w-full placeholder:text-black hover:bg-black-0 focus:border-1 focus:bg-black-0 focus:border-primary focus:outline-none" placeholder="輸入訊息" />
+        <input
+          type="text"
+          className="rounded-large text-sm leading-normal bg-black-200 px-3 w-full placeholder:text-black hover:bg-black-0 focus:border-1 focus:bg-black-0 focus:border-primary focus:outline-none"
+          placeholder="輸入訊息"
+        />
         <button type="button" className="bg-black-0 rounded-full p-1 cursor-pointer active:outline active:outline-primary active:outline-1 active:outline-offset-0">
           <FiSend className="w-6 h-6 text-primary hover:text-primary-800 active:text-primary" />
         </button>

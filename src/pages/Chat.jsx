@@ -342,10 +342,7 @@ function Finish() {
         </div>
       </div>
 
-      <div
-        className={`px-3 py-4 space-y-4 ${state.divHeightClass} 
-        } mb-12`}
-      >
+      <div className={`px-3 py-4 space-y-4 ${state.divHeightClass} ${!state.showOrderInfo && !state.showProductInfo ? "mt-[68px]" : ""} mb-[56px]`}>
         <div className="bg-accent flex justify-center items-center h-8 px-6 rounded-large">
           <FiAlertTriangle className="w-notice h-notice mr-4" />
           <p className="text-sm leading-normal">提醒您，請勿透露個人資料</p>
@@ -483,14 +480,14 @@ function Finish() {
         </div>
       </div>
 
-      <div className="bg-primary-600 w-container py-2 px-3 flex justify-between gap-x-2 fixed bottom-0 left-0 right-0 z-10 my-0 mx-auto">
+      <div className="bg-primary-600 w-container py-3 px-3 flex justify-between gap-x-2 fixed bottom-0 left-0 right-0 z-10 my-0 mx-auto">
         <label className="bg-black-0 rounded-full p-1 cursor-pointer active:outline active:outline-primary active:outline-1 active:outline-offset-0">
           <FiImage className="w-6 h-6 text-primary hover:text-primary-800 active:text-primary" />
           <input type="file" className="hidden" accept="image/jpg,image/jpeg,image/png,image/gif" onChange={sendImage} />
         </label>
         <input
           type="text"
-          className="bg-black-200 grow rounded-3xl pl-3  focus:outline-primary focus:outline focus:bg-white hover:bg-white"
+          className="w-[271px] bg-black-200 grow rounded-3xl pl-3 border-0 focus:outline-primary focus:outline focus:outline-1 focus:outline-offset-0 focus:bg-white hover:bg-white"
           placeholder="輸入訊息"
           value={state.inputValue}
           onChange={(e) => dispatch({ type: "SET_INPUT_VALUE", payload: e.target.value })}
