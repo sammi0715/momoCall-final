@@ -279,6 +279,12 @@ function Finish() {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      sendMessage();
+    }
+  };
+
   const imageFormats = [".jpeg", ".jpg", ".png", ".gif"];
   const setChats = async (url) => {
     try {
@@ -523,7 +529,7 @@ function Finish() {
           <FiImage className="w-6 h-6 text-primary hover:text-primary-800 active:text-primary" />
           <input type="file" className="hidden" accept="image/jpg,image/jpeg,image/png,image/gif" onChange={sendImage} />
         </label>
-        <input type="text" className="bg-black-200 grow rounded-3xl pl-3  focus:outline-primary focus:outline focus:bg-white hover:bg-white" placeholder="輸入訊息" value={state.inputValue} onChange={(e) => dispatch({ type: "SET_INPUT_VALUE", payload: e.target.value })} />
+        <input type="text" className="bg-black-200 grow rounded-3xl pl-3  focus:outline-primary focus:outline focus:bg-white hover:bg-white" placeholder="輸入訊息" value={state.inputValue} onChange={(e) => dispatch({ type: "SET_INPUT_VALUE", payload: e.target.value })} onKeyDown={handleKeyDown} />
         <button className="bg-white w-8 h-8 rounded-full active:border-primary active:border" onClick={sendMessage}>
           <FiSend className="w-5 h-5 mx-auto text-primary hover:text-primary" />
         </button>
