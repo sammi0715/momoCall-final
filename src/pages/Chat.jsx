@@ -188,6 +188,7 @@ function Finish() {
 
     const handleScroll = () => {
       const height = document.documentElement.scrollHeight;
+
       dispatch({
         type: "SET_DIV_HEIGHT",
         payload: height < 850 ? "h-screen" : "h-auto",
@@ -408,7 +409,7 @@ function Finish() {
         </div>
       </div>
 
-      <div className={`px-3 py-4 space-y-4 ${state.divHeightClass} ${!state.showOrderInfo && !state.showProductInfo ? "mt-[68px]" : ""} mb-[56px]`}>
+      <div className={`px-3 py-4 space-y-4 ${state.divHeightClass}  mb-[56px] min-h-screen`}>
         <div className="bg-accent flex justify-center items-center h-8 px-6 rounded-large">
           <FiAlertTriangle className="w-notice h-notice mr-4" />
           <p className="text-sm leading-normal">提醒您，請勿透露個人資料</p>
@@ -475,7 +476,7 @@ function Finish() {
             <div className="flex justify-around items-center">
               <label htmlFor="spec">規格</label>
               <select name="spec" id="spec" className="w-2/4 border-1 border-black-600 rounded-md text-center" onChange={(e) => dispatch({ type: "SELECT_SPEC", payload: e.target.value })}>
-                <option value="yellow">黃色</option>
+                <option value="yellow">{state.productInfo?.spec}</option>
               </select>
             </div>
             <div className="flex justify-around items-center ">
@@ -517,7 +518,7 @@ function Finish() {
             </div>
             <div className="flex justify-between items-center">
               <p>規格：</p>
-              <p className="text-black-600">{state.spec}</p>
+              <p className="text-black-600">{state.productInfo?.spec}</p>
             </div>
             <div className="flex justify-between items-center">
               <p>訂單金額：</p>
