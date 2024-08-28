@@ -1,7 +1,8 @@
 import { useEffect, useReducer } from "react";
 import { FiChevronLeft, FiAlertTriangle, FiImage, FiSend } from "react-icons/fi";
 import happy from "./img/happy.png";
-import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc } from "../utils/firebase";
+import responses from "./responses.json";
+import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, getDocs, where } from "../utils/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
 import tappay from "../utils/tappay";
@@ -16,6 +17,10 @@ const initialState = {
   isPerchase: false,
   isCheckout: false,
   count: 0,
+  divHeightClass: "h-screen",
+  productInfo: null,
+  shopName: "",
+  orderInfo: null,
 };
 
 function reducer(state, action) {
@@ -51,25 +56,98 @@ function reducer(state, action) {
       }
       return { ...state, count: state.count - 1 };
 
+    case "SET_DIV_HEIGHT":
+      return {
+        ...state,
+        divHeightClass: action.payload,
+      };
+    case "SET_PRODUCT_INFO":
+      return { ...state, productInfo: action.payload };
+    case "SET_SHOP_NAME":
+      return { ...state, shopName: action.payload };
+    case "SET_ORDER_INFO": // 处理订单信息的状态更新
+      return { ...state, orderInfo: action.payload };
     default:
       return state;
   }
 }
 function Finish() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const fetchOrderInfo = async (shopId, orderNumber) => {
+    try {
+      const ordersCollectionRef = collection(db, "orders");
+      const orderQuery = query(ordersCollectionRef, where("shopId", "==", shopId), where("orderNumber", "==", orderNumber));
+      const querySnapshot = await getDocs(orderQuery);
+      if (!querySnapshot.empty) {
+        const orderDoc = querySnapshot.docs[0];
+        dispatch({ type: "SET_ORDER_INFO", payload: orderDoc.data() });
+      } else {
+        console.log("No matching order found!");
+      }
+    } catch (error) {
+      console.error("Error getting order documents:", error);
+    }
+  };
+
+  const fetchProductInfo = async (shopId, productNumber) => {
+    try {
+      const shopQuery = query(collection(db, "shops"), where("shopId", "==", shopId));
+      const shopSnapshot = await getDocs(shopQuery);
+      if (!shopSnapshot.empty) {
+        const shopDoc = shopSnapshot.docs[0];
+        const shopDocId = shopDoc.id;
+        const shopName = shopDoc.data().shopName;
+        dispatch({ type: "SET_SHOP_NAME", payload: shopName });
+
+        const productsCollectionRef = collection(doc(db, "shops", shopDocId), "products");
+        const productQuery = query(productsCollectionRef, where("productNumber", "==", productNumber));
+        const productSnapshot = await getDocs(productQuery);
+        if (!productSnapshot.empty) {
+          const productDoc = productSnapshot.docs[0];
+          dispatch({ type: "SET_PRODUCT_INFO", payload: productDoc.data() });
+        } else {
+          console.log("No matching product found!");
+        }
+      } else {
+        console.log("No matching shop found for the given shopId!");
+      }
+    } catch (error) {
+      console.error("Error getting product documents:", error);
+    }
+  };
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth",
+      });
+    }, 500);
+  };
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
-    if (!queryParams.has("member")) {
-      if (queryParams.has("order")) {
-        dispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
-      }
-      if (queryParams.has("product")) {
-        dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
-      }
+    const shopId = queryParams.get("member");
+    const orderNumber = queryParams.get("order");
+    const productNumber = queryParams.get("product");
+
+    if (shopId && orderNumber) {
+      dispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
+      fetchOrderInfo(shopId, orderNumber);
+    } else {
+      dispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
     }
 
-    const q = query(collection(db, "chatroom", "chat1", "messages"), orderBy("created_time"));
+    if (shopId && productNumber) {
+      dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
+      fetchProductInfo(shopId, productNumber);
+    } else {
+      dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: false });
+    }
+
+    // Firebase 查詢消息
+    const chatroomName = shopId || " ";
+    const q = query(collection(db, "chatroom", chatroomName, "messages"), orderBy("created_time"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const msgs = [];
       querySnapshot.forEach((doc) => {
@@ -78,7 +156,23 @@ function Finish() {
       dispatch({ type: "SET_MESSAGES", payload: msgs });
     });
 
-    return () => unsubscribe(); // 清理快照監聽器
+    // 處理頁面高度
+    const handleScroll = () => {
+      const height = document.documentElement.scrollHeight;
+      dispatch({
+        type: "SET_DIV_HEIGHT",
+        payload: height < 850 ? "h-screen" : "h-auto",
+      });
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+
+    // 清理工作
+    return () => {
+      unsubscribe();
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -89,33 +183,40 @@ function Finish() {
     setupTappay();
   }, []);
 
-  const predefinedResponses = [
-    { pattern: /訂單編號[\s\S]*/, response: "訂單編號是20240823153700" },
-    {
-      pattern: /營業時間[\s\S]*/,
-      response: "我們的營業時間為每天9:00-18:00",
-    },
-    {
-      pattern: /聯絡方式[\s\S]*/,
-      response: "您好！可以透過客服電話或電子郵件聯絡我們喔～",
-    },
-  ];
+  useEffect(() => {
+    scrollToBottom();
+  }, [state.messages]);
+
+  const predefinedResponses = responses.map((item) => ({
+    pattern: new RegExp(item.pattern, "i"),
+    response: item.response,
+  }));
 
   const sendMessage = async () => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
+    const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
+
     if (state.inputValue.trim() !== "") {
-      await addDoc(collection(db, "chatroom", "chat1", "messages"), {
+      await addDoc(messagesCollectionRef, {
         content: state.inputValue,
         created_time: serverTimestamp(),
         from: "user1",
       });
-      const response = predefinedResponses.find(({ pattern }) => pattern.test(state.inputValue))?.response || "抱歉，我不太明白您的問題！";
+      let response = "抱歉，我不太明白您的問題！";
+      const matchedResponse = predefinedResponses.find(({ pattern }) => pattern.test(state.inputValue));
 
-      await addDoc(collection(db, "chatroom", "chat1", "messages"), {
+      if (matchedResponse) {
+        response = matchedResponse.response;
+      }
+
+      await addDoc(messagesCollectionRef, {
         content: response,
         created_time: serverTimestamp(),
         from: "shop",
       });
       dispatch({ type: "RESET_INPUT_VALUE" }); // 清空輸入框
+      scrollToBottom();
     }
   };
 
@@ -159,6 +260,7 @@ function Finish() {
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           setChats(downloadURL);
+          // scrollToBottom();
         });
       }
     );
@@ -183,7 +285,7 @@ function Finish() {
     }
   }
   return (
-    <div className="bg-black-200 w-container h-100 my-0 mx-auto relative font-sans">
+    <div className="bg-black-200 w-container my-0 mx-auto relative font-sans">
       <div className="bg-black-200 w-container px-3 fixed top-0 left-0 right-0 z-10 my-0 mx-auto">
         <div className="flex items-center py-4">
           <Link to={"/"}>
@@ -197,25 +299,31 @@ function Finish() {
       <div className={`${state.showOrderInfo ? "grid" : "hidden"}  bg-black-0 w-container py-2 px-3  grid-cols-4 gap-6  top-[68px] mt-[68px] left-0 right-0 z-10 my-0 mx-auto`}>
         <div className="flex flex-col items-center gap-y-2 col-span-1">
           <img src="https://images.unsplash.com/photo-1635865933730-e5817b5680cd?q=80&w=2864&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="product-image" className="rounded-full w-large h-large" />
-          <p className="text-xs leading-normal text-center w-large bg-secondary-400 text-secondary rounded-lg">訂單成立</p>
+          <p className="text-xs leading-normal text-center w-large bg-secondary-400 text-secondary rounded-lg">
+            {state.orderInfo?.status} {/* 顯示狀態 */}
+          </p>
         </div>
         <div className="flex flex-col gap-y-1 col-span-3">
-          <p className="font-bold line-clamp-2">商品名稱一行最多十七個字商品名稱一行最多十七個字</p>
-          <p className="text-primary">NT. 499</p>
-          <p>訂單編號：20240823153700</p>
+          <p className="font-bold">
+            {state.orderInfo?.shopName || "商家名稱未找到"} {/* 使用 shopName */}
+          </p>
+          <p className="text-primary">NT. {state.orderInfo?.totalPrice}</p> {/* 顯示價格 */}
+          <p>訂單編號：{state.orderInfo?.orderNumber}</p> {/* 顯示訂單編號 */}
         </div>
       </div>
 
       {/* 這裡要做選擇，hidden or flex */}
       <div className={`w-full product bg-white ${state.showProductInfo ? "flex" : "hidden"} justify-center gap-6 py-2 mt-[68px] items-center`}>
         <img src={happy} alt="camera" className="w-20 rounded-full" />
-        <div className="w-4/6 my-2 flex flex-col py-2 justify-between">
-          <h4 className="w-fit text-base font-bold leading-normal line-clamp-1">商家名稱最多也十六個字十六個字</h4>
+        <div className="w4/6 my-2 flex flex-col py-2 justify-between">
+          <h4 className="w-fit text-base font-bold leading-normal line-clamp-1">
+            {state.shopName || "商家名稱未找到"} {/* 使用 shopName */}
+          </h4>
           <p className="text-base leading-normal text-secondary">momoCall 回應率：100%</p>
         </div>
       </div>
 
-      <div className={`px-3 py-4 space-y-4 ${!state.showOrderInfo && !state.showProductInfo ? "mt-[68px]" : ""} mb-12`}>
+      <div className={`px-3 py-4 space-y-4 ${state.divHeightClass} ${!state.showOrderInfo && !state.showProductInfo ? "mt-[68px]" : ""} mb-12`}>
         <div className="bg-accent flex justify-center items-center h-8 px-6 rounded-large">
           <FiAlertTriangle className="w-notice h-notice mr-4" />
           <p className="text-sm leading-normal">提醒您，請勿透露個人資料</p>
@@ -227,17 +335,14 @@ function Finish() {
         </div>
         <div>
           <div className={`bg-black-0 p-4 rounded-t-lg ${state.showOrderInfo ? "hidden" : "flex"} justify-between border-b-1 border-black-400`}>
-            <img src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="product-image" className="w-middle h-middle rounded-lg mr-3" />
-            <div className="flex flex-col justify-between">
-              <p className="text-xs leading-normal">商品編號</p>
-              <p className="w-full text-xs leading-normal font-bold line-clamp-2">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔vsss</p>
+            <img src={state.productInfo?.image} alt="product-image" className="w-middle h-middle rounded-lg mr-3" />
+            <div className="flex flex-col grow justify-between">
+              <p className="text-xs leading-normal">商品編號 {state.productInfo?.productNumber}</p>
+              <p className="w-full h-[36px] text-xs leading-normal font-bold line-clamp-2">{state.productInfo?.productName || "商品名稱未找到"}</p>
             </div>
           </div>
-
-          <div className={`bg-black-0 rounded-b-lg ${state.showOrderInfo ? "hidden" : "flex"} justify-center`}>
-            <button className="w-full py-2 text-xs leading-normal font-bold text-primary cursor-pointer" onClick={() => dispatch({ type: "TO_PURCHASE" })}>
-              立即購買
-            </button>
+          <div className={`bg-black-0 rounded-b-lg  ${state.showOrderInfo ? "hidden" : "flex"} justify-center`}>
+            <button className="w-full py-2 text-xs leading-normal font-bold text-primary cursor-pointer">立即購買</button>
           </div>
         </div>
         {state.messages.map((message, index) => (
