@@ -342,7 +342,9 @@ function Finish() {
             </div>
           </div>
           <div className={`bg-black-0 rounded-b-lg  ${state.showOrderInfo ? "hidden" : "flex"} justify-center`}>
-            <button className="w-full py-2 text-xs leading-normal font-bold text-primary cursor-pointer">立即購買</button>
+            <button className="w-full py-2 text-xs leading-normal font-bold text-primary cursor-pointer" onClick={() => dispatch({ type: "TO_PURCHASE" })}>
+              立即購買
+            </button>
           </div>
         </div>
         {state.messages.map((message, index) => (
