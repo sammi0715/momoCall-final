@@ -233,7 +233,11 @@ function ProductChat() {
 
       <div className={`${state.showOrderInfo ? "grid" : "hidden"}  bg-black-0 w-container py-2 px-3  grid-cols-4 gap-6  top-[68px] mt-[68px] left-0 right-0 z-10 my-0 mx-auto`}>
         <div className="flex flex-col items-center gap-y-2 col-span-1">
-          <img src="https://images.unsplash.com/photo-1635865933730-e5817b5680cd?q=80&w=2864&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="product-image" className="rounded-full w-large h-large" />
+          <img
+            src="https://images.unsplash.com/photo-1635865933730-e5817b5680cd?q=80&w=2864&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            alt="product-image"
+            className="rounded-full w-large h-large"
+          />
           <p className="text-xs leading-normal text-center w-large bg-secondary-400 text-secondary rounded-lg">訂單成立</p>
         </div>
         <div className="flex flex-col gap-y-1 col-span-3">
@@ -263,7 +267,11 @@ function ProductChat() {
         </div>
         <div>
           <div className={`bg-black-0 p-4 rounded-t-lg ${state.showOrderInfo ? "hidden" : "flex"} justify-between border-b-1 border-black-400`}>
-            <img src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="product-image" className="w-middle h-middle rounded-lg mr-3" />
+            <img
+              src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="product-image"
+              className="w-middle h-middle rounded-lg mr-3"
+            />
             <div className="flex flex-col justify-between">
               <p className="text-xs leading-normal">商品編號</p>
               <p className="w-full text-xs leading-normal font-bold line-clamp-2">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔vsss</p>
@@ -281,13 +289,19 @@ function ProductChat() {
           <div key={index} className={`flex gap-1 mr-3 ${message.from === "user1" ? "justify-end" : ""}`}>
             {message.from !== "user1" && <img src={happy} alt="" className="w-9 h-9" />}
             <div
-              className={`w-fit max-w-[65%]  text-black break-words rounded-lg p-3 relative ${message.from === "user1" ? "bg-white" : "bg-primary-600"} ${message.from === "user1" ? "order-2" : "order-1 ml-2"} ${
+              className={`w-fit max-w-[65%]  text-black break-words rounded-lg p-3 relative ${message.from === "user1" ? "bg-white" : "bg-primary-600"} ${
+                message.from === "user1" ? "order-2" : "order-1 ml-2"
+              } ${
                 message.from === "user1"
                   ? "after:absolute after:top-4 after:-right-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-l-[20px] after:border-l-white after:border-b-transparent"
                   : "after:absolute after:top-4 after:-left-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-r-[20px] after:border-r-primary-600 after:border-b-transparent"
               }`}
             >
-              {imageFormats.some((format) => message.content.includes(format)) ? <img src={message.content} alt="Sent" className="rounded-lg max-w-full h-auto" /> : <p dangerouslySetInnerHTML={{ __html: marked(message.content) }}></p>}
+              {imageFormats.some((format) => message.content.includes(format)) ? (
+                <img src={message.content} alt="Sent" className="rounded-lg max-w-full h-auto" />
+              ) : (
+                <p dangerouslySetInnerHTML={{ __html: marked(message.content) }}></p>
+              )}
             </div>
             <small className={`self-end ${message.from === "user1" ? "order-1 mr-3" : "order-2 ml-2"}`}>{message.created_time?.toDate().toLocaleTimeString() || "Loading..."}</small>
           </div>
@@ -298,7 +312,11 @@ function ProductChat() {
         <div className="w-64 h-60 bg-white mx-auto py-2 px-4 flex flex-col gap-3 text-sm rounded-xl">
           <h4 className="text-center font-bold leading-normal text-base text-primary-800">請選擇規格數量</h4>
           <div className="bg-black-0 p-1 rounded-t-large flex justify-center items-center">
-            <img src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="product-image" className="w-small h-small rounded-lg mr-3" />
+            <img
+              src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="product-image"
+              className="w-small h-small rounded-lg mr-3"
+            />
             <div className="flex flex-col justify-between">
               <p className="text-xs leading-normal">123456</p>
               <p className="text-xs leading-normal font-bold line-clamp-1">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔vsss</p>
@@ -390,7 +408,13 @@ function ProductChat() {
           <FiImage className="w-6 h-6 text-primary hover:text-primary-800 active:text-primary" />
           <input type="file" className="hidden" accept="image/jpg,image/jpeg,image/png,image/gif" onChange={sendImage} />
         </label>
-        <input type="text" className="bg-black-200 grow rounded-3xl pl-3  focus:outline-primary focus:outline focus:bg-white hover:bg-white" placeholder="輸入訊息" value={state.inputValue} onChange={(e) => dispatch({ type: "SET_INPUT_VALUE", payload: e.target.value })} />
+        <input
+          type="text"
+          className="bg-black-200 grow rounded-3xl pl-3  focus:outline-primary focus:outline focus:bg-white hover:bg-white"
+          placeholder="輸入訊息"
+          value={state.inputValue}
+          onChange={(e) => dispatch({ type: "SET_INPUT_VALUE", payload: e.target.value })}
+        />
         <button className="bg-white w-8 h-8 rounded-full active:border-primary active:border" onClick={sendMessage}>
           <FiSend className="w-5 h-5 mx-auto text-primary hover:text-primary" />
         </button>
