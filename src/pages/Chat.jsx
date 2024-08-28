@@ -6,7 +6,7 @@ import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTime
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
 import tappay from "../utils/tappay";
-import { count } from "firebase/firestore";
+import { marked } from "marked";
 
 const initialState = {
   messages: [],
@@ -21,6 +21,7 @@ const initialState = {
   productInfo: null,
   shopName: "",
   orderInfo: null,
+  errorMsg: "",
 };
 
 function reducer(state, action) {
@@ -67,12 +68,15 @@ function reducer(state, action) {
       return { ...state, shopName: action.payload };
     case "SET_ORDER_INFO": // 处理订单信息的状态更新
       return { ...state, orderInfo: action.payload };
+    case "SET_GPT_ERROR":
+      return { ...state, errorMsg: action.payload };
     default:
       return state;
   }
 }
 function Finish() {
   const [state, dispatch] = useReducer(reducer, initialState);
+
   const fetchOrderInfo = async (shopId, orderNumber) => {
     try {
       const ordersCollectionRef = collection(db, "orders");
@@ -192,6 +196,57 @@ function Finish() {
     response: item.response,
   }));
 
+  const fetchCustomGPTResponse = async (inputText, document) => {
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    const apiUrl = "https://api.openai.com/v1/chat/completions";
+
+    try {
+      //complete fetch
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          max_tokens: 150,
+          messages: [
+            {
+              role: "system",
+              content: "你是一個全程使用繁體中文並且非常人性化回覆「已登入」的使用者提問MOMO電商客服相關問題的富邦媒體電商客服人員",
+            },
+            {
+              role: "user",
+              content: inputText,
+            },
+          ],
+          temperature: 0.7,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+
+        await addDoc(document, {
+          content: data.choices[0].message.content,
+          created_time: serverTimestamp(),
+          from: "shop",
+        });
+      } else if (res.status === 429) {
+        console.error("Too many requests. Please try again later.");
+        dispatch({ type: "SET_GPT_ERROR", payload: "Too many requests. Please try again later." });
+      } else {
+        console.log(res.json());
+        console.error("Error:", res.status, res.statusText);
+        dispatch({ type: "SET_GPT_ERROR", payload: "An error occurred. Please try again later." });
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      dispatch({ type: "SET_GPT_ERROR", payload: "An error occurred. Please try again later." });
+    }
+  };
+
   const sendMessage = async () => {
     const queryParams = new URLSearchParams(window.location.search);
     const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
@@ -203,18 +258,20 @@ function Finish() {
         created_time: serverTimestamp(),
         from: "user1",
       });
-      let response = "抱歉，我不太明白您的問題！";
+      let response = "";
       const matchedResponse = predefinedResponses.find(({ pattern }) => pattern.test(state.inputValue));
 
       if (matchedResponse) {
         response = matchedResponse.response;
+        await addDoc(messagesCollectionRef, {
+          content: response,
+          created_time: serverTimestamp(),
+          from: "shop",
+        });
+      } else {
+        fetchCustomGPTResponse(state.inputValue, messagesCollectionRef);
       }
 
-      await addDoc(messagesCollectionRef, {
-        content: response,
-        created_time: serverTimestamp(),
-        from: "shop",
-      });
       dispatch({ type: "RESET_INPUT_VALUE" }); // 清空輸入框
       scrollToBottom();
     }
@@ -357,7 +414,7 @@ function Finish() {
                   : "after:absolute after:top-4 after:-left-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-r-[20px] after:border-r-primary-600 after:border-b-transparent"
               }`}
             >
-              {imageFormats.some((format) => message.content.includes(format)) ? <img src={message.content} alt="Sent" className="rounded-lg max-w-full h-auto" /> : <p>{message.content}</p>}
+              {imageFormats.some((format) => message.content.includes(format)) ? <img src={message.content} alt="Sent" className="rounded-lg max-w-full h-auto" /> : <p dangerouslySetInnerHTML={{ __html: marked(message.content) }}></p>}
             </div>
             <small className={`self-end ${message.from === "user1" ? "order-1 mr-3" : "order-2 ml-2"}`}>{message.created_time?.toDate().toLocaleTimeString() || "Loading..."}</small>
           </div>

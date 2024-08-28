@@ -56,9 +56,8 @@ function reducer(state, action) {
 }
 
 function ProductChat() {
-  const [input, setInput] = useState("");
   const [error, setError] = useState("");
-  const [QA, setQA] = useState([]);
+
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -92,7 +91,7 @@ function ProductChat() {
     setupTappay();
   }, []);
 
-  const fetchCustomGPTResponse = async (inputText) => {
+  const fetchCustomGPTResponse = async (inputText, document) => {
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
     const apiUrl = "https://api.openai.com/v1/chat/completions";
 
@@ -124,7 +123,7 @@ function ProductChat() {
       if (res.ok) {
         const data = await res.json();
 
-        await addDoc(collection(db, "chatroom", "chat1", "messages"), {
+        await addDoc(document, {
           content: data.choices[0].message.content,
           created_time: serverTimestamp(),
           from: "shop",
