@@ -2,14 +2,7 @@ import { FiChevronLeft } from "react-icons/fi";
 import momoLogo from "/momocallLogo.png";
 import { useEffect, useReducer, useState } from "react";
 import { db } from "../utils/firebase";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  orderBy,
-  limit,
-} from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
 import { Link, useNavigate } from "react-router-dom";
 
 const initialState = {
@@ -53,11 +46,7 @@ const SearchPages = () => {
       for (const result of state.results) {
         if (result.collectionName === "chatroom") {
           const messagesRef = collection(db, `chatroom/${result.id}/messages`);
-          const messagesQuery = query(
-            messagesRef,
-            orderBy("created_time", "desc"),
-            limit(1)
-          );
+          const messagesQuery = query(messagesRef, orderBy("created_time", "desc"), limit(1));
           const messagesSnapshot = await getDocs(messagesQuery);
           if (!messagesSnapshot.empty) {
             const latestMessage = messagesSnapshot.docs[0].data();
@@ -98,9 +87,7 @@ const SearchPages = () => {
           </button>
         </Link>
         <Link to="/" onClick={handleLinkClick}>
-          <h1 className="text-2xl leading-normal font-bold text-primary ml-20">
-            momoCall
-          </h1>
+          <h1 className="text-2xl leading-normal font-bold text-primary ml-20">momoCall</h1>
         </Link>
       </header>
       <input
@@ -114,10 +101,7 @@ const SearchPages = () => {
       <div>
         {!state.isSearching &&
           state.results
-            .filter(
-              (result, index, self) =>
-                index === self.findIndex((r) => r.shopId === result.shopId)
-            )
+            .filter((result, index, self) => index === self.findIndex((r) => r.shopId === result.shopId))
             .sort((a, b) => {
               const aTime = latestMessages[a.id]?.created_time?.seconds || 0;
               const bTime = latestMessages[b.id]?.created_time?.seconds || 0;
@@ -137,28 +121,16 @@ const SearchPages = () => {
                 <Link
                   to={`/chat?${urlParam}`}
                   key={result.id}
-                  className={`w-full py-4 flex items-center border-t border-gray-300 cursor-pointer ${
-                    index === state.results.length - 1
-                      ? "border-b border-gray-300"
-                      : ""
-                  }`}
+                  className={`w-full py-4 flex items-center border-t border-gray-300 cursor-pointer ${index === state.results.length - 1 ? "border-b border-gray-300" : ""}`}
                 >
-                  <img
-                    className="w-large h-large rounded-full"
-                    src={momoLogo}
-                  ></img>
+                  <img className="w-large h-large rounded-full" src={momoLogo}></img>
 
                   <div className="flex ml-4 flex-col py-2 justify-between w-full h-large">
                     <div className="flex justify-between items-center">
-                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent h-6 line-clamp-1">
-                        {result.shopName}
-                      </h2>
+                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent h-6 line-clamp-1">{result.shopName}</h2>
                       <p className="text-xs text-gray-500 leading-normal">
                         {latestMessages[result.id]?.created_time
-                          ? new Date(
-                              latestMessages[result.id].created_time.seconds *
-                                1000
-                            ).toLocaleDateString("zh-TW", {
+                          ? new Date(latestMessages[result.id].created_time.seconds * 1000).toLocaleDateString("zh-TW", {
                               month: "2-digit",
                               day: "2-digit",
                             })
@@ -166,24 +138,16 @@ const SearchPages = () => {
                       </p>
                     </div>
                     <div className="flex justify-between">
-                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-6 line-clamp-1">
-                        {latestMessages[result.id]?.content || ""}
-                      </p>
+                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-6 line-clamp-1">{latestMessages[result.id]?.content || ""}</p>
                       {latestMessages[result.id] && result.unreadCount > 0 && (
-                        <div className="bg-primary-800 text-black-0 text-base w-6 h-6 rounded-full flex items-center justify-center ml-2">
-                          {result.unreadCount}
-                        </div>
+                        <div className="bg-primary-800 text-black-0 text-base w-6 h-6 rounded-full flex items-center justify-center ml-2">{result.unreadCount}</div>
                       )}
                     </div>
                   </div>
                 </Link>
               );
             })}
-        {state.isSearching && state.results.length === 0 && (
-          <p className="text-base leading-normal text-black text-center">
-            找不到您搜尋的內容
-          </p>
-        )}
+        {state.isSearching && state.results.length === 0 && <p className="text-base leading-normal text-black text-center">找不到您搜尋的內容</p>}
         {state.isSearching &&
           state.results
             .filter((result) => result.collectionName === "chatroom")
@@ -206,28 +170,16 @@ const SearchPages = () => {
                 <Link
                   to={`/chat?${urlParam}`}
                   key={result.id}
-                  className={`w-full py-4 flex items-center border-t border-gray-300 cursor-pointer ${
-                    index === state.results.length - 1
-                      ? "border-b border-gray-300"
-                      : ""
-                  }`}
+                  className={`w-full py-4 flex items-center border-t border-gray-300 cursor-pointer ${index === state.results.length - 1 ? "border-b border-gray-300" : ""}`}
                 >
-                  <img
-                    className="w-large h-large rounded-full"
-                    src={momoLogo}
-                  ></img>
+                  <img className="w-large h-large rounded-full" src={momoLogo}></img>
 
                   <div className="flex ml-4 flex-col py-2 justify-between w-full h-large">
                     <div className="flex justify-between items-center">
-                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent h-6 line-clamp-1">
-                        {result.shopName}
-                      </h2>
+                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent h-6 line-clamp-1">{result.shopName}</h2>
                       <p className="text-xs text-gray-500 leading-normal">
                         {latestMessages[result.id]?.created_time
-                          ? new Date(
-                              latestMessages[result.id].created_time.seconds *
-                                1000
-                            ).toLocaleDateString("zh-TW", {
+                          ? new Date(latestMessages[result.id].created_time.seconds * 1000).toLocaleDateString("zh-TW", {
                               month: "2-digit",
                               day: "2-digit",
                             })
@@ -235,13 +187,9 @@ const SearchPages = () => {
                       </p>
                     </div>
                     <div className="flex justify-between">
-                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-6 line-clamp-1">
-                        {latestMessages[result.id]?.content || ""}
-                      </p>
+                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-6 line-clamp-1">{latestMessages[result.id]?.content || ""}</p>
                       {latestMessages[result.id] && result.unreadCount > 0 && (
-                        <div className="bg-primary-800 text-black-0 text-base w-6 h-6 rounded-full flex items-center justify-center ml-2">
-                          {result.unreadCount}
-                        </div>
+                        <div className="bg-primary-800 text-black-0 text-base w-6 h-6 rounded-full flex items-center justify-center ml-2">{result.unreadCount}</div>
                       )}
                     </div>
                   </div>
@@ -268,10 +216,7 @@ const fetchAllChatrooms = async () => {
 const searchFirestore = async (searchTerm) => {
   let results = [];
 
-  const chatroomQuery = query(
-    collection(db, "chatroom"),
-    where("shopName", "==", searchTerm)
-  );
+  const chatroomQuery = query(collection(db, "chatroom"), where("shopName", "==", searchTerm));
   const chatroomSnapshot = await getDocs(chatroomQuery);
   for (const doc of chatroomSnapshot.docs) {
     let data = {
@@ -283,20 +228,14 @@ const searchFirestore = async (searchTerm) => {
     results.push(data);
   }
 
-  const ordersQuery = query(
-    collection(db, "orders"),
-    where("orderNumber", "==", searchTerm)
-  );
+  const ordersQuery = query(collection(db, "orders"), where("orderNumber", "==", searchTerm));
   const ordersSnapshot = await getDocs(ordersQuery);
   for (const doc of ordersSnapshot.docs) {
     const orderData = doc.data();
     const shopId = orderData.shopId;
     const myOrderNumber = orderData.orderNumber;
 
-    const chatroomByShopIdQuery = query(
-      collection(db, "chatroom"),
-      where("shopId", "==", shopId)
-    );
+    const chatroomByShopIdQuery = query(collection(db, "chatroom"), where("shopId", "==", shopId));
     const chatroomByShopIdSnapshot = await getDocs(chatroomByShopIdQuery);
     for (const chatroomDoc of chatroomByShopIdSnapshot.docs) {
       let data = {
@@ -314,10 +253,7 @@ const searchFirestore = async (searchTerm) => {
   for (const shopDoc of shopsSnapshot.docs) {
     const shopIdentifier = shopDoc.id;
     const productsRef = collection(db, `shops/${shopIdentifier}/products`);
-    const productsQuery = query(
-      productsRef,
-      where("productName", "==", searchTerm)
-    );
+    const productsQuery = query(productsRef, where("productName", "==", searchTerm));
     const productsSnapshot = await getDocs(productsQuery);
 
     if (!productsSnapshot.empty) {
@@ -326,10 +262,7 @@ const searchFirestore = async (searchTerm) => {
       const productData = productsSnapshot.docs[0].data();
       const myProductNumber = productData.productNumber;
 
-      const chatroomByShopIdQuery = query(
-        collection(db, "chatroom"),
-        where("shopId", "==", shopId)
-      );
+      const chatroomByShopIdQuery = query(collection(db, "chatroom"), where("shopId", "==", shopId));
       const chatroomByShopIdSnapshot = await getDocs(chatroomByShopIdQuery);
       for (const chatroomDoc of chatroomByShopIdSnapshot.docs) {
         let data = {
