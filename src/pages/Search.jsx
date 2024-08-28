@@ -145,7 +145,7 @@ const SearchPages = () => {
 
                   <div className="flex ml-4 flex-col py-2 justify-between w-full h-large">
                     <div className="flex justify-between items-center">
-                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent h-6">
+                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent h-6 line-clamp-1">
                         {result.shopName}
                       </h2>
                       <p className="text-xs text-gray-500 leading-normal">
@@ -161,7 +161,7 @@ const SearchPages = () => {
                       </p>
                     </div>
                     <div className="flex justify-between">
-                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-6 overflow-hidden text-ellipsis">
+                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-6 line-clamp-1">
                         {latestMessages[result.id]?.content || ""}
                       </p>
                       {latestMessages[result.id] && result.unreadCount > 0 && (
@@ -175,19 +175,21 @@ const SearchPages = () => {
               );
             })}
         {state.isSearching && state.results.length === 0 && (
-          <p className="text-2xl text-black text-center">Not found</p>
+          <p className="text-base leading-normal text-black text-center">
+            找不到您搜尋的內容
+          </p>
         )}
         {state.isSearching &&
           state.results
             .filter((result) => result.collectionName === "chatroom")
             .map((result, index) => {
-              let urlParam = "member";
+              let urlParam = `member=${result.id}`;
               if (result.type === "member") {
-                urlParam = "member";
+                urlParam = `member=${result.id}`;
               } else if (result.type === "order") {
-                urlParam = "order";
+                urlParam = `member=${result.id}&order=${result.myOrderNumber}`;
               } else if (result.type === "product") {
-                urlParam = "product";
+                urlParam = `member=${result.id}&product=${result.myProductNumber}`;
               }
 
               return (
@@ -207,7 +209,7 @@ const SearchPages = () => {
 
                   <div className="flex ml-4 flex-col py-2 justify-between w-full h-large">
                     <div className="flex justify-between items-center">
-                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent h-6">
+                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent h-6 line-clamp-1">
                         {result.shopName}
                       </h2>
                       <p className="text-xs text-gray-500 leading-normal">
@@ -223,7 +225,7 @@ const SearchPages = () => {
                       </p>
                     </div>
                     <div className="flex justify-between">
-                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-6 overflow-hidden text-ellipsis">
+                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-6 line-clamp-1">
                         {latestMessages[result.id]?.content || ""}
                       </p>
                       {latestMessages[result.id] && result.unreadCount > 0 && (
@@ -279,6 +281,7 @@ const searchFirestore = async (searchTerm) => {
   for (const doc of ordersSnapshot.docs) {
     const orderData = doc.data();
     const shopId = orderData.shopId;
+    const myOrderNumber = orderData.orderNumber;
 
     const chatroomByShopIdQuery = query(
       collection(db, "chatroom"),
@@ -291,6 +294,7 @@ const searchFirestore = async (searchTerm) => {
         ...chatroomDoc.data(),
         collectionName: "chatroom",
         type: "order",
+        myOrderNumber,
       };
       results.push(data);
     }
@@ -309,6 +313,9 @@ const searchFirestore = async (searchTerm) => {
     if (!productsSnapshot.empty) {
       const shopData = shopDoc.data();
       const shopId = shopData.shopId;
+      const productData = productsSnapshot.docs[0].data();
+      const myProductNumber = productData.productNumber;
+
       const chatroomByShopIdQuery = query(
         collection(db, "chatroom"),
         where("shopId", "==", shopId)
@@ -320,6 +327,7 @@ const searchFirestore = async (searchTerm) => {
           ...chatroomDoc.data(),
           collectionName: "chatroom",
           type: "product",
+          myProductNumber,
         };
         results.push(data);
       }
