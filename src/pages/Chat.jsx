@@ -5,6 +5,7 @@ import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTime
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
 import tappay from "../utils/tappay";
+import { count } from "firebase/firestore";
 
 const initialState = {
   messages: [],
@@ -38,7 +39,10 @@ function reducer(state, action) {
       }
       return { ...state, isPerchase: !state.isPerchase };
     case "FINISH_CHECKOUT":
-      return { ...state, isCheckout: !state.isCheckout, isChoose: false, isPerchase: false };
+      if (state.isCheckout == true) {
+        window.location.reload();
+      }
+      return { ...state, isCheckout: !state.isCheckout, isChoose: false, isPerchase: false, count: 0 };
     case "ADD_PRODUCT_NUM":
       return { ...state, count: state.count + 1 };
     case "SUB_PRODUCT_NUM":
@@ -172,6 +176,7 @@ function Finish() {
         window.alert("付款資料輸入有誤");
         return;
       }
+
       dispatch({ type: "FINISH_CHECKOUT" });
     } catch (err) {
       console.log(err);
@@ -279,7 +284,7 @@ function Finish() {
             </div>
             <div className="flex justify-around items-center">
               <p>總金額：</p>
-              <p className="text-black-600 w-2/4 text-center">1000元</p>
+              <p className="text-black-600 w-2/4 text-center">{state.count * 200}</p>
             </div>
           </div>
           <div className="flex justify-around items-center">
@@ -308,7 +313,7 @@ function Finish() {
             </div>
             <div className="flex justify-between items-center">
               <p>訂單金額：</p>
-              <p className="text-black-600">1000元</p>
+              <p className="text-black-600">{state.count * 200}</p>
             </div>
           </div>
 
