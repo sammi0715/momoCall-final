@@ -6,6 +6,7 @@ import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTime
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
 import tappay from "../utils/tappay";
+import { marked } from "marked";
 
 const initialState = {
   messages: [],
@@ -17,10 +18,12 @@ const initialState = {
   isPerchase: false,
   isCheckout: false,
   count: 0,
+  spec: "",
   divHeightClass: "h-screen",
   productInfo: null,
   shopName: "",
   orderInfo: null,
+  errorMsg: "",
 };
 
 function reducer(state, action) {
@@ -63,7 +66,8 @@ function reducer(state, action) {
         return state;
       }
       return { ...state, count: state.count - 1 };
-
+    case "SELECT_SPEC":
+      return { ...state, spec: action.payload };
     case "SET_DIV_HEIGHT":
       return {
         ...state,
@@ -75,12 +79,15 @@ function reducer(state, action) {
       return { ...state, shopName: action.payload };
     case "SET_ORDER_INFO":
       return { ...state, orderInfo: action.payload };
+    case "SET_GPT_ERROR":
+      return { ...state, errorMsg: action.payload };
     default:
       return state;
   }
 }
 function Finish() {
   const [state, dispatch] = useReducer(reducer, initialState);
+
   const fetchOrderInfo = async (shopId, orderNumber) => {
     try {
       const ordersCollectionRef = collection(db, "orders");
@@ -213,6 +220,57 @@ function Finish() {
     response: item.response,
   }));
 
+  const fetchCustomGPTResponse = async (inputText, document) => {
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    const apiUrl = "https://api.openai.com/v1/chat/completions";
+
+    try {
+      //complete fetch
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          max_tokens: 150,
+          messages: [
+            {
+              role: "system",
+              content: "你是一個全程使用繁體中文並且非常人性化回覆「已登入」的使用者提問MOMO電商客服相關問題的富邦媒體電商客服人員",
+            },
+            {
+              role: "user",
+              content: inputText,
+            },
+          ],
+          temperature: 0.7,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+
+        await addDoc(document, {
+          content: data.choices[0].message.content,
+          created_time: serverTimestamp(),
+          from: "shop",
+        });
+      } else if (res.status === 429) {
+        console.error("Too many requests. Please try again later.");
+        dispatch({ type: "SET_GPT_ERROR", payload: "Too many requests. Please try again later." });
+      } else {
+        console.log(res.json());
+        console.error("Error:", res.status, res.statusText);
+        dispatch({ type: "SET_GPT_ERROR", payload: "An error occurred. Please try again later." });
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      dispatch({ type: "SET_GPT_ERROR", payload: "An error occurred. Please try again later." });
+    }
+  };
+
   const sendMessage = async () => {
     const queryParams = new URLSearchParams(window.location.search);
     const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
@@ -224,20 +282,28 @@ function Finish() {
         created_time: serverTimestamp(),
         from: "user1",
       });
-      let response = "抱歉，我不太明白您的問題！";
+      let response = "";
       const matchedResponse = predefinedResponses.find(({ pattern }) => pattern.test(state.inputValue));
 
       if (matchedResponse) {
         response = matchedResponse.response;
+        await addDoc(messagesCollectionRef, {
+          content: response,
+          created_time: serverTimestamp(),
+          from: "shop",
+        });
+      } else {
+        fetchCustomGPTResponse(state.inputValue, messagesCollectionRef);
       }
 
-      await addDoc(messagesCollectionRef, {
-        content: response,
-        created_time: serverTimestamp(),
-        from: "shop",
-      });
       dispatch({ type: "RESET_INPUT_VALUE" }); // 清空輸入框
       scrollToBottom();
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      sendMessage();
     }
   };
 
@@ -378,9 +444,15 @@ function Finish() {
                   : "after:absolute after:top-4 after:-left-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-r-[20px] after:border-r-primary-600 after:border-b-transparent"
               }`}
             >
-              {imageFormats.some((format) => message.content.includes(format)) ? <img src={message.content} alt="Sent" className="rounded-lg max-w-full h-auto" /> : <p>{message.content}</p>}
+              {imageFormats.some((format) => message.content.includes(format)) ? (
+                <img src={message.content} alt="Sent" className="rounded-lg max-w-full h-auto" />
+              ) : (
+                <p dangerouslySetInnerHTML={{ __html: marked(message.content) }}></p>
+              )}
             </div>
-            <small className={`self-end ${message.from === "user1" ? "order-1 mr-3" : "order-2 ml-2"}`}>{message.created_time?.toDate().toLocaleTimeString() || "Loading..."}</small>
+            <small className={`self-end ${message.from === "user1" ? "order-1 mr-3" : "order-2 ml-2"}`}>
+              {message.created_time?.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "Loading..."}
+            </small>
           </div>
         ))}
       </div>
@@ -395,14 +467,14 @@ function Finish() {
               className="w-small h-small rounded-lg mr-3"
             />
             <div className="flex flex-col justify-between">
-              <p className="text-xs leading-normal">123456</p>
-              <p className="text-xs leading-normal font-bold line-clamp-1">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔vsss</p>
+              <p className="text-xs leading-normal">{state.productInfo?.productNumber}</p>
+              <p className="text-xs leading-normal font-bold line-clamp-1">{state.productInfo?.productName || "商品名稱未找到"}</p>
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <div className="flex justify-around items-center">
               <label htmlFor="spec">規格</label>
-              <select name="spec" id="spec" className="w-2/4 border-1 border-black-600 rounded-md text-center">
+              <select name="spec" id="spec" className="w-2/4 border-1 border-black-600 rounded-md text-center" onChange={(e) => dispatch({ type: "SELECT_SPEC", payload: e.target.value })}>
                 <option value="yellow">黃色</option>
               </select>
             </div>
@@ -416,7 +488,7 @@ function Finish() {
             </div>
             <div className="flex justify-around items-center">
               <p>總金額：</p>
-              <p className="text-black-600 w-2/4 text-center">{state.count * 200}</p>
+              <p className="text-black-600 w-2/4 text-center">{state.productInfo?.price * state.count}</p>
             </div>
           </div>
           <div className="flex justify-around items-center">
@@ -437,15 +509,19 @@ function Finish() {
           <div className="flex flex-col gap-1">
             <div className="flex justify-between items-center">
               <p>產品名稱：</p>
-              <p className="text-black-600 line-clamp-1 w-3/5">商品名稱商品名稱商品名稱商品名稱商品名稱商品名稱最多兩行共四十個字多的用刪節號喔vsss</p>
+              <p className="text-black-600 line-clamp-1 w-3/5 text-end">{state.productInfo?.productName || "商品名稱未找到"}</p>
             </div>
             <div className="flex justify-between items-center">
               <p>數量：</p>
               <p className="text-black-600">{state.count}</p>
             </div>
             <div className="flex justify-between items-center">
+              <p>規格：</p>
+              <p className="text-black-600">{state.spec}</p>
+            </div>
+            <div className="flex justify-between items-center">
               <p>訂單金額：</p>
-              <p className="text-black-600">{state.count * 200}</p>
+              <p className="text-black-600">{state.productInfo?.price * state.count || 0}</p>
             </div>
           </div>
 
@@ -491,6 +567,7 @@ function Finish() {
           placeholder="輸入訊息"
           value={state.inputValue}
           onChange={(e) => dispatch({ type: "SET_INPUT_VALUE", payload: e.target.value })}
+          onKeyDown={handleKeyDown}
         />
         <button className="bg-white w-8 h-8 rounded-full active:border-primary active:border" onClick={sendMessage}>
           <FiSend className="w-5 h-5 mx-auto text-primary hover:text-primary" />
