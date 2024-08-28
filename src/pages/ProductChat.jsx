@@ -57,7 +57,6 @@ function reducer(state, action) {
 
 function ProductChat() {
   const [error, setError] = useState("");
-  const { labels, handleAnalyzeImage } = useGoogleVisionAPI();
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -90,10 +89,6 @@ function ProductChat() {
     };
     setupTappay();
   }, []);
-
-  const handleAnalyzeClick = () => {
-    handleAnalyzeImage(imageUrl);
-  };
 
   const fetchCustomGPTResponse = async (inputText, document) => {
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
@@ -414,7 +409,7 @@ function ProductChat() {
           <FiImage className="w-6 h-6 text-primary hover:text-primary-800 active:text-primary" />
           <input type="file" className="hidden" accept="image/jpg,image/jpeg,image/png,image/gif" onChange={sendImage} />
         </label>
-        <button onClick={handleAnalyzeClick}>取label</button>
+
         <input
           type="text"
           className="bg-black-200 grow rounded-3xl pl-3  focus:outline-primary focus:outline focus:bg-white hover:bg-white"

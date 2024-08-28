@@ -2,7 +2,7 @@ import { useEffect, useReducer } from "react";
 import { FiChevronLeft, FiAlertTriangle, FiImage, FiSend } from "react-icons/fi";
 import happy from "./img/happy.png";
 import responses from "./responses.json";
-import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, getDocs, where } from "../utils/firebase";
+import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDocs, where } from "../utils/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
 import tappay from "../utils/tappay";

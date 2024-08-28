@@ -41,7 +41,7 @@ const useGoogleVisionAPI = () => {
       const data = await response.json();
       const labels = data.responses[0].labelAnnotations;
       setLabels(labels.map((label) => label.description).toString());
-      console.log(labels.map((label) => label.description).toString());
+      console.log(labels);
     } catch (err) {
       setError("Failed to analyze image");
       console.error(err);
