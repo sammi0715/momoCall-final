@@ -2,6 +2,7 @@ import { useEffect, useReducer, useState } from "react";
 import { FiChevronLeft, FiAlertTriangle, FiImage, FiSend } from "react-icons/fi";
 import happy from "./img/happy.png";
 import responses from "./responses.json";
+import loading from "./img/loading.gif";
 import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDocs, where } from "../utils/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
@@ -19,6 +20,8 @@ const initialState = {
   showOrderInfo: false,
   showShopInfo: false,
   showProductInfo: false,
+  isGPTLoading: false,
+  isImageLoading: false,
   isChoose: false,
   isPerchase: false,
   isCheckout: false,
@@ -45,6 +48,10 @@ function reducer(state, action) {
       return { ...state, showProductInfo: action.payload };
     case "RESET_INPUT_VALUE":
       return { ...state, inputValue: "" };
+    case "TOGGLE_GPT_LOADING":
+      return { ...state, isGPTLoading: !state.isGPTLoading };
+    case "TOGGLE_IMG_LOADING":
+      return { ...state, isImageLoading: !state.isImageLoading };
     case "TO_PURCHASE":
       return { ...state, isChoose: !state.isChoose };
     case "TO_CHECKOUT":
@@ -360,6 +367,10 @@ function Finish() {
     const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
 
     if (url !== undefined) {
+      setTimeout(() => {
+        dispatch({ type: "TOGGLE_IMG_LOADING" }); // 3 秒
+        dispatch({ type: "TOGGLE_GPT_LOADING" });
+      }, 500);
       await addDoc(messagesCollectionRef, {
         content: url,
         created_time: serverTimestamp(),
@@ -376,7 +387,6 @@ function Finish() {
       const matchedResponse = predefinedResponses.find(({ pattern }) => pattern.test(state.inputValue));
 
       if (matchedResponse) {
-        console.log("se");
         response = matchedResponse.response;
         await addDoc(messagesCollectionRef, {
           content: response,
@@ -384,10 +394,8 @@ function Finish() {
           from: "shop",
         });
       } else if (url !== undefined) {
-        console.log("test");
         fetchCustomGPTResponse(labels, messagesCollectionRef);
       } else {
-        console.log("sste");
         fetchCustomGPTResponse(state.inputValue, messagesCollectionRef);
       }
 
@@ -406,7 +414,7 @@ function Finish() {
 
   const sendImage = (event) => {
     console.log(event.target.files);
-
+    dispatch({ type: "TOGGLE_IMG_LOADING" });
     const file = event.target.files[0];
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
     if (!file) return;
@@ -445,6 +453,9 @@ function Finish() {
       const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
       const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
       fetchCustomGPTResponse(`圖片相關如下${labels}`, messagesCollectionRef);
+      setTimeout(() => {
+        dispatch({ type: "TOGGLE_GPT_LOADING" }); // 3 秒後觸發 dispatch
+      }, 500);
     }
   }, [labels]);
 
@@ -505,7 +516,7 @@ function Finish() {
       {/* 在滾動時顯示的日期標籤 */}
       {isScrolling && currentLabel && (
         <div className="fixed flex justify-center  top-[70px] left-0 right-0  z-10 ">
-          <div className="bg-gray-300/85 shadow rounded-full px-3 py-1 mb-3 shadow-lg">
+          <div className="bg-gray-300/85 rounded-full px-3 py-1 mb-3 shadow-lg">
             <p className="text-xs leading-normal">{currentLabel}</p>
           </div>
         </div>
@@ -530,8 +541,6 @@ function Finish() {
           </div>
         </div>
         {state.messages.map((message, index) => {
-          const messageDate = message.created_time ? message.created_time.toDate() : null;
-
           return (
             <div key={index} id={`message-${index}`}>
               <div key={index} className={`flex gap-1 mr-3 ${message.from === "user1" ? "items-end flex-col" : "max-w-[258px] flex-wrap"}`}>
@@ -558,6 +567,11 @@ function Finish() {
             </div>
           );
         })}
+        <div className={`items-center ${state.isImageLoading ? "flex flex-row-reverse" : state.isGPTLoading ? "flex" : "hidden"}`}>
+          <img src={happy} alt="" className="w-9 h-9" />
+          <img src={loading} alt="" />
+          <p>loading</p>
+        </div>
       </div>
 
       <div className={`${state.isChoose ? "flex" : "hidden"} justify-center items-center bg-black-800/80 w-container h-full fixed top-0`}>
