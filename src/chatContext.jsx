@@ -13,7 +13,7 @@ const initialState = {
   isGPTLoading: false,
   isImageLoading: false,
   isChoose: false,
-  isPerchase: false,
+  isPurchase: false,
   isCheckout: false,
   count: 0,
   spec: "",
