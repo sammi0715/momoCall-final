@@ -16,7 +16,6 @@ import { zhTW } from "date-fns/locale";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
 
-import OrderCard from "./Chat/OrderCard";
 import { ChatContext, ChatDispatchContext } from "../chatContext";
 import { useContext } from "react";
 
@@ -419,7 +418,22 @@ function Finish() {
         </div>
       </div>
 
-      <OrderCard />
+      {/*拆*/}
+      <div className={`${state.showOrderInfo ? "grid" : "hidden"} bg-black-0 w-container py-2 px-3 grid-cols-4 gap-6 top-[68px] mt-[68px] left-0 right-0 z-10 my-0 mx-auto`}>
+        <div className="flex flex-col items-center gap-y-2 col-span-1">
+          <img
+            src="https://images.unsplash.com/photo-1635865933730-e5817b5680cd?q=80&w=2864&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            alt="product-image"
+            className="rounded-full w-large h-large"
+          />
+          <p className="text-xs leading-normal text-center w-large bg-secondary-400 text-secondary rounded-lg">{state.orderInfo?.status}</p>
+        </div>
+        <div className="flex flex-col gap-y-1 col-span-3">
+          <p className="font-bold">{state.orderInfo?.shopName || "商家名稱未找到"}</p>
+          <p className="text-primary">NT. {state.orderInfo?.totalPrice}</p>
+          <p>訂單編號：{state.orderInfo?.orderNumber}</p>
+        </div>
+      </div>
 
       <div className={`w-full product bg-white ${state.showShopInfo && !state.showOrderInfo ? "flex" : "hidden"} justify-center gap-6 py-2 mt-[68px] items-center`}>
         <img src={happy} alt="camera" className="w-20 rounded-full" />
@@ -442,6 +456,8 @@ function Finish() {
           <FiAlertTriangle className="w-notice h-notice mr-4" />
           <p className="text-sm leading-normal">提醒您，請勿透露個人資料</p>
         </div>
+
+        {/*拆*/}
         <div>
           <div className={`bg-black-0 p-4 rounded-t-lg ${state.showProductInfo ? "flex" : "hidden"} justify-between border-b-1 border-black-400`}>
             <img src={state.productInfo?.image} alt="product-image" className="w-middle h-middle rounded-lg mr-3" />
@@ -458,6 +474,8 @@ function Finish() {
             </button>
           </div>
         </div>
+
+        {/*拆*/}
         {state.messages.map((message, index) => {
           return (
             <div key={index} id={`message-${index}`}>
@@ -512,6 +530,7 @@ function Finish() {
         </div>
       </div>
 
+      {/*拆*/}
       <div className={`${state.isChoose ? "flex" : "hidden"} justify-center items-center bg-black-800/80 w-container h-full fixed top-0`}>
         <div className="w-64 h-60 bg-white mx-auto py-2 px-4 flex flex-col gap-3 text-sm rounded-xl">
           <h4 className="text-center font-bold leading-normal text-base text-primary-800">請選擇規格數量</h4>
@@ -557,6 +576,7 @@ function Finish() {
         </div>
       </div>
 
+      {/*拆*/}
       <div className={`${state.isPurchase ? "flex" : "hidden"} justify-center items-center w-container h-full fixed top-0`}>
         <div className="w-64 h-84 bg-white mx-auto py-2 px-4 flex flex-col gap-4 text-sm rounded-xl">
           <h4 className="text-center font-bold leading-normal text-lg text-primary-800 mt-2">訂單即將送出</h4>
@@ -600,6 +620,7 @@ function Finish() {
         </div>
       </div>
 
+      {/*拆*/}
       <div className={`${state.isCheckout ? "flex" : "hidden"} justify-center items-center w-container h-full fixed top-0 bg-black-800/80`}>
         <div className="w-64 h-32 bg-white mx-auto py-2 px-4 flex flex-col gap-3 text-sm rounded-xl">
           <h4 className="text-center font-bold leading-normal text-lg text-primary-800 mt-2">付款成功，即將為您出貨</h4>
@@ -611,6 +632,7 @@ function Finish() {
         </div>
       </div>
 
+      {/*拆*/}
       <div className="bg-primary-600 w-container py-3 px-3 flex justify-between gap-x-2 fixed bottom-0 left-0 right-0 z-10 my-0 mx-auto">
         <label className="bg-black-0 rounded-full p-1 cursor-pointer active:outline active:outline-primary active:outline-1 active:outline-offset-0">
           <FiImage className="w-6 h-6 text-primary hover:text-primary-800 active:text-primary" />

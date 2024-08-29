@@ -1,7 +1,7 @@
 import { ChatContext, ChatDispatchContext } from "../../chatContext";
 import { useContext } from "react";
 
-function Checkout() {
+function Checkout({ checkout }) {
   const state = useContext(ChatContext);
   const dispatch = useContext(ChatDispatchContext);
 
