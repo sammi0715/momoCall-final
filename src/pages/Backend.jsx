@@ -19,7 +19,9 @@ function Backend() {
     textarea.style.height = `${textarea.scrollHeight}px`;
   };
 
-  const toggleModal = () => {
+  const toggleModal = (input = "", textarea = "") => {
+    setInputValue(input);
+    setTextareaValue(textarea);
     setIsModalOpen(!isModalOpen);
   };
 
@@ -56,33 +58,19 @@ function Backend() {
           <div>
             <div className="bg-primary-600 rounded-lg py-2 px-4 flex justify-between items-center cursor-pointer" onClick={() => toggleCollapse(1)}>
               <p className="text-black text-base leading-normal">離島</p>
-              <FiPenTool className="w-6 h-6 hover:text-primary" />
+              <button
+                className="cursor-pointer"
+                onClick={() =>
+                  toggleModal(
+                    "離島",
+                    "有「速」標誌商品皆可離島全區配送，單一商品材積限制：長＋寬＋高需低於120公分；單一商品重量限制：需低於20公斤； 離島配送物流費90元，若有一般宅配和快速到貨同時結帳，最高收取 180 元（後續發生退款者，運費將不予以退還）；配送時間：約3個工作天。"
+                  )
+                }
+              >
+                <FiPenTool className="w-6 h-6 hover:text-primary" />
+              </button>
             </div>
             <div className={`bg-black-0 rounded-lg px-4 transition-max-height duration-300 ease-in overflow-hidden ${openId === 1 ? "max-h-screen py-2 mt-2" : "max-h-0"}`}>
-              <p className="text-black text-base leading-normal">
-                有「速」標誌商品皆可離島全區配送，單一商品材積限制：長＋寬＋高需低於120公分；單一商品重量限制：需低於20公斤； 離島配送物流費90元，若有一般宅配和快速到貨同時結帳，最高收取 180
-                元（後續發生退款者，運費將不予以退還）；配送時間：約3個工作天。
-              </p>
-            </div>
-          </div>
-          <div>
-            <div className="bg-primary-600 rounded-lg py-2 px-4 flex justify-between items-center cursor-pointer" onClick={() => toggleCollapse(2)}>
-              <p className="text-black text-base leading-normal">離島</p>
-              <FiPenTool className="w-6 h-6 hover:text-primary" />
-            </div>
-            <div className={`bg-black-0 rounded-lg px-4 transition-max-height duration-300 ease-in overflow-hidden ${openId === 2 ? "max-h-screen py-2 mt-2" : "max-h-0"}`}>
-              <p className="text-black text-base leading-normal">
-                有「速」標誌商品皆可離島全區配送，單一商品材積限制：長＋寬＋高需低於120公分；單一商品重量限制：需低於20公斤； 離島配送物流費90元，若有一般宅配和快速到貨同時結帳，最高收取 180
-                元（後續發生退款者，運費將不予以退還）；配送時間：約3個工作天。
-              </p>
-            </div>
-          </div>
-          <div>
-            <div className="bg-primary-600 rounded-lg py-2 px-4 flex justify-between items-center cursor-pointer" onClick={() => toggleCollapse(3)}>
-              <p className="text-black text-base leading-normal">離島</p>
-              <FiPenTool className="w-6 h-6 hover:text-primary" />
-            </div>
-            <div className={`bg-black-0 rounded-lg px-4 transition-max-height duration-300 ease-in overflow-hidden ${openId === 3 ? "max-h-screen py-2 mt-2" : "max-h-0"}`}>
               <p className="text-black text-base leading-normal">
                 有「速」標誌商品皆可離島全區配送，單一商品材積限制：長＋寬＋高需低於120公分；單一商品重量限制：需低於20公斤； 離島配送物流費90元，若有一般宅配和快速到貨同時結帳，最高收取 180
                 元（後續發生退款者，運費將不予以退還）；配送時間：約3個工作天。
@@ -92,7 +80,7 @@ function Backend() {
         </div>
       </div>
       <div className="bg-black-200 rounded-b-lg py-3 px-3">
-        <button className="w-full py-2 px-4 rounded-lg flex items-center cursor-pointer hover:bg-black-400" onClick={toggleModal}>
+        <button className="w-full py-2 px-4 rounded-lg flex items-center cursor-pointer hover:bg-black-400" onClick={() => toggleModal()}>
           <FiPlus className="w-6 h-6 mr-1" />
           <p className="text-base leading-normal font-bold">新增問答</p>
         </button>
@@ -119,11 +107,11 @@ function Backend() {
               id="replyContent"
               aria-label="請輸入回覆內容"
               placeholder="請輸入回覆內容"
-              className="text-sm leading-normal w-full bg-black-200 border border-black-600 rounded-md py-1 px-3 focus:bg-black-0 focus:border-primary"
+              className="text-sm leading-normal w-full h-[84px] bg-black-200 border border-black-600 rounded-md py-1 px-3 focus:bg-black-0 focus:border-primary"
               onInput={handleTextareaInput}
               value={textareaValue}
               onChange={(e) => setTextareaValue(e.target.value)}
-              style={{ overflow: "hidden" }}
+              style={{ overflow: "scroll" }}
             ></textarea>
             <div className="flex">
               <button
