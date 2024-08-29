@@ -7,6 +7,7 @@ function Backend() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [textareaValue, setTextareaValue] = useState("");
+  const [isEditMode, setIsEditMode] = useState(false);
   const textareaRef = useRef(null);
 
   const toggleCollapse = (id) => {
@@ -19,15 +20,16 @@ function Backend() {
     textarea.style.height = `${textarea.scrollHeight}px`;
   };
 
-  const toggleModal = (input = "", textarea = "") => {
+  const toggleModal = (input = "", textarea = "", editMode = false) => {
     setInputValue(input);
     setTextareaValue(textarea);
+    setIsEditMode(editMode);
     setIsModalOpen(!isModalOpen);
   };
 
   const handleSubmit = () => {
     if (inputValue && textareaValue) {
-      console.log("送出成功");
+      console.log(isEditMode ? "修改成功" : "新增成功");
       toggleModal();
       setInputValue("");
       setTextareaValue("");
@@ -63,7 +65,8 @@ function Backend() {
                 onClick={() =>
                   toggleModal(
                     "離島",
-                    "有「速」標誌商品皆可離島全區配送，單一商品材積限制：長＋寬＋高需低於120公分；單一商品重量限制：需低於20公斤； 離島配送物流費90元，若有一般宅配和快速到貨同時結帳，最高收取 180 元（後續發生退款者，運費將不予以退還）；配送時間：約3個工作天。"
+                    "有「速」標誌商品皆可離島全區配送，單一商品材積限制：長＋寬＋高需低於120公分；單一商品重量限制：需低於20公斤； 離島配送物流費90元，若有一般宅配和快速到貨同時結帳，最高收取 180 元（後續發生退款者，運費將不予以退還）；配送時間：約3個工作天。",
+                    true
                   )
                 }
               >
@@ -90,7 +93,7 @@ function Backend() {
           <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
           <div className="bg-black-0 rounded-lg w-[319px] h-fit py-3 px-4 space-y-2 absolute inset-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
             <div className="flex justify-between items-center">
-              <p className="text-base leading-normal">新增問答</p>
+              <p className="text-base leading-normal">{isEditMode ? "修改問答" : "新增問答"}</p>
               <FiX className="w-6 h-6 text-black hover:text-red-600 cursor-pointer" onClick={toggleModal} />
             </div>
             <input
@@ -113,12 +116,22 @@ function Backend() {
               onChange={(e) => setTextareaValue(e.target.value)}
               style={{ overflow: "scroll" }}
             ></textarea>
-            <div className="flex">
+            <div className="flex gap-1">
               <button
-                className="text-xs leading-normal text-black-0 py-1 px-2 rounded-md bg-primary-800 ml-auto outline-none hover:bg-primary focus:outline focus:outline-1 focus:outline-primary focus:outline-offset-0"
+                className={`text-xs leading-normal text-black-0 py-1 px-2 rounded-md bg-primary ml-auto outline-none hover:bg-primary focus:outline focus:outline-1 focus:outline-primary focus:outline-offset-0 ${
+                  isEditMode ? "block" : "hidden"
+                }`}
                 onClick={handleSubmit}
               >
-                確認新增
+                {isEditMode ? "刪除問答" : ""}
+              </button>
+              <button
+                className={`text-xs leading-normal text-black-0 py-1 px-2 rounded-md bg-primary-800 outline-none hover:bg-primary focus:outline focus:outline-1 focus:outline-primary focus:outline-offset-0 ${
+                  isEditMode ? "" : "ml-auto"
+                }`}
+                onClick={handleSubmit}
+              >
+                {isEditMode ? "確認修改" : "確認新增"}
               </button>
             </div>
           </div>
