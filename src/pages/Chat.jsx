@@ -3,6 +3,7 @@ import { FiChevronLeft, FiAlertTriangle, FiImage, FiSend } from "react-icons/fi"
 import happy from "./img/happy.png";
 import responses from "./responses.json";
 import loading from "./img/loading.gif";
+import beenEater from "./img/beenEater.gif";
 import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDocs, where } from "../utils/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
@@ -370,6 +371,7 @@ function Finish() {
       setTimeout(() => {
         dispatch({ type: "TOGGLE_IMG_LOADING" }); // 3 秒
         dispatch({ type: "TOGGLE_GPT_LOADING" });
+        scrollToBottom();
       }, 500);
       await addDoc(messagesCollectionRef, {
         content: url,
@@ -415,6 +417,7 @@ function Finish() {
   const sendImage = (event) => {
     console.log(event.target.files);
     dispatch({ type: "TOGGLE_IMG_LOADING" });
+    scrollToBottom();
     const file = event.target.files[0];
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
     if (!file) return;
@@ -455,7 +458,7 @@ function Finish() {
       fetchCustomGPTResponse(`圖片相關如下${labels}`, messagesCollectionRef);
       setTimeout(() => {
         dispatch({ type: "TOGGLE_GPT_LOADING" }); // 3 秒後觸發 dispatch
-      }, 500);
+      }, 1000);
     }
   }, [labels]);
 
@@ -567,10 +570,11 @@ function Finish() {
             </div>
           );
         })}
-        <div className={`items-center ${state.isImageLoading ? "flex flex-row-reverse" : state.isGPTLoading ? "flex" : "hidden"}`}>
+
+        <div className={`items-center flex gap-3 ${state.isImageLoading ? "flex flex-row-reverse" : state.isGPTLoading ? "flex" : "hidden"}`}>
           <img src={happy} alt="" className="w-9 h-9" />
-          <img src={loading} alt="" />
-          <p>loading</p>
+          <img src={beenEater} alt="" className="w-14 h-14" />
+          <img src={loading} alt="" className="-ml-7" />
         </div>
       </div>
 
