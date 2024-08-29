@@ -57,9 +57,12 @@ function Finish() {
         const shopName = shopDoc.data().shopName;
 
         dispatch({ type: "SET_SHOP_NAME", payload: shopName });
+
         const productsCollectionRef = collection(doc(db, "shops", shopDocId), "products");
+
         if (productNumber) {
           const productQuery = query(productsCollectionRef, where("productNumber", "==", productNumber));
+
           const productSnapshot = await getDocs(productQuery);
           if (!productSnapshot.empty) {
             const productDoc = productSnapshot.docs[0];
@@ -70,8 +73,11 @@ function Finish() {
           }
         } else {
           const productSnapshot = await getDocs(productsCollectionRef);
+
           const productList = productSnapshot.docs.map((doc) => doc.data());
+
           const randomIndex = Math.floor(Math.random() * productList.length);
+
           const productDoc = productSnapshot.docs[randomIndex];
           dispatch({ type: "SET_PRODUCT_INFO", payload: productDoc.data() });
         }
@@ -103,13 +109,10 @@ function Finish() {
       if (orderNumber) {
         dispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
         fetchOrderInfo(shopId, orderNumber);
-      } else if (productNumber) {
+      } else {
         dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
         dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
         fetchProductInfo(shopId, productNumber);
-      } else if (!orderNumber && !productNumber) {
-        dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
-        dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
       }
     } else {
       dispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
@@ -240,6 +243,15 @@ function Finish() {
     response: item.response,
   }));
 
+  const addMessage = async (document, content, from) => {
+    await addDoc(document, {
+      content: content,
+      created_time: serverTimestamp(),
+      from: from,
+      isUsefull: "",
+    });
+  };
+
   const fetchGPT = async (inputText, document) => {
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
     const apiUrl = "https://api.openai.com/v1/chat/completions";
@@ -270,13 +282,7 @@ function Finish() {
 
       if (res.ok) {
         const data = await res.json();
-
-        await addDoc(document, {
-          content: data.choices[0].message.content,
-          created_time: serverTimestamp(),
-          from: "shop",
-          isUsefull: "",
-        });
+        await addMessage(document, data.choices[0].message.content, "shop");
       } else if (res.status === 429) {
         console.error("Too many requests. Please try again later.");
         dispatch({ type: "SET_GPT_ERROR", payload: "Too many requests. Please try again later." });
@@ -301,28 +307,17 @@ function Finish() {
         dispatch({ type: "TOGGLE_GPT_LOADING" });
         scrollToBottom();
       }, 500);
-      await addDoc(messagesCollectionRef, {
-        content: url,
-        created_time: serverTimestamp(),
-        from: "user1",
-      });
+
+      await addMessage(messagesCollectionRef, url, "user1");
     } else if (state.inputValue.trim() !== "") {
-      await addDoc(messagesCollectionRef, {
-        content: state.inputValue,
-        created_time: serverTimestamp(),
-        from: "user1",
-      });
+      await addMessage(messagesCollectionRef, state.inputValue, "user1");
 
       let response = "";
       const matchedResponse = predefinedResponses.find(({ pattern }) => pattern.test(state.inputValue));
 
       if (matchedResponse) {
         response = matchedResponse.response;
-        await addDoc(messagesCollectionRef, {
-          content: response,
-          created_time: serverTimestamp(),
-          from: "shop",
-        });
+        await addMessage(messagesCollectionRef, response, "shop");
       } else if (url !== undefined) {
         fetchGPT(labels, messagesCollectionRef);
       } else {
@@ -378,8 +373,6 @@ function Finish() {
 
   useEffect(() => {
     if (labels.length > 0) {
-      const queryParams = new URLSearchParams(window.location.search);
-      const shopId = queryParams.get("member");
       const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
       fetchGPT(`圖片相關如下${labels}`, messagesCollectionRef);
       setTimeout(() => {
