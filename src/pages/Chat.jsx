@@ -92,10 +92,9 @@ function reducer(state, action) {
 }
 function Finish() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [currentLabel, setCurrentLabel] = useState(""); // 用來顯示當前日期標籤
-  const [isScrolling, setIsScrolling] = useState(false); //
+  const [currentLabel, setCurrentLabel] = useState("");
+  const [isScrolling, setIsScrolling] = useState(false);
   const { labels, handleAnalyzeImage } = useGoogleVisionAPI();
-
   const fetchOrderInfo = async (shopId, orderNumber) => {
     try {
       const ordersCollectionRef = collection(db, "orders");
@@ -210,6 +209,61 @@ function Finish() {
       unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    let hasSentMessage = false;
+
+    const sendQAMessage = async () => {
+      const queryParams = new URLSearchParams(window.location.search);
+      const shopId = queryParams.get("member");
+      const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
+
+      if (!hasSentMessage) {
+        const qaMessage = {
+          content: `歡迎來到${state.shopName}！ 我是你的 AI 小幫手，你可以先從選單了解我們的服務～`,
+          created_time: serverTimestamp(),
+          from: "shop",
+          isQA: true,
+        };
+        await addDoc(messagesCollectionRef, qaMessage);
+
+        hasSentMessage = true;
+      }
+    };
+
+    if (state.shopName) {
+      sendQAMessage();
+    }
+  }, [state.shopName]);
+
+  const handleQAClick = async (pattern) => {
+    const responseItem = responses.find((item) => item.pattern === pattern);
+    const queryParams = new URLSearchParams(window.location.search);
+    const shopId = queryParams.get("member");
+    const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
+
+    if (responseItem) {
+      const userMessage = {
+        content: pattern,
+        created_time: serverTimestamp(),
+        from: "user1",
+      };
+      await addDoc(messagesCollectionRef, userMessage);
+
+      const shopMessage = {
+        content: responseItem.response,
+        created_time: serverTimestamp(),
+        from: "shop",
+      };
+
+      await addDoc(messagesCollectionRef, shopMessage);
+
+      scrollToBottom();
+    } else {
+      console.error("未找到相應的回覆");
+    }
+  };
+
   let scrollTimeout;
   useEffect(() => {
     if (state.messages.length > 0) {
@@ -433,8 +487,6 @@ function Finish() {
           } catch (error) {
             console.error("handleAnalyzeClick 發生錯誤：", error);
           }
-
-          // scrollToBottom();
         });
       }
     );
@@ -505,7 +557,7 @@ function Finish() {
       {/* 在滾動時顯示的日期標籤 */}
       {isScrolling && currentLabel && (
         <div className="fixed flex justify-center  top-[70px] left-0 right-0  z-10 ">
-          <div className="bg-gray-300/85 shadow rounded-full px-3 py-1 mb-3 shadow-lg">
+          <div className="bg-gray-300/85 rounded-full px-3 py-1 mb-3 shadow-lg">
             <p className="text-xs leading-normal">{currentLabel}</p>
           </div>
         </div>
@@ -530,8 +582,6 @@ function Finish() {
           </div>
         </div>
         {state.messages.map((message, index) => {
-          const messageDate = message.created_time ? message.created_time.toDate() : null;
-
           return (
             <div key={index} id={`message-${index}`}>
               <div key={index} className={`flex gap-1 mr-3 ${message.from === "user1" ? "items-end flex-col" : "max-w-[258px] flex-wrap"}`}>
@@ -552,7 +602,21 @@ function Finish() {
                   ) : (
                     <p dangerouslySetInnerHTML={{ __html: marked(message.content) }}></p>
                   )}
+                  {message.isQA && (
+                    <div>
+                      <button className="bg-primary text-white text-center w-[182px] h-[24px] mt-[10px] mb-[10px] rounded" onClick={() => handleQAClick("配送問題")}>
+                        配送問題
+                      </button>
+                      <button className="bg-primary text-white text-center w-[182px] h-[24px] mb-[10px] rounded" onClick={() => handleQAClick("運送時間")}>
+                        運送時間
+                      </button>
+                      <button className="bg-primary text-white text-center w-[182px] h-[24px] mb-[10px] rounded" onClick={() => handleQAClick("聯絡方式")}>
+                        聯絡方式
+                      </button>
+                    </div>
+                  )}
                 </div>
+
                 <small className={`${message.from === "user1" ? "" : "ml-12"}`}>{message.created_time?.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "Loading..."}</small>
               </div>
             </div>
