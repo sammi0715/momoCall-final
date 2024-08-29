@@ -168,13 +168,12 @@ function Finish() {
       });
     }, 500);
   };
+  const queryParams = new URLSearchParams(window.location.search);
+  const shopId = queryParams.get("member");
+  const orderNumber = queryParams.get("order");
+  const productNumber = queryParams.get("product");
 
   useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const shopId = queryParams.get("member");
-    const orderNumber = queryParams.get("order");
-    const productNumber = queryParams.get("product");
-
     if (shopId) {
       dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
       fetchProductInfo(shopId, productNumber);
@@ -536,7 +535,9 @@ function Finish() {
           <div className={`bg-black-0 p-4 rounded-t-lg ${state.showProductInfo ? "flex" : "hidden"} justify-between border-b-1 border-black-400`}>
             <img src={state.productInfo?.image} alt="product-image" className="w-middle h-middle rounded-lg mr-3" />
             <div className="flex flex-col grow justify-between">
-              <p className="text-xs leading-normal">商品編號 {state.productInfo?.productNumber}</p>
+              <p className={`text-xs leading-normal flex justify-between`}>
+                商品編號 {state.productInfo?.productNumber} <span className={`${productNumber === null ? "inline" : "hidden"} text-primary-800 font-bold `}>推薦</span>
+              </p>
               <p className="w-full h-[36px] text-xs leading-normal font-bold line-clamp-2">{state.productInfo?.productName || "商品名稱未找到"}</p>
             </div>
           </div>
