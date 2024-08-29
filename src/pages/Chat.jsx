@@ -220,7 +220,7 @@ function Finish() {
 
       if (!hasSentMessage) {
         const qaMessage = {
-          content: `歡迎來到${state.shopName}！ 我是你的 AI 小幫手，你可以先從選單了解我們的服務～`,
+          content: `歡迎來到${state.shopName}！</br> 我是你的 AI 小幫手，你可以先從選單了解我們的服務～`,
           created_time: serverTimestamp(),
           from: "shop",
           isQA: true,
