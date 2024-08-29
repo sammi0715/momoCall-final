@@ -2,13 +2,16 @@ import { useEffect, useReducer, useState } from "react";
 import { FiChevronLeft, FiAlertTriangle, FiImage, FiSend } from "react-icons/fi";
 import happy from "./img/happy.png";
 import responses from "./responses.json";
-import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, setDoc, getDocs, where } from "../utils/firebase";
+import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDocs, where } from "../utils/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
 import tappay from "../utils/tappay";
 import { marked } from "marked";
 import { format, isToday, isYesterday, differenceInMinutes } from "date-fns";
 import { zhTW } from "date-fns/locale";
+import useGoogleVisionAPI from "../utils/useGoogleVisionAPI";
+import { PhotoProvider, PhotoView } from "react-photo-view";
+import "react-photo-view/dist/react-photo-view.css";
 
 const initialState = {
   messages: [],
@@ -91,6 +94,7 @@ function Finish() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [currentLabel, setCurrentLabel] = useState(""); // 用來顯示當前日期標籤
   const [isScrolling, setIsScrolling] = useState(false); //
+  const { labels, handleAnalyzeImage } = useGoogleVisionAPI();
 
   const fetchOrderInfo = async (shopId, orderNumber) => {
     try {
@@ -317,7 +321,7 @@ function Finish() {
           messages: [
             {
               role: "system",
-              content: "你是一個全程使用繁體中文並且非常人性化回覆「已登入」的使用者提問MOMO電商客服相關問題的富邦媒體電商客服人員",
+              content: "你是一個全程使用繁體中文並且非常人性化回覆「已登入」的使用者提問MOMO電商客服相關問題，且不會提到「關鍵字」三個字的富邦媒體電商客服人員",
             },
             {
               role: "user",
@@ -350,28 +354,40 @@ function Finish() {
     }
   };
 
-  const sendMessage = async () => {
+  const sendMessage = async (url) => {
     const queryParams = new URLSearchParams(window.location.search);
     const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
     const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
 
-    if (state.inputValue.trim() !== "") {
+    if (url !== undefined) {
+      await addDoc(messagesCollectionRef, {
+        content: url,
+        created_time: serverTimestamp(),
+        from: "user1",
+      });
+    } else if (state.inputValue.trim() !== "") {
       await addDoc(messagesCollectionRef, {
         content: state.inputValue,
         created_time: serverTimestamp(),
         from: "user1",
       });
+
       let response = "";
       const matchedResponse = predefinedResponses.find(({ pattern }) => pattern.test(state.inputValue));
 
       if (matchedResponse) {
+        console.log("se");
         response = matchedResponse.response;
         await addDoc(messagesCollectionRef, {
           content: response,
           created_time: serverTimestamp(),
           from: "shop",
         });
+      } else if (url !== undefined) {
+        console.log("test");
+        fetchCustomGPTResponse(labels, messagesCollectionRef);
       } else {
+        console.log("sste");
         fetchCustomGPTResponse(state.inputValue, messagesCollectionRef);
       }
 
@@ -387,21 +403,7 @@ function Finish() {
   };
 
   const imageFormats = [".jpeg", ".jpg", ".png", ".gif"];
-  const setChats = async (url) => {
-    try {
-      const messagesRef = collection(db, "chatroom", "chat1", "messages");
-      const messageRef = doc(messagesRef);
-      setDoc(messageRef, {
-        content: url,
-        created_time: serverTimestamp(),
-        from: "user1",
-      })
-        .then(() => console.log("Document successfully written!"))
-        .catch((error) => console.error("Error writing document: ", error));
-    } catch (error) {
-      console.error("Error getting random document:", error);
-    }
-  };
+
   const sendImage = (event) => {
     console.log(event.target.files);
 
@@ -424,13 +426,27 @@ function Finish() {
         console.error("Upload failed:", error);
       },
       () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          setChats(downloadURL);
+        getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+          sendMessage(downloadURL);
+          try {
+            await handleAnalyzeImage(downloadURL);
+          } catch (error) {
+            console.error("handleAnalyzeClick 發生錯誤：", error);
+          }
+
           // scrollToBottom();
         });
       }
     );
   };
+  useEffect(() => {
+    if (labels.length > 0) {
+      const queryParams = new URLSearchParams(window.location.search);
+      const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
+      const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
+      fetchCustomGPTResponse(`圖片相關如下${labels}`, messagesCollectionRef);
+    }
+  }, [labels]);
 
   async function checkout() {
     try {
@@ -530,7 +546,11 @@ function Finish() {
                   }`}
                 >
                   {imageFormats.some((format) => message.content.includes(format)) ? (
-                    <img src={message.content} alt="Sent" className="rounded-lg max-w-full h-auto" />
+                    <PhotoProvider maskOpacity={0.5}>
+                      <PhotoView src={message.content}>
+                        <img src={message.content} alt="Sent" className="rounded-lg max-w-full h-auto" />
+                      </PhotoView>
+                    </PhotoProvider>
                   ) : (
                     <p dangerouslySetInnerHTML={{ __html: marked(message.content) }}></p>
                   )}
