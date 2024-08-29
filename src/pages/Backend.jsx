@@ -35,7 +35,7 @@ function Backend() {
   };
 
   return (
-    <div className="w-container max-w-screen h-screen m-[auto] bg-white flex flex-col p-3 pt-0 font-sans">
+    <div className="w-container max-w-screen h-screen m-[auto] bg-white flex flex-col p-3 pt-0 font-sans relative">
       <header className="flex items-center py-4">
         <Link to="/">
           <button className="mr-3">
@@ -98,40 +98,43 @@ function Backend() {
         </button>
       </div>
       {isModalOpen && (
-        <div className="bg-black-0 rounded-lg w-[319px] h-fit py-3 px-4 space-y-2 absolute inset-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <div className="flex justify-between items-center">
-            <p className="text-base leading-normal">新增問答</p>
-            <FiX className="w-6 h-6 text-black hover:text-red-600 cursor-pointer" onClick={toggleModal} />
+        <>
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+          <div className="bg-black-0 rounded-lg w-[319px] h-fit py-3 px-4 space-y-2 absolute inset-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+            <div className="flex justify-between items-center">
+              <p className="text-base leading-normal">新增問答</p>
+              <FiX className="w-6 h-6 text-black hover:text-red-600 cursor-pointer" onClick={toggleModal} />
+            </div>
+            <input
+              type="text"
+              aria-label="請輸入提問關鍵字"
+              placeholder="請輸入提問關鍵字"
+              className="text-sm leading-normal w-full bg-black-200 border border-black-600 rounded-md py-1 px-3 focus:bg-black-0 focus:border-primary"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+            />
+            <textarea
+              ref={textareaRef}
+              name="replyContent"
+              id="replyContent"
+              aria-label="請輸入回覆內容"
+              placeholder="請輸入回覆內容"
+              className="text-sm leading-normal w-full bg-black-200 border border-black-600 rounded-md py-1 px-3 focus:bg-black-0 focus:border-primary"
+              onInput={handleTextareaInput}
+              value={textareaValue}
+              onChange={(e) => setTextareaValue(e.target.value)}
+              style={{ overflow: "hidden" }}
+            ></textarea>
+            <div className="flex">
+              <button
+                className="text-xs leading-normal text-black-0 py-1 px-2 rounded-md bg-primary-800 ml-auto outline-none hover:bg-primary focus:outline focus:outline-1 focus:outline-primary focus:outline-offset-0"
+                onClick={handleSubmit}
+              >
+                確認新增
+              </button>
+            </div>
           </div>
-          <input
-            type="text"
-            aria-label="請輸入提問關鍵字"
-            placeholder="請輸入提問關鍵字"
-            className="text-sm leading-normal w-full bg-black-200 border border-black-600 rounded-md py-1 px-3 focus:bg-black-0 focus:border-primary"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-          />
-          <textarea
-            ref={textareaRef}
-            name="replyContent"
-            id="replyContent"
-            aria-label="請輸入回覆內容"
-            placeholder="請輸入回覆內容"
-            className="text-sm leading-normal w-full bg-black-200 border border-black-600 rounded-md py-1 px-3 focus:bg-black-0 focus:border-primary"
-            onInput={handleTextareaInput}
-            value={textareaValue}
-            onChange={(e) => setTextareaValue(e.target.value)}
-            style={{ overflow: "hidden" }}
-          ></textarea>
-          <div className="flex">
-            <button
-              className="text-xs leading-normal text-black-0 py-1 px-2 rounded-md bg-primary-800 ml-auto outline-none hover:bg-primary focus:outline focus:outline-1 focus:outline-primary focus:outline-offset-0"
-              onClick={handleSubmit}
-            >
-              確認新增
-            </button>
-          </div>
-        </div>
+        </>
       )}
     </div>
   );
