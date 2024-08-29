@@ -12,6 +12,7 @@ function Backend() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [faqs, setFaqs] = useState([]);
   const [currentFaqId, setCurrentFaqId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const textareaRef = useRef(null);
 
   useEffect(() => {
@@ -109,6 +110,16 @@ function Backend() {
     setIsModalOpen(true);
   };
 
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const clearSearch = () => {
+    setSearchTerm("");
+  };
+
+  const filteredFaqs = faqs.filter((faq) => faq.keyword.includes(searchTerm) || faq.response.includes(searchTerm));
+
   return (
     <div className="w-container max-w-screen h-screen m-[auto] bg-white flex flex-col p-3 pt-0 font-sans relative">
       <header className="flex items-center py-4">
@@ -121,14 +132,20 @@ function Backend() {
           <h1 className="text-2xl leading-normal font-bold text-primary ml-12">momoCallback</h1>
         </Link>
       </header>
-      <input
-        type="text"
-        placeholder="請輸入提問關鍵字"
-        className="leading-normal w-full py-[5.5px] text-sm text-black-100 text-center bg-black-200 placeholder-black-600 rounded-full mb-4 hover:bg-black-200 focus:outline outline-black-600 focus:bg-black-200"
-      />
+      <div className="relative mb-4">
+        <input
+          type="text"
+          placeholder="請輸入提問關鍵字"
+          className="leading-normal w-full py-[5.5px] text-sm text-black-100 text-center bg-black-200 placeholder-black-600 rounded-full hover:bg-black-200 focus:outline outline-black-600 focus:bg-black-200"
+          value={searchTerm}
+          onChange={handleSearch}
+        />
+        {searchTerm && <FiX className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer" onClick={clearSearch} />}
+      </div>
       <div className="flex-grow overflow-scroll bg-black-200 p-3 rounded-t-lg">
         <div className="space-y-3">
-          {faqs.map((faq, index) => (
+          {searchTerm && filteredFaqs.length === 0 && <p className="text-black text-base leading-normal text-center">查無相關問答</p>}
+          {filteredFaqs.map((faq, index) => (
             <div key={faq.id}>
               <div className="bg-primary-600 rounded-lg py-2 px-4 flex justify-between items-center cursor-pointer" onClick={() => toggleCollapse(index)}>
                 <p className="text-black text-base leading-normal">{faq.keyword}</p>
