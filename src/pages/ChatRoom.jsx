@@ -16,6 +16,10 @@ import { zhTW } from "date-fns/locale";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
 
+import OrderCard from "./Chat/OrderCard";
+import { ChatContext, ChatDispatchContext } from "../chatContext";
+import { useContext } from "react";
+
 const initialState = {
   messages: [],
   inputValue: "",
@@ -103,10 +107,17 @@ function reducer(state, action) {
   }
 }
 function Finish() {
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const [currentLabel, setCurrentLabel] = useState(""); // 用來顯示當前日期標籤
-  const [isScrolling, setIsScrolling] = useState(false); //
+  //const [state, dispatch] = useReducer(reducer, initialState);
+  const [currentLabel, setCurrentLabel] = useState("");
+  const [isScrolling, setIsScrolling] = useState(false);
   const { labels, handleAnalyzeImage } = useGoogleVisionAPI();
+  const queryParams = new URLSearchParams(window.location.search);
+  const shopId = queryParams.get("member");
+  const orderNumber = queryParams.get("order");
+  const productNumber = queryParams.get("product");
+
+  const state = useContext(ChatContext);
+  const dispatch = useContext(ChatDispatchContext);
 
   const fetchOrderInfo = async (shopId, orderNumber) => {
     try {
@@ -172,10 +183,6 @@ function Finish() {
       });
     }, 500);
   };
-  const queryParams = new URLSearchParams(window.location.search);
-  const shopId = queryParams.get("member");
-  const orderNumber = queryParams.get("order");
-  const productNumber = queryParams.get("product");
 
   useEffect(() => {
     if (shopId) {
@@ -225,7 +232,9 @@ function Finish() {
       unsubscribe();
     };
   }, []);
+
   let scrollTimeout;
+
   useEffect(() => {
     if (state.messages.length > 0) {
       const handleScroll = () => {
@@ -282,6 +291,7 @@ function Finish() {
       const firstMessage = state.messages[0];
 
       const messageDate = firstMessage.created_time ? firstMessage.created_time.toDate() : null;
+
       if (messageDate) {
         let label = "";
         const now = new Date();
@@ -318,12 +328,11 @@ function Finish() {
     response: item.response,
   }));
 
-  const fetchCustomGPTResponse = async (inputText, document) => {
+  const fetchGPT = async (inputText, document) => {
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
     const apiUrl = "https://api.openai.com/v1/chat/completions";
 
     try {
-      //complete fetch
       const res = await fetch(apiUrl, {
         method: "POST",
         headers: {
@@ -360,7 +369,6 @@ function Finish() {
         console.error("Too many requests. Please try again later.");
         dispatch({ type: "SET_GPT_ERROR", payload: "Too many requests. Please try again later." });
       } else {
-        console.log(res.json());
         console.error("Error:", res.status, res.statusText);
         dispatch({ type: "SET_GPT_ERROR", payload: "An error occurred. Please try again later." });
       }
@@ -372,12 +380,12 @@ function Finish() {
 
   const sendMessage = async (url) => {
     const queryParams = new URLSearchParams(window.location.search);
-    const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
+    const shopId = queryParams.get("member");
     const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
 
     if (url !== undefined) {
       setTimeout(() => {
-        dispatch({ type: "TOGGLE_IMG_LOADING" }); // 3 秒
+        dispatch({ type: "TOGGLE_IMG_LOADING" });
         dispatch({ type: "TOGGLE_GPT_LOADING" });
         scrollToBottom();
       }, 500);
@@ -404,12 +412,12 @@ function Finish() {
           from: "shop",
         });
       } else if (url !== undefined) {
-        fetchCustomGPTResponse(labels, messagesCollectionRef);
+        fetchGPT(labels, messagesCollectionRef);
       } else {
-        fetchCustomGPTResponse(state.inputValue, messagesCollectionRef);
+        fetchGPT(state.inputValue, messagesCollectionRef);
       }
 
-      dispatch({ type: "RESET_INPUT_VALUE" }); // 清空輸入框
+      dispatch({ type: "RESET_INPUT_VALUE" });
       scrollToBottom();
     }
   };
@@ -423,9 +431,9 @@ function Finish() {
   const imageFormats = [".jpeg", ".jpg", ".png", ".gif"];
 
   const sendImage = (event) => {
-    console.log(event.target.files);
     dispatch({ type: "TOGGLE_IMG_LOADING" });
     scrollToBottom();
+
     const file = event.target.files[0];
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
     if (!file) return;
@@ -435,7 +443,6 @@ function Finish() {
       return;
     }
     const storageRef = ref(storage, `images/${file.name}`);
-
     const uploadTask = uploadBytesResumable(storageRef, file);
 
     uploadTask.on(
@@ -452,20 +459,19 @@ function Finish() {
           } catch (error) {
             console.error("handleAnalyzeClick 發生錯誤：", error);
           }
-
-          // scrollToBottom();
         });
       }
     );
   };
+
   useEffect(() => {
     if (labels.length > 0) {
       const queryParams = new URLSearchParams(window.location.search);
-      const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
+      const shopId = queryParams.get("member");
       const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
-      fetchCustomGPTResponse(`圖片相關如下${labels}`, messagesCollectionRef);
+      fetchGPT(`圖片相關如下${labels}`, messagesCollectionRef);
       setTimeout(() => {
-        dispatch({ type: "TOGGLE_GPT_LOADING" }); // 3 秒後觸發 dispatch
+        dispatch({ type: "TOGGLE_GPT_LOADING" });
       }, 1000);
     }
   }, [labels]);
@@ -488,6 +494,7 @@ function Finish() {
       console.log(err);
     }
   }
+
   return (
     <div className="bg-black-200 w-container my-0 mx-auto relative font-sans">
       <div className="bg-black-200 w-container px-3 fixed top-0 left-0 right-0 z-10 my-0 mx-auto">
@@ -499,24 +506,8 @@ function Finish() {
         </div>
       </div>
 
-      {/* 這裡要做選擇，hidden or grid */}
-      <div className={`${state.showOrderInfo ? "grid" : "hidden"} bg-black-0 w-container py-2 px-3 grid-cols-4 gap-6 top-[68px] mt-[68px] left-0 right-0 z-10 my-0 mx-auto`}>
-        <div className="flex flex-col items-center gap-y-2 col-span-1">
-          <img
-            src="https://images.unsplash.com/photo-1635865933730-e5817b5680cd?q=80&w=2864&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            alt="product-image"
-            className="rounded-full w-large h-large"
-          />
-          <p className="text-xs leading-normal text-center w-large bg-secondary-400 text-secondary rounded-lg">{state.orderInfo?.status}</p>
-        </div>
-        <div className="flex flex-col gap-y-1 col-span-3">
-          <p className="font-bold">{state.orderInfo?.shopName || "商家名稱未找到"}</p>
-          <p className="text-primary">NT. {state.orderInfo?.totalPrice}</p>
-          <p>訂單編號：{state.orderInfo?.orderNumber}</p>
-        </div>
-      </div>
+      <OrderCard />
 
-      {/* 這裡要做選擇，hidden or flex */}
       <div className={`w-full product bg-white ${state.showShopInfo && !state.showOrderInfo ? "flex" : "hidden"} justify-center gap-6 py-2 mt-[68px] items-center`}>
         <img src={happy} alt="camera" className="w-20 rounded-full" />
         <div className="w4/6 my-2 flex flex-col py-2 justify-between">
@@ -524,7 +515,7 @@ function Finish() {
           <p className="text-base leading-normal text-secondary">momoCall 回應率：100%</p>
         </div>
       </div>
-      {/* 在滾動時顯示的日期標籤 */}
+
       {isScrolling && currentLabel && (
         <div className="fixed flex justify-center  top-[70px] left-0 right-0  z-10 ">
           <div className="bg-gray-300/85 rounded-full px-3 py-1 mb-3 shadow-lg">
@@ -532,6 +523,7 @@ function Finish() {
           </div>
         </div>
       )}
+
       <div className={`px-3 py-4 space-y-4 ${state.divHeightClass} mb-[56px] min-h-screen`}>
         <div className="bg-accent flex justify-center items-center h-8 px-6 rounded-large">
           <FiAlertTriangle className="w-notice h-notice mr-4" />
