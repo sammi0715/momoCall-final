@@ -130,9 +130,8 @@ function Finish() {
         const shopName = shopDoc.data().shopName;
 
         dispatch({ type: "SET_SHOP_NAME", payload: shopName });
-
+        const productsCollectionRef = collection(doc(db, "shops", shopDocId), "products");
         if (productNumber) {
-          const productsCollectionRef = collection(doc(db, "shops", shopDocId), "products");
           const productQuery = query(productsCollectionRef, where("productNumber", "==", productNumber));
           const productSnapshot = await getDocs(productQuery);
           if (!productSnapshot.empty) {
@@ -143,7 +142,11 @@ function Finish() {
             dispatch({ type: "SET_PRODUCT_INFO", payload: null });
           }
         } else {
-          dispatch({ type: "SET_PRODUCT_INFO", payload: null });
+          const productSnapshot = await getDocs(productsCollectionRef);
+          const productList = productSnapshot.docs.map((doc) => doc.data());
+          const randomIndex = Math.floor(Math.random() * productList.length);
+          const productDoc = productSnapshot.docs[randomIndex];
+          dispatch({ type: "SET_PRODUCT_INFO", payload: productDoc.data() });
         }
 
         dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
@@ -183,7 +186,7 @@ function Finish() {
         dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
         fetchProductInfo(shopId, productNumber);
       } else if (!orderNumber && !productNumber) {
-        dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: false });
+        dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
         dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
       }
     } else {
