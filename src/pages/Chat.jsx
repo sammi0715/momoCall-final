@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { FiChevronLeft, FiAlertTriangle, FiImage, FiSend } from "react-icons/fi";
 import happy from "./img/happy.png";
 import responses from "./responses.json";
@@ -7,6 +7,8 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
 import tappay from "../utils/tappay";
 import { marked } from "marked";
+import { format, isToday, isYesterday, differenceInMinutes } from "date-fns";
+import { zhTW } from "date-fns/locale";
 import useGoogleVisionAPI from "../utils/useGoogleVisionAPI";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
@@ -90,6 +92,8 @@ function reducer(state, action) {
 }
 function Finish() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [currentLabel, setCurrentLabel] = useState(""); // 用來顯示當前日期標籤
+  const [isScrolling, setIsScrolling] = useState(false); //
   const { labels, handleAnalyzeImage } = useGoogleVisionAPI();
 
   const fetchOrderInfo = async (shopId, orderNumber) => {
@@ -204,9 +208,83 @@ function Finish() {
 
     return () => {
       unsubscribe();
-      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+  let scrollTimeout;
+  useEffect(() => {
+    if (state.messages.length > 0) {
+      const handleScroll = () => {
+        setIsScrolling(true);
+        clearTimeout(scrollTimeout);
+
+        const scrollPosition = window.scrollY + 10;
+        let newLabel = "";
+
+        for (let i = 0; i < state.messages.length; i++) {
+          const message = state.messages[i];
+          const messageDate = message.created_time ? message.created_time.toDate() : null;
+
+          let dateLabel = "Loading...";
+          if (messageDate) {
+            const now = new Date();
+            const minutesDifference = differenceInMinutes(now, messageDate);
+
+            if (minutesDifference < 30) {
+              dateLabel = "剛剛";
+            } else if (isToday(messageDate)) {
+              dateLabel = "今天";
+            } else if (isYesterday(messageDate)) {
+              dateLabel = "昨天";
+            } else {
+              dateLabel = format(messageDate, "M/d (EEE)", { locale: zhTW });
+            }
+          }
+
+          const element = document.getElementById(`message-${i}`);
+          if (element && element.offsetTop >= scrollPosition) {
+            newLabel = dateLabel;
+            break;
+          }
+        }
+
+        setCurrentLabel(newLabel);
+
+        scrollTimeout = setTimeout(() => {
+          setIsScrolling(false);
+        }, 900);
+      };
+
+      window.addEventListener("scroll", handleScroll);
+
+      return () => {
+        window.removeEventListener("scroll", handleScroll);
+      };
+    }
+  }, [state.messages]);
+
+  useEffect(() => {
+    if (state.messages.length > 0) {
+      const firstMessage = state.messages[0];
+
+      const messageDate = firstMessage.created_time ? firstMessage.created_time.toDate() : null;
+      if (messageDate) {
+        let label = "";
+        const now = new Date();
+        const minutesDifference = differenceInMinutes(now, messageDate);
+        if (minutesDifference < 30) {
+          label = "剛剛";
+        } else if (isToday(messageDate)) {
+          label = "今天";
+        } else if (isYesterday(messageDate)) {
+          label = "昨天";
+        } else {
+          label = format(messageDate, "M/d (EEE)", { locale: zhTW });
+        }
+
+        setCurrentLabel(label);
+      }
+    }
+  }, [state.messages]);
 
   useEffect(() => {
     const setupTappay = async () => {
@@ -400,7 +478,7 @@ function Finish() {
       </div>
 
       {/* 這裡要做選擇，hidden or grid */}
-      <div className={`${state.showOrderInfo ? "grid" : "hidden"}  bg-black-0 w-container py-2 px-3  grid-cols-4 gap-6  top-[68px] mt-[68px] left-0 right-0 z-10 my-0 mx-auto`}>
+      <div className={`${state.showOrderInfo ? "grid" : "hidden"} bg-black-0 w-container py-2 px-3 grid-cols-4 gap-6 top-[68px] mt-[68px] left-0 right-0 z-10 my-0 mx-auto`}>
         <div className="flex flex-col items-center gap-y-2 col-span-1">
           <img
             src="https://images.unsplash.com/photo-1635865933730-e5817b5680cd?q=80&w=2864&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
@@ -417,23 +495,25 @@ function Finish() {
       </div>
 
       {/* 這裡要做選擇，hidden or flex */}
-      <div className={`w-full product bg-white ${state.showShopInfo ? "flex" : "hidden"} justify-center gap-6 py-2 mt-[68px] items-center`}>
+      <div className={`w-full product bg-white ${state.showShopInfo && !state.showOrderInfo ? "flex" : "hidden"} justify-center gap-6 py-2 mt-[68px] items-center`}>
         <img src={happy} alt="camera" className="w-20 rounded-full" />
         <div className="w4/6 my-2 flex flex-col py-2 justify-between">
           <h4 className="w-fit text-base font-bold leading-normal line-clamp-1">{state.shopName || "商家名稱未找到"}</h4>
           <p className="text-base leading-normal text-secondary">momoCall 回應率：100%</p>
         </div>
       </div>
-
-      <div className={`px-3 py-4 space-y-4 ${state.divHeightClass}  mb-[56px] min-h-screen`}>
+      {/* 在滾動時顯示的日期標籤 */}
+      {isScrolling && currentLabel && (
+        <div className="fixed flex justify-center  top-[70px] left-0 right-0  z-10 ">
+          <div className="bg-gray-300/85 shadow rounded-full px-3 py-1 mb-3 shadow-lg">
+            <p className="text-xs leading-normal">{currentLabel}</p>
+          </div>
+        </div>
+      )}
+      <div className={`px-3 py-4 space-y-4 ${state.divHeightClass} mb-[56px] min-h-screen`}>
         <div className="bg-accent flex justify-center items-center h-8 px-6 rounded-large">
           <FiAlertTriangle className="w-notice h-notice mr-4" />
           <p className="text-sm leading-normal">提醒您，請勿透露個人資料</p>
-        </div>
-        <div className="flex justify-center">
-          <div className="bg-black-0 rounded-large w-14">
-            <p className="text-xs leading-normal px-4">今天</p>
-          </div>
         </div>
         <div>
           <div className={`bg-black-0 p-4 rounded-t-lg ${state.showProductInfo ? "flex" : "hidden"} justify-between border-b-1 border-black-400`}>
@@ -449,32 +529,42 @@ function Finish() {
             </button>
           </div>
         </div>
-        {state.messages.map((message, index) => (
-          <div key={index} className={`flex gap-1 mr-3 ${message.from === "user1" ? "items-end flex-col" : "max-w-[258px] flex-wrap"}`}>
-            {message.from !== "user1" && <img src={happy} alt="" className="w-9 h-9" />}
-            <div
-              className={`w-fit max-w-52 text-black break-words rounded-lg p-3 relative ${message.from === "user1" ? "bg-white" : "bg-primary-600"} ${message.from === "user1" ? "" : "ml-2"} ${
-                message.from === "user1"
-                  ? "after:absolute after:top-4 after:-right-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-l-[20px] after:border-l-white after:border-b-transparent"
-                  : "after:absolute after:top-4 after:-left-3  after:content-[''] after:w-0 after:h-0 after:block  after:border-b-[20px] after:border-r-[20px] after:border-r-primary-600 after:border-b-transparent"
-              }`}
-            >
-              {imageFormats.some((format) => message.content.includes(format)) ? (
-                <PhotoProvider maskOpacity={0.5}>
-                  <PhotoView src={message.content}>
-                    <img src={message.content} alt="Sent" className="rounded-lg max-w-full h-auto" />
-                  </PhotoView>
-                </PhotoProvider>
-              ) : (
-                <p dangerouslySetInnerHTML={{ __html: marked(message.content) }}></p>
-              )}
+        {state.messages.map((message, index) => {
+          const messageDate = message.created_time ? message.created_time.toDate() : null;
+
+          return (
+            <div key={index} id={`message-${index}`}>
+              <div className={`flex gap-1 mr-3 ${message.from === "user1" ? "justify-end" : ""}`}>
+                {message.from !== "user1" && <img src={happy} alt="" className="w-9 h-9" />}
+                <div
+                  className={`w-fit max-w-[65%] text-black break-words rounded-lg p-3 relative ${message.from === "user1" ? "bg-white" : "bg-primary-600"} ${
+                    message.from === "user1" ? "order-2" : "order-1 ml-2"
+                  } ${
+                    message.from === "user1"
+                      ? "after:absolute after:top-4 after:-right-3 after:content-[''] after:w-0 after:h-0 after:block after:border-b-[20px] after:border-l-[20px] after:border-l-white after:border-b-transparent"
+                      : "after:absolute after:top-4 after:-left-3 after:content-[''] after:w-0 after:h-0 after:block after:border-b-[20px] after:border-r-[20px] after:border-r-primary-600 after:border-b-transparent"
+                  }`}
+                >
+                  {imageFormats.some((format) => message.content.includes(format)) ? (
+                    <PhotoProvider maskOpacity={0.5}>
+                      <PhotoView src={message.content}>
+                        <img src={message.content} alt="Sent" className="rounded-lg max-w-full h-auto" />
+                      </PhotoView>
+                    </PhotoProvider>
+                  ) : (
+                    <p dangerouslySetInnerHTML={{ __html: marked(message.content) }}></p>
+                  )}
+                </div>
+                <small className={`self-end ${message.from === "user1" ? "order-1 mr-3" : "order-2 ml-2"}`}>
+                  {message.created_time?.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "Loading..."}
+                </small>
+              </div>
             </div>
-            <small className={`${message.from === "user1" ? "" : "ml-12"}`}>{message.created_time?.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "Loading..."}</small>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <div className={`${state.isChoose ? "flex" : "hidden"} justify-center items-center bg-black-800/80 w-container h-full  fixed top-0`}>
+      <div className={`${state.isChoose ? "flex" : "hidden"} justify-center items-center bg-black-800/80 w-container h-full fixed top-0`}>
         <div className="w-64 h-60 bg-white mx-auto py-2 px-4 flex flex-col gap-3 text-sm rounded-xl">
           <h4 className="text-center font-bold leading-normal text-base text-primary-800">請選擇規格數量</h4>
           <div className="bg-black-0 p-1 rounded-t-large flex justify-center items-center">
@@ -519,7 +609,7 @@ function Finish() {
         </div>
       </div>
 
-      <div className={`${state.isPerchase ? "flex" : "hidden"} justify-center items-center  w-container h-full  fixed top-0`}>
+      <div className={`${state.isPerchase ? "flex" : "hidden"} justify-center items-center w-container h-full fixed top-0`}>
         <div className="w-64 h-84 bg-white mx-auto py-2 px-4 flex flex-col gap-4 text-sm rounded-xl">
           <h4 className="text-center font-bold leading-normal text-lg text-primary-800 mt-2">訂單即將送出</h4>
           <p className="text-center font-bold">已確認品項、數量並進行結帳嗎？</p>
@@ -562,7 +652,7 @@ function Finish() {
         </div>
       </div>
 
-      <div className={`${state.isCheckout ? "flex" : "hidden"} justify-center items-center  w-container h-full  fixed top-0 bg-black-800/80`}>
+      <div className={`${state.isCheckout ? "flex" : "hidden"} justify-center items-center w-container h-full fixed top-0 bg-black-800/80`}>
         <div className="w-64 h-32 bg-white mx-auto py-2 px-4 flex flex-col gap-3 text-sm rounded-xl">
           <h4 className="text-center font-bold leading-normal text-lg text-primary-800 mt-2">付款成功，即將為您出貨</h4>
           <p className="text-center font-bold">訂單編號：20240827000001</p>
