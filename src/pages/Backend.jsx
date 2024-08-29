@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { FiChevronLeft, FiPenTool, FiPlus, FiX } from "react-icons/fi";
 import { useState, useRef, useEffect } from "react";
 import { db } from "../utils/firebase";
-import { collection, getDocs, updateDoc, addDoc, deleteDoc, doc } from "../utils/firebase";
+import { collection, getDocs, updateDoc, addDoc, deleteDoc, doc, orderBy, query } from "../utils/firebase";
 
 function Backend() {
   const [openId, setOpenId] = useState(null);
@@ -16,12 +16,14 @@ function Backend() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const querySnapshot = await getDocs(collection(db, "faq"));
+      const q = query(collection(db, "faq"), orderBy("updatedTime", "desc"));
+      const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
         const faqList = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           keyword: doc.data().keyword,
           response: doc.data().response,
+          updatedTime: doc.data().updatedTime,
         }));
         setFaqs(faqList);
       } else {
@@ -52,7 +54,8 @@ function Backend() {
     try {
       const docRef = await addDoc(collection(db, "faq"), { keyword, response, updatedTime: new Date() });
       console.log("Document written with ID: ", docRef.id);
-      setFaqs([...faqs, { id: docRef.id, keyword, response, updatedTime: new Date() }]);
+      const newFaqs = [...faqs, { id: docRef.id, keyword, response, updatedTime: new Date() }];
+      setFaqs(newFaqs.sort((a, b) => b.updatedTime - a.updatedTime));
     } catch (e) {
       console.error("Error adding document: ", e);
     }
@@ -63,7 +66,8 @@ function Backend() {
       const faqDoc = doc(db, "faq", id);
       await updateDoc(faqDoc, { keyword, response, updatedTime: new Date() });
       console.log("Document updated with ID: ", id);
-      setFaqs(faqs.map((faq) => (faq.id === id ? { id, keyword, response } : faq)));
+      const updatedFaqs = faqs.map((faq) => (faq.id === id ? { id, keyword, response, updatedTime: new Date() } : faq));
+      setFaqs(updatedFaqs.sort((a, b) => b.updatedTime - a.updatedTime));
     } catch (e) {
       console.error("Error updating document: ", e);
     }
