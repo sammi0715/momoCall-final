@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { FiChevronLeft, FiPenTool, FiPlus, FiX } from "react-icons/fi";
 import { useState, useRef, useEffect } from "react";
 import { db } from "../utils/firebase";
-import { collection, getDocs } from "../utils/firebase";
+import { collection, getDocs, updateDoc, addDoc, deleteDoc, doc } from "../utils/firebase";
 
 function Backend() {
   const [openId, setOpenId] = useState(null);
@@ -11,6 +11,7 @@ function Backend() {
   const [textareaValue, setTextareaValue] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
   const [faqs, setFaqs] = useState([]);
+  const [currentFaqId, setCurrentFaqId] = useState(null);
   const textareaRef = useRef(null);
 
   useEffect(() => {
@@ -47,15 +48,61 @@ function Backend() {
     setIsModalOpen(!isModalOpen);
   };
 
+  const addFaq = async (keyword, response) => {
+    try {
+      const docRef = await addDoc(collection(db, "faq"), { keyword, response });
+      console.log("Document written with ID: ", docRef.id);
+      setFaqs([...faqs, { id: docRef.id, keyword, response }]);
+    } catch (e) {
+      console.error("Error adding document: ", e);
+    }
+  };
+
+  const updateFaq = async (id, keyword, response) => {
+    try {
+      const faqDoc = doc(db, "faq", id);
+      await updateDoc(faqDoc, { keyword, response });
+      console.log("Document updated with ID: ", id);
+      setFaqs(faqs.map((faq) => (faq.id === id ? { id, keyword, response } : faq)));
+    } catch (e) {
+      console.error("Error updating document: ", e);
+    }
+  };
+
+  const deleteFaq = async (id) => {
+    try {
+      const faqDoc = doc(db, "faq", id);
+      await deleteDoc(faqDoc);
+      console.log("Document deleted with ID: ", id);
+      setFaqs(faqs.filter((faq) => faq.id !== id));
+    } catch (e) {
+      console.error("Error deleting document: ", e);
+    }
+  };
+
   const handleSubmit = () => {
     if (inputValue && textareaValue) {
-      console.log(isEditMode ? "修改成功" : "新增成功");
-      toggleModal();
+      if (isEditMode) {
+        updateFaq(currentFaqId, inputValue, textareaValue);
+      } else {
+        addFaq(inputValue, textareaValue);
+      }
       setInputValue("");
       setTextareaValue("");
+      setIsEditMode(false);
+      setCurrentFaqId(null);
+      setIsModalOpen(false);
     } else {
       alert("請填寫所有欄位");
     }
+  };
+
+  const handleEdit = (id, keyword, response) => {
+    setInputValue(keyword);
+    setTextareaValue(response);
+    setIsEditMode(true);
+    setCurrentFaqId(id);
+    setIsModalOpen(true);
   };
 
   return (
@@ -81,7 +128,7 @@ function Backend() {
             <div key={faq.id}>
               <div className="bg-primary-600 rounded-lg py-2 px-4 flex justify-between items-center cursor-pointer" onClick={() => toggleCollapse(index)}>
                 <p className="text-black text-base leading-normal">{faq.keyword}</p>
-                <button className="cursor-pointer" onClick={() => toggleModal(faq.keyword, faq.response, true)}>
+                <button className="cursor-pointer" onClick={() => handleEdit(faq.id, faq.keyword, faq.response)}>
                   <FiPenTool className="w-6 h-6 hover:text-primary" />
                 </button>
               </div>
@@ -131,7 +178,7 @@ function Backend() {
                 className={`text-xs leading-normal text-black-0 py-1 px-2 rounded-md bg-primary ml-auto outline-none hover:bg-primary focus:outline focus:outline-1 focus:outline-primary focus:outline-offset-0 ${
                   isEditMode ? "block" : "hidden"
                 }`}
-                onClick={handleSubmit}
+                onClick={() => deleteFaq(currentFaqId)}
               >
                 {isEditMode ? "刪除問答" : ""}
               </button>
