@@ -1,12 +1,37 @@
 import { Link } from "react-router-dom";
-import { FiChevronLeft, FiPenTool, FiPlus } from "react-icons/fi";
-import { useState } from "react";
+import { FiChevronLeft, FiPenTool, FiPlus, FiX } from "react-icons/fi";
+import { useState, useRef } from "react";
 
 function Backend() {
   const [openId, setOpenId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const [textareaValue, setTextareaValue] = useState("");
+  const textareaRef = useRef(null);
 
   const toggleCollapse = (id) => {
     setOpenId(openId === id ? null : id);
+  };
+
+  const handleTextareaInput = () => {
+    const textarea = textareaRef.current;
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  };
+
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+
+  const handleSubmit = () => {
+    if (inputValue && textareaValue) {
+      console.log("送出成功");
+      toggleModal();
+      setInputValue("");
+      setTextareaValue("");
+    } else {
+      alert("請填寫所有欄位");
+    }
   };
 
   return (
@@ -66,12 +91,48 @@ function Backend() {
           </div>
         </div>
       </div>
-      <div className="bg-black-200 rounded-b-lg pb-3 px-3">
-        <button className="w-full py-2 px-4 rounded-lg flex items-center cursor-pointer hover:bg-black-400">
-          <FiPlus className="w-6 h-6 hover:text-primary mr-1" />
+      <div className="bg-black-200 rounded-b-lg py-3 px-3">
+        <button className="w-full py-2 px-4 rounded-lg flex items-center cursor-pointer hover:bg-black-400" onClick={toggleModal}>
+          <FiPlus className="w-6 h-6 mr-1" />
           <p className="text-base leading-normal font-bold">新增問答</p>
         </button>
       </div>
+      {isModalOpen && (
+        <div className="bg-black-0 rounded-lg w-[319px] h-fit py-3 px-4 space-y-2 absolute inset-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div className="flex justify-between items-center">
+            <p className="text-base leading-normal">新增問答</p>
+            <FiX className="w-6 h-6 text-black hover:text-red-600 cursor-pointer" onClick={toggleModal} />
+          </div>
+          <input
+            type="text"
+            aria-label="請輸入提問關鍵字"
+            placeholder="請輸入提問關鍵字"
+            className="text-sm leading-normal w-full bg-black-200 border border-black-600 rounded-md py-1 px-3 focus:bg-black-0 focus:border-primary"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+          />
+          <textarea
+            ref={textareaRef}
+            name="replyContent"
+            id="replyContent"
+            aria-label="請輸入回覆內容"
+            placeholder="請輸入回覆內容"
+            className="text-sm leading-normal w-full bg-black-200 border border-black-600 rounded-md py-1 px-3 focus:bg-black-0 focus:border-primary"
+            onInput={handleTextareaInput}
+            value={textareaValue}
+            onChange={(e) => setTextareaValue(e.target.value)}
+            style={{ overflow: "hidden" }}
+          ></textarea>
+          <div className="flex">
+            <button
+              className="text-xs leading-normal text-black-0 py-1 px-2 rounded-md bg-primary-800 ml-auto outline-none hover:bg-primary focus:outline focus:outline-1 focus:outline-primary focus:outline-offset-0"
+              onClick={handleSubmit}
+            >
+              確認新增
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
