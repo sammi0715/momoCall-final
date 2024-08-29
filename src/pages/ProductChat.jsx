@@ -6,8 +6,8 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { Link } from "react-router-dom";
 import tappay from "../utils/tappay";
 import { useState } from "react";
-import product from "./img/product.jpg";
 import { marked } from "marked";
+import useGoogleVisionAPI from "../utils/useGoogleVisionAPI";
 
 const initialState = {
   messages: [],
@@ -57,7 +57,6 @@ function reducer(state, action) {
 
 function ProductChat() {
   const [error, setError] = useState("");
-
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -113,7 +112,7 @@ function ProductChat() {
             },
             {
               role: "user",
-              content: inputText,
+              content: `這些是圖片內容${labels.toString()}`,
             },
           ],
           temperature: 0.7,
@@ -122,6 +121,7 @@ function ProductChat() {
 
       if (res.ok) {
         const data = await res.json();
+        console.log(data);
 
         await addDoc(document, {
           content: data.choices[0].message.content,
@@ -173,6 +173,7 @@ function ProductChat() {
       console.error("Error getting random document:", error);
     }
   };
+
   const sendImage = (event) => {
     console.log(event.target.files);
 
@@ -408,6 +409,7 @@ function ProductChat() {
           <FiImage className="w-6 h-6 text-primary hover:text-primary-800 active:text-primary" />
           <input type="file" className="hidden" accept="image/jpg,image/jpeg,image/png,image/gif" onChange={sendImage} />
         </label>
+
         <input
           type="text"
           className="bg-black-200 grow rounded-3xl pl-3  focus:outline-primary focus:outline focus:bg-white hover:bg-white"
