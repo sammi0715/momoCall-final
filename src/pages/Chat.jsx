@@ -1,17 +1,18 @@
 import { useEffect, useReducer, useState } from "react";
+import { Link } from "react-router-dom";
 import { FiChevronLeft, FiAlertTriangle, FiImage, FiSend } from "react-icons/fi";
+import { AiOutlineLike, AiOutlineDislike, AiFillDislike, AiFillLike } from "react-icons/ai";
 import happy from "./img/happy.png";
 import responses from "./responses.json";
 import loading from "./img/loading.gif";
 import beenEater from "./img/beenEater.gif";
 import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDocs, where } from "../utils/firebase";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { Link } from "react-router-dom";
+import useGoogleVisionAPI from "../utils/useGoogleVisionAPI";
 import tappay from "../utils/tappay";
 import { marked } from "marked";
 import { format, isToday, isYesterday, differenceInMinutes } from "date-fns";
 import { zhTW } from "date-fns/locale";
-import useGoogleVisionAPI from "../utils/useGoogleVisionAPI";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
 
@@ -47,6 +48,13 @@ function reducer(state, action) {
       return { ...state, showShopInfo: action.payload };
     case "TOGGLE_PRODUCT_INFO":
       return { ...state, showProductInfo: action.payload };
+    case "TOGGLE_USEFUL": {
+      let copyMessages = state.messages.map((item, index) => {
+        if (index == action.payload.index) return { ...item, isUseful: action.payload.isUseful };
+        return item;
+      });
+      return { ...state, messages: copyMessages };
+    }
     case "RESET_INPUT_VALUE":
       return { ...state, inputValue: "" };
     case "TOGGLE_GPT_LOADING":
@@ -62,9 +70,7 @@ function reducer(state, action) {
       }
       return { ...state, isPerchase: !state.isPerchase };
     case "FINISH_CHECKOUT":
-      if (state.isCheckout == true) {
-        window.location.reload();
-      }
+      if (state.isCheckout == true) window.location.reload();
       return {
         ...state,
         isCheckout: !state.isCheckout,
@@ -75,9 +81,7 @@ function reducer(state, action) {
     case "ADD_PRODUCT_NUM":
       return { ...state, count: state.count + 1 };
     case "SUB_PRODUCT_NUM":
-      if (state.count === 0) {
-        return state;
-      }
+      if (state.count === 0) return state;
       return { ...state, count: state.count - 1 };
     case "SELECT_SPEC":
       return { ...state, spec: action.payload };
@@ -201,6 +205,7 @@ function Finish() {
       querySnapshot.forEach((doc) => {
         msgs.push(doc.data());
       });
+
       dispatch({ type: "SET_MESSAGES", payload: msgs });
     });
 
@@ -349,6 +354,7 @@ function Finish() {
           content: data.choices[0].message.content,
           created_time: serverTimestamp(),
           from: "shop",
+          isUsefull: "",
         });
       } else if (res.status === 429) {
         console.error("Too many requests. Please try again later.");
@@ -550,10 +556,10 @@ function Finish() {
         {state.messages.map((message, index) => {
           return (
             <div key={index} id={`message-${index}`}>
-              <div key={index} className={`flex gap-1 mr-3 ${message.from === "user1" ? "items-end flex-col" : "max-w-[258px] flex-wrap"}`}>
+              <div key={index} className={`group flex gap-1 mr-3 relative ${message.from === "user1" ? "items-end flex-col" : "max-w-[258px] flex-wrap"}`}>
                 {message.from !== "user1" && <img src={happy} alt="" className="w-9 h-9" />}
                 <div
-                  className={`w-fit max-w-52 text-black break-words rounded-lg p-3 relative ${message.from === "user1" ? "bg-white" : "bg-primary-600"} ${message.from === "user1" ? "" : "ml-2"} ${
+                  className={` w-fit max-w-52 text-black break-words rounded-lg p-3 relative ${message.from === "user1" ? "bg-white" : "bg-primary-600"} ${message.from === "user1" ? "" : "ml-2"} ${
                     message.from === "user1"
                       ? "after:absolute after:top-4 after:-right-3 after:content-[''] after:w-0 after:h-0 after:block after:border-b-[20px] after:border-l-[20px] after:border-l-white after:border-b-transparent"
                       : "after:absolute after:top-4 after:-left-3 after:content-[''] after:w-0 after:h-0 after:block after:border-b-[20px] after:border-r-[20px] after:border-r-primary-600 after:border-b-transparent"
@@ -569,7 +575,26 @@ function Finish() {
                     <p dangerouslySetInnerHTML={{ __html: marked(message.content) }}></p>
                   )}
                 </div>
-                <small className={`${message.from === "user1" ? "" : "ml-12"}`}>{message.created_time?.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "Loading..."}</small>
+
+                <small className={`${message.from === "user1" ? "" : "ml-12 "} h-6`}>
+                  {message.created_time?.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "Loading..."}
+                </small>
+                <div className="hidden group-hover:block ">
+                  <button
+                    onClick={() => dispatch({ type: "TOGGLE_USEFUL", payload: { index, isUseful: "Yes" } })}
+                    className={`${message.from === "user1" ? "hidden" : state.messages[index].isUseful === "No" ? "hidden" : "inline"} mx-2`}
+                  >
+                    <AiOutlineLike className={`${state.messages[index].isUseful === "Yes" ? "hidden" : "inline"}`} />
+                    <AiFillLike className={`${state.messages[index].isUseful == "Yes" ? "inline" : "hidden"}`} />
+                  </button>
+                  <button
+                    onClick={() => dispatch({ type: "TOGGLE_USEFUL", payload: { index, isUseful: "No" } })}
+                    className={`${message.from === "user1" ? "hidden" : state.messages[index].isUseful === "Yes" ? "hidden" : "inline"} mx-2`}
+                  >
+                    <AiOutlineDislike className={`${state.messages[index].isUseful === "No" ? "hidden" : "inline"}`} />
+                    <AiFillDislike className={`${state.messages[index].isUseful == "No" ? "inline" : "hidden"}`} />
+                  </button>
+                </div>
               </div>
             </div>
           );
