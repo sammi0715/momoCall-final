@@ -50,9 +50,9 @@ function Backend() {
 
   const addFaq = async (keyword, response) => {
     try {
-      const docRef = await addDoc(collection(db, "faq"), { keyword, response });
+      const docRef = await addDoc(collection(db, "faq"), { keyword, response, updatedTime: new Date() });
       console.log("Document written with ID: ", docRef.id);
-      setFaqs([...faqs, { id: docRef.id, keyword, response }]);
+      setFaqs([...faqs, { id: docRef.id, keyword, response, updatedTime: new Date() }]);
     } catch (e) {
       console.error("Error adding document: ", e);
     }
@@ -61,7 +61,7 @@ function Backend() {
   const updateFaq = async (id, keyword, response) => {
     try {
       const faqDoc = doc(db, "faq", id);
-      await updateDoc(faqDoc, { keyword, response });
+      await updateDoc(faqDoc, { keyword, response, updatedTime: new Date() });
       console.log("Document updated with ID: ", id);
       setFaqs(faqs.map((faq) => (faq.id === id ? { id, keyword, response } : faq)));
     } catch (e) {
@@ -178,7 +178,10 @@ function Backend() {
                 className={`text-xs leading-normal text-black-0 py-1 px-2 rounded-md bg-primary ml-auto outline-none hover:bg-primary focus:outline focus:outline-1 focus:outline-primary focus:outline-offset-0 ${
                   isEditMode ? "block" : "hidden"
                 }`}
-                onClick={() => deleteFaq(currentFaqId)}
+                onClick={() => {
+                  deleteFaq(currentFaqId);
+                  toggleModal();
+                }}
               >
                 {isEditMode ? "刪除問答" : ""}
               </button>
