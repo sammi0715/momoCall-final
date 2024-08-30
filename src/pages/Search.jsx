@@ -75,7 +75,6 @@ const Search = () => {
     dispatch({ type: "CLEAR_SEARCH_TERM" });
     const fetchedResults = await fetchAllChatrooms();
     dispatch({ type: "SET_RESULTS", payload: fetchedResults });
-    navigate("/");
   };
 
   return (
@@ -86,7 +85,7 @@ const Search = () => {
             <FiChevronLeft className="w-6 h-6" />
           </button>
         </Link>
-        <Link to="/" onClick={handleLinkClick}>
+        <Link to="/search" onClick={handleLinkClick}>
           <h1 className="text-2xl leading-normal font-bold text-primary ml-20">momoCall</h1>
         </Link>
       </header>
