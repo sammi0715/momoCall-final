@@ -579,7 +579,7 @@ function Finish() {
                 <small className={`${message.from === "user1" ? "" : "ml-12 "} h-6`}>
                   {message.created_time?.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "Loading..."}
                 </small>
-                <div className="hidden group-hover:block ">
+                <div className="flex self-center ">
                   <button
                     onClick={() => dispatch({ type: "TOGGLE_USEFUL", payload: { index, isUseful: "Yes" } })}
                     className={`${message.from === "user1" ? "hidden" : state.messages[index].isUseful === "No" ? "hidden" : "inline"} mx-2`}
