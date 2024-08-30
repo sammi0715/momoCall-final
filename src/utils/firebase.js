@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, setDoc, doc, query, orderBy, onSnapshot, serverTimestamp, getDocs, getDoc, where, deleteDoc, updateDoc } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "momocall.firebaseapp.com",
@@ -15,4 +16,5 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
 const db = getFirestore(app);
-export { db, storage, collection, addDoc, doc, setDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, getDoc, where, deleteDoc, updateDoc };
+
+export { db, storage, collection, addDoc, doc, setDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, getDoc, where, deleteDoc, updateDoc, ref, uploadBytesResumable, getDownloadURL };

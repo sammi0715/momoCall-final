@@ -90,6 +90,7 @@ const SearchPages = () => {
           <h1 className="text-2xl leading-normal font-bold text-primary ml-20">momoCall</h1>
         </Link>
       </header>
+
       <input
         type="text"
         placeholder="請輸入商店名稱、商品名稱或商品編號"
