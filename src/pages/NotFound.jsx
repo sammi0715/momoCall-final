@@ -10,9 +10,9 @@ function NotFound() {
         <p className="text-5xl leading-normal text-primary font-black font-libre">4</p>
       </div>
       <h2 className="text-xl leading-normal text-black font-bold">momoCallout</h2>
-      <button className="bg-primary-800 text-black-0 rounded-large py-2 px-6 hover:bg-primary-600">
-        <Link to="/search">回到聊天室</Link>
-      </button>
+      <Link to="/search">
+        <button className="bg-primary-800 text-black-0 rounded-large py-2 px-6 hover:bg-primary-600">回到聊天室</button>
+      </Link>
     </div>
   );
 }
