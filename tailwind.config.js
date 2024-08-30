@@ -48,6 +48,7 @@ export default {
       },
       fontFamily: {
         sans: ["Noto Sans TC", "sans-serif"],
+        libre: ["Libre Franklin", "sans-serif"],
       },
     },
   },
