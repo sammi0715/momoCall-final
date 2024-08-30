@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer } from "react";
 import { Link } from "react-router-dom";
 import { FiChevronLeft, FiAlertTriangle, FiImage, FiSend } from "react-icons/fi";
 import { AiOutlineLike, AiOutlineDislike, AiFillDislike, AiFillLike } from "react-icons/ai";
@@ -14,7 +14,7 @@ import { format, isToday, isYesterday, differenceInMinutes } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
-
+import { fetchOrderInfo, fetchProductInfo, fetchCustomGPTResponse } from "../utils/fetch";
 const initialState = {
   messages: [],
   inputValue: "",
@@ -111,61 +111,6 @@ function Finish() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [faqs, setFaqs] = useState([]);
   const { labels, handleAnalyzeImage } = useGoogleVisionAPI();
-  const fetchOrderInfo = async (shopId, orderNumber) => {
-    try {
-      const ordersCollectionRef = collection(db, "orders");
-      const orderQuery = query(ordersCollectionRef, where("shopId", "==", shopId), where("orderNumber", "==", orderNumber));
-      const querySnapshot = await getDocs(orderQuery);
-      if (!querySnapshot.empty) {
-        const orderDoc = querySnapshot.docs[0];
-        dispatch({ type: "SET_ORDER_INFO", payload: orderDoc.data() });
-      } else {
-        console.log("No matching order found!");
-      }
-    } catch (error) {
-      console.error("Error getting order documents:", error);
-    }
-  };
-
-  const fetchProductInfo = async (shopId, productNumber) => {
-    try {
-      const shopQuery = query(collection(db, "shops"), where("shopId", "==", shopId));
-      const shopSnapshot = await getDocs(shopQuery);
-      if (!shopSnapshot.empty) {
-        const shopDoc = shopSnapshot.docs[0];
-        const shopDocId = shopDoc.id;
-        const shopName = shopDoc.data().shopName;
-
-        dispatch({ type: "SET_SHOP_NAME", payload: shopName });
-        const productsCollectionRef = collection(doc(db, "shops", shopDocId), "products");
-        if (productNumber) {
-          const productQuery = query(productsCollectionRef, where("productNumber", "==", productNumber));
-          const productSnapshot = await getDocs(productQuery);
-          if (!productSnapshot.empty) {
-            const productDoc = productSnapshot.docs[0];
-            dispatch({ type: "SET_PRODUCT_INFO", payload: productDoc.data() });
-          } else {
-            console.log("No matching product found!");
-            dispatch({ type: "SET_PRODUCT_INFO", payload: null });
-          }
-        } else {
-          const productSnapshot = await getDocs(productsCollectionRef);
-          const productList = productSnapshot.docs.map((doc) => doc.data());
-          const randomIndex = Math.floor(Math.random() * productList.length);
-          const productDoc = productSnapshot.docs[randomIndex];
-          dispatch({ type: "SET_PRODUCT_INFO", payload: productDoc.data() });
-        }
-
-        dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
-      } else {
-        console.log("No matching shop found for the given shopId!");
-        dispatch({ type: "SET_SHOP_NAME", payload: "商家名稱未找到" });
-        dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
-      }
-    } catch (error) {
-      console.error("Error getting product documents:", error);
-    }
-  };
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -183,14 +128,14 @@ function Finish() {
   useEffect(() => {
     if (shopId) {
       dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
-      fetchProductInfo(shopId, productNumber);
+      fetchProductInfo(shopId, productNumber, dispatch);
       if (orderNumber) {
         dispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
-        fetchOrderInfo(shopId, orderNumber);
+        fetchOrderInfo(shopId, orderNumber, dispatch);
       } else if (productNumber) {
         dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
         dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
-        fetchProductInfo(shopId, productNumber);
+        fetchProductInfo(shopId, productNumber, dispatch);
       } else if (!orderNumber && !productNumber) {
         dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
         dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
@@ -200,7 +145,6 @@ function Finish() {
       dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: false });
     }
 
-    // Firebase 查詢消息
     const chatroomName = shopId || " ";
     const q = query(collection(db, "chatroom", chatroomName, "messages"), orderBy("created_time"));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -335,29 +279,6 @@ function Finish() {
   }, [state.messages]);
 
   useEffect(() => {
-    if (state.messages.length > 0) {
-      const firstMessage = state.messages[0];
-
-      const messageDate = firstMessage.created_time ? firstMessage.created_time.toDate() : null;
-      if (messageDate) {
-        let label = "";
-        const now = new Date();
-        const minutesDifference = differenceInMinutes(now, messageDate);
-        if (minutesDifference < 30) {
-          label = "剛剛";
-        } else if (isToday(messageDate)) {
-          label = "今天";
-        } else if (isYesterday(messageDate)) {
-          label = "昨天";
-        } else {
-          label = format(messageDate, "M/d (EEE)", { locale: zhTW });
-        }
-        dispatch({ type: "SET_DATE_LABEL", payload: label });
-      }
-    }
-  }, [state.messages]);
-
-  useEffect(() => {
     const setupTappay = async () => {
       await tappay.setupSDK();
       tappay.setupCard();
@@ -374,66 +295,14 @@ function Finish() {
     response: item.response,
   }));
 
-  const fetchCustomGPTResponse = async (inputText, document) => {
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    const apiUrl = "https://api.openai.com/v1/chat/completions";
-
-    try {
-      //complete fetch
-      const res = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          max_tokens: 150,
-          messages: [
-            {
-              role: "system",
-              content: "你是一個全程使用繁體中文並且非常人性化回覆「已登入」的使用者提問MOMO電商客服相關問題，且不會提到「關鍵字」三個字的富邦媒體電商客服人員",
-            },
-            {
-              role: "user",
-              content: inputText,
-            },
-          ],
-          temperature: 0.7,
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-
-        await addDoc(document, {
-          content: data.choices[0].message.content,
-          created_time: serverTimestamp(),
-          from: "shop",
-          isUseful: "",
-        });
-      } else if (res.status === 429) {
-        console.error("Too many requests. Please try again later.");
-        dispatch({ type: "SET_GPT_ERROR", payload: "Too many requests. Please try again later." });
-      } else {
-        console.log(res.json());
-        console.error("Error:", res.status, res.statusText);
-        dispatch({ type: "SET_GPT_ERROR", payload: "An error occurred. Please try again later." });
-      }
-    } catch (error) {
-      console.error("Fetch error:", error);
-      dispatch({ type: "SET_GPT_ERROR", payload: "An error occurred. Please try again later." });
-    }
-  };
-
   const sendMessage = async (url) => {
     const queryParams = new URLSearchParams(window.location.search);
-    const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
+    const shopId = queryParams.get("member");
     const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
 
     if (url !== undefined) {
       setTimeout(() => {
-        dispatch({ type: "TOGGLE_IMG_LOADING" }); // 3 秒
+        dispatch({ type: "TOGGLE_IMG_LOADING" });
         dispatch({ type: "TOGGLE_GPT_LOADING" });
         scrollToBottom();
       }, 500);
@@ -465,7 +334,7 @@ function Finish() {
         fetchCustomGPTResponse(state.inputValue, messagesCollectionRef);
       }
 
-      dispatch({ type: "RESET_INPUT_VALUE" }); // 清空輸入框
+      dispatch({ type: "RESET_INPUT_VALUE" });
       scrollToBottom();
     }
   };
@@ -515,11 +384,11 @@ function Finish() {
   useEffect(() => {
     if (labels.length > 0) {
       const queryParams = new URLSearchParams(window.location.search);
-      const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
+      const shopId = queryParams.get("member") || "chat1";
       const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
       fetchCustomGPTResponse(`圖片相關如下${labels}`, messagesCollectionRef);
       setTimeout(() => {
-        dispatch({ type: "TOGGLE_GPT_LOADING" }); // 3 秒後觸發 dispatch
+        dispatch({ type: "TOGGLE_GPT_LOADING" });
       }, 1000);
     }
   }, [labels]);
@@ -567,7 +436,6 @@ function Finish() {
         </div>
       </div>
 
-      {/* 這裡要做選擇，hidden or grid */}
       <div className={`${state.showOrderInfo ? "grid" : "hidden"} bg-black-0 w-container py-2 px-3 grid-cols-4 gap-6 top-[68px] mt-[68px] left-0 right-0 z-10 my-0 mx-auto`}>
         <div className="flex flex-col items-center gap-y-2 col-span-1">
           <img
@@ -584,7 +452,6 @@ function Finish() {
         </div>
       </div>
 
-      {/* 這裡要做選擇，hidden or flex */}
       <div className={`w-full product bg-white ${state.showShopInfo && !state.showOrderInfo ? "flex" : "hidden"} justify-center gap-6 py-2 mt-[68px] items-center`}>
         <img src={happy} alt="camera" className="w-20 rounded-full" />
         <div className="w4/6 my-2 flex flex-col py-2 justify-between">
@@ -592,7 +459,7 @@ function Finish() {
           <p className="text-base leading-normal text-secondary">momoCall 回應率：100%</p>
         </div>
       </div>
-      {/* 在滾動時顯示的日期標籤 */}
+
       {state.scrolling && state.dateLabel && (
         <div className="fixed flex justify-center  top-[70px] left-0 right-0  z-10 ">
           <div className="bg-gray-300/85 rounded-full px-3 py-1 mb-3 shadow-lg">
