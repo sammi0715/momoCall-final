@@ -95,14 +95,11 @@ export const fetchGPT = async (inputText, document) => {
       });
     } else if (res.status === 429) {
       console.error("Too many requests. Please try again later.");
-      dispatch({ type: "SET_GPT_ERROR", payload: "Too many requests. Please try again later." });
     } else {
       console.log(res.json());
       console.error("Error:", res.status, res.statusText);
-      dispatch({ type: "SET_GPT_ERROR", payload: "An error occurred. Please try again later." });
     }
   } catch (error) {
     console.error("Fetch error:", error);
-    dispatch({ type: "SET_GPT_ERROR", payload: "An error occurred. Please try again later." });
   }
 };

@@ -2,7 +2,7 @@ import { ChatContext } from "../../chatContext";
 import { useContext } from "react";
 
 function DateLabel() {
-  const state = useContext(ChatContext);
+  const { state } = useContext(ChatContext);
 
   {
     return (

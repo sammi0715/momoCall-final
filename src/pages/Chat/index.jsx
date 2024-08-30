@@ -25,24 +25,24 @@ function Chat() {
   const orderNumber = queryParams.get("order");
   const productNumber = queryParams.get("product");
 
-  const state = useContext(ChatContext);
-  const { dispatch, scrollToBottom } = useContext(ChatDispatchContext);
+  const { state } = useContext(ChatContext);
+  const { dispatch, renderDispatch, scrollToBottom } = useContext(ChatDispatchContext);
 
   useEffect(() => {
     if (shopId) {
-      dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
+      renderDispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
       fetchProductInfo(shopId, productNumber, dispatch);
       if (orderNumber) {
-        dispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
+        renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
         fetchOrderInfo(shopId, orderNumber, dispatch);
       } else {
-        dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
-        dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
+        renderDispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
+        renderDispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
         fetchProductInfo(shopId, productNumber, dispatch);
       }
     } else {
-      dispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
-      dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: false });
+      renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
+      renderDispatch({ type: "TOGGLE_PRODUCT_INFO", payload: false });
     }
 
     const chatroomName = shopId || " ";
@@ -59,7 +59,7 @@ function Chat() {
     const handleScroll = () => {
       const height = document.documentElement.scrollHeight;
 
-      dispatch({
+      renderDispatch({
         type: "SET_DIV_HEIGHT",
         payload: height < 850 ? "h-screen" : "h-auto",
       });
@@ -181,8 +181,8 @@ function Chat() {
 
     if (url !== undefined) {
       setTimeout(() => {
-        dispatch({ type: "TOGGLE_IMG_LOADING" });
-        dispatch({ type: "TOGGLE_GPT_LOADING" });
+        renderDispatch({ type: "TOGGLE_IMG_LOADING" });
+        renderDispatch({ type: "TOGGLE_GPT_LOADING" });
         scrollToBottom();
       }, 500);
 
@@ -216,7 +216,7 @@ function Chat() {
   const imageFormats = [".jpeg", ".jpg", ".png", ".gif"];
 
   const sendImage = (event) => {
-    dispatch({ type: "TOGGLE_IMG_LOADING" });
+    renderDispatch({ type: "TOGGLE_IMG_LOADING" });
     scrollToBottom();
 
     const file = event.target.files[0];
@@ -254,7 +254,7 @@ function Chat() {
       const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
       fetchGPT(`圖片相關如下${labels}`, messagesCollectionRef);
       setTimeout(() => {
-        dispatch({ type: "TOGGLE_GPT_LOADING" });
+        renderDispatch({ type: "TOGGLE_GPT_LOADING" });
       }, 1000);
     }
   }, [labels]);
@@ -286,7 +286,7 @@ function Chat() {
         return;
       }
 
-      dispatch({ type: "FINISH_CHECKOUT" });
+      renderDispatch({ type: "FINISH_CHECKOUT" });
     } catch (err) {
       console.log(err);
     }

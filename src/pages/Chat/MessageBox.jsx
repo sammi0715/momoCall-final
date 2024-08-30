@@ -8,7 +8,7 @@ import "react-photo-view/dist/react-photo-view.css";
 import PropTypes from "prop-types";
 
 function MessageBox({ imageFormats }) {
-  const state = useContext(ChatContext);
+  const { state } = useContext(ChatContext);
   const { dispatch, handleQAClick } = useContext(ChatDispatchContext);
 
   {
