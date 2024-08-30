@@ -1,5 +1,6 @@
 import { ChatContext, ChatDispatchContext } from "../../chatContext";
 import { useContext } from "react";
+import PropTypes from "prop-types";
 
 function Checkout({ checkout }) {
   const state = useContext(ChatContext);
@@ -50,4 +51,9 @@ function Checkout({ checkout }) {
     </div>
   );
 }
+
+Checkout.propTypes = {
+  checkout: PropTypes.func.isRequired,
+};
+
 export default Checkout;

@@ -1,16 +1,18 @@
 import { ChatContext, ChatDispatchContext } from "../../chatContext";
 import { useContext } from "react";
 import { AiOutlineLike, AiOutlineDislike, AiFillDislike, AiFillLike } from "react-icons/ai";
-import happy from "./img/happy.png";
+import happy from "../img/happy.png";
 import { marked } from "marked";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
+import PropTypes from "prop-types";
 
-function MessageBox() {
+function MessageBox({ imageFormats }) {
   const state = useContext(ChatContext);
-  const dispatch = useContext(ChatDispatchContext);
+  const { dispatch, handleQAClick } = useContext(ChatDispatchContext);
+
   {
-    state.messages.map((message, index) => {
+    return state.messages.map((message, index) => {
       return (
         <div key={index} id={`message-${index}`}>
           <div key={index} className={`group flex gap-1 mr-3 relative ${message.from === "user1" ? "items-end flex-col" : "max-w-[258px] flex-wrap"}`}>
@@ -31,10 +33,23 @@ function MessageBox() {
               ) : (
                 <p dangerouslySetInnerHTML={{ __html: marked(message.content) }}></p>
               )}
+              {message.isQA && (
+                <div>
+                  <button className="bg-primary text-white text-center w-[182px] h-[24px] mt-[10px] mb-[10px] rounded" onClick={() => handleQAClick("配送問題")}>
+                    配送問題
+                  </button>
+                  <button className="bg-primary text-white text-center w-[182px] h-[24px] mb-[10px] rounded" onClick={() => handleQAClick("運送時間")}>
+                    運送時間
+                  </button>
+                  <button className="bg-primary text-white text-center w-[182px] h-[24px] mb-[10px] rounded" onClick={() => handleQAClick("聯絡方式")}>
+                    聯絡方式
+                  </button>
+                </div>
+              )}
             </div>
 
             <small className={`${message.from === "user1" ? "" : "ml-12 "} h-6`}>{message.created_time?.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "Loading..."}</small>
-            <div className="hidden group-hover:block ">
+            <div className="flex self-center ">
               <button
                 onClick={() => dispatch({ type: "TOGGLE_USEFUL", payload: { index, isUseful: "Yes" } })}
                 className={`${message.from === "user1" ? "hidden" : state.messages[index].isUseful === "No" ? "hidden" : "inline"} mx-2`}
@@ -56,4 +71,9 @@ function MessageBox() {
     });
   }
 }
+
+MessageBox.propTypes = {
+  imageFormats: PropTypes.array.isRequired,
+  handleQAClick: PropTypes.func.isRequired,
+};
 export default MessageBox;

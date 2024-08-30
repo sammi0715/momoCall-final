@@ -1,5 +1,6 @@
 import { ChatContext, ChatDispatchContext } from "../../chatContext";
 import { useContext } from "react";
+import PropTypes from "prop-types";
 
 function ProductCard({ productNumber }) {
   const state = useContext(ChatContext);
@@ -24,4 +25,9 @@ function ProductCard({ productNumber }) {
     </div>
   );
 }
+
+ProductCard.propTypes = {
+  productNumber: PropTypes.object.isRequired,
+};
+
 export default ProductCard;

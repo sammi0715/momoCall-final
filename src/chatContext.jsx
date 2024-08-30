@@ -1,5 +1,7 @@
 import PropTypes from "prop-types";
 import { createContext, useReducer } from "react";
+import { db, collection, addDoc, serverTimestamp } from "./utils/firebase";
+import responses from "./pages/responses.json";
 
 export const ChatContext = createContext(null);
 export const ChatDispatchContext = createContext(null);
@@ -100,9 +102,46 @@ function reducer(state, action) {
 export function ChatContextProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth",
+      });
+    }, 500);
+  };
+
+  const handleQAClick = async (pattern) => {
+    const responseItem = responses.find((item) => item.pattern === pattern);
+    const queryParams = new URLSearchParams(window.location.search);
+    const shopId = queryParams.get("member");
+    const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
+
+    if (responseItem) {
+      const userMessage = {
+        content: pattern,
+        created_time: serverTimestamp(),
+        from: "user1",
+      };
+      await addDoc(messagesCollectionRef, userMessage);
+
+      const shopMessage = {
+        content: responseItem.response,
+        created_time: serverTimestamp(),
+        from: "shop",
+      };
+
+      await addDoc(messagesCollectionRef, shopMessage);
+
+      scrollToBottom();
+    } else {
+      console.error("未找到相應的回覆");
+    }
+  };
+
   return (
     <ChatContext.Provider value={state}>
-      <ChatDispatchContext.Provider value={dispatch}>{children}</ChatDispatchContext.Provider>
+      <ChatDispatchContext.Provider value={{ dispatch, handleQAClick, scrollToBottom }}>{children}</ChatDispatchContext.Provider>
     </ChatContext.Provider>
   );
 }

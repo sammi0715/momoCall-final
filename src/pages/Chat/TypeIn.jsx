@@ -1,8 +1,9 @@
 import { ChatContext, ChatDispatchContext } from "../../chatContext";
 import { useContext } from "react";
 import { FiImage, FiSend } from "react-icons/fi";
+import PropTypes from "prop-types";
 
-function TypeIn() {
+function TypeIn({ sendImage, handleKeyDown, sendMessage }) {
   const state = useContext(ChatContext);
   const dispatch = useContext(ChatDispatchContext);
 
@@ -26,4 +27,10 @@ function TypeIn() {
     </div>
   );
 }
+
+TypeIn.propTypes = {
+  sendImage: PropTypes.func.isRequired,
+  handleKeyDown: PropTypes.func.isRequired,
+  sendMessage: PropTypes.func.isRequired,
+};
 export default TypeIn;
