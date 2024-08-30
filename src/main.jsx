@@ -5,7 +5,7 @@ import App from "./App";
 import Home from "./pages/Home.jsx";
 import Admin from "./pages/Admin.jsx";
 import Search from "./pages/Search.jsx";
-import Chat from "./pages/Chat/index.jsx";
+import Chat from "./pages/Chat";
 import Backend from "./pages/Backend.jsx";
 
 import "./index.css";
