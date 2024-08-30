@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { Link } from "react-router-dom";
 import { FiChevronLeft, FiAlertTriangle, FiImage, FiSend } from "react-icons/fi";
 import { AiOutlineLike, AiOutlineDislike, AiFillDislike, AiFillLike } from "react-icons/ai";
@@ -16,19 +16,101 @@ import { zhTW } from "date-fns/locale";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
 
-import { ChatContext, ChatDispatchContext } from "../chatContext";
-import { useContext } from "react";
+const initialState = {
+  messages: [],
+  inputValue: "",
+  showOrderInfo: false,
+  showShopInfo: false,
+  showProductInfo: false,
+  isGPTLoading: false,
+  isImageLoading: false,
+  isChoose: false,
+  isPerchase: false,
+  isCheckout: false,
+  count: 0,
+  spec: "",
+  divHeightClass: "h-screen",
+  productInfo: null,
+  shopName: "",
+  orderInfo: null,
+  errorMsg: "",
+  dateLabel: "",
+  scrolling: false,
+};
 
+function reducer(state, action) {
+  switch (action.type) {
+    case "SET_MESSAGES":
+      return { ...state, messages: action.payload };
+    case "SET_INPUT_VALUE":
+      return { ...state, inputValue: action.payload };
+    case "TOGGLE_ORDER_INFO":
+      return { ...state, showOrderInfo: action.payload };
+    case "TOGGLE_SHOP_INFO":
+      return { ...state, showShopInfo: action.payload };
+    case "TOGGLE_PRODUCT_INFO":
+      return { ...state, showProductInfo: action.payload };
+    case "TOGGLE_USEFUL": {
+      let copyMessages = state.messages.map((item, index) => {
+        if (index == action.payload.index) return { ...item, isUseful: action.payload.isUseful };
+        return item;
+      });
+      return { ...state, messages: copyMessages };
+    }
+    case "RESET_INPUT_VALUE":
+      return { ...state, inputValue: "" };
+    case "TOGGLE_GPT_LOADING":
+      return { ...state, isGPTLoading: !state.isGPTLoading };
+    case "TOGGLE_IMG_LOADING":
+      return { ...state, isImageLoading: !state.isImageLoading };
+    case "TO_PURCHASE":
+      return { ...state, isChoose: !state.isChoose };
+    case "TO_CHECKOUT":
+      if (state.count === 0) {
+        alert("請選擇數量");
+        return state;
+      }
+      return { ...state, isPerchase: !state.isPerchase };
+    case "FINISH_CHECKOUT":
+      if (state.isCheckout == true) window.location.reload();
+      return {
+        ...state,
+        isCheckout: !state.isCheckout,
+        isChoose: false,
+        isPerchase: false,
+        count: 0,
+      };
+    case "ADD_PRODUCT_NUM":
+      return { ...state, count: state.count + 1 };
+    case "SUB_PRODUCT_NUM":
+      if (state.count === 0) return state;
+      return { ...state, count: state.count - 1 };
+    case "SELECT_SPEC":
+      return { ...state, spec: action.payload };
+    case "SET_DIV_HEIGHT":
+      return {
+        ...state,
+        divHeightClass: action.payload,
+      };
+    case "SET_PRODUCT_INFO":
+      return { ...state, productInfo: action.payload };
+    case "SET_SHOP_NAME":
+      return { ...state, shopName: action.payload };
+    case "SET_ORDER_INFO":
+      return { ...state, orderInfo: action.payload };
+    case "SET_GPT_ERROR":
+      return { ...state, errorMsg: action.payload };
+    case "SET_DATE_LABEL":
+      return { ...state, dateLabel: action.payload };
+    case "SET_IS_SCROLLING":
+      return { ...state, scrolling: action.payload };
+    default:
+      return state;
+  }
+}
 function Finish() {
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { labels, handleAnalyzeImage } = useGoogleVisionAPI();
-  const queryParams = new URLSearchParams(window.location.search);
-  const shopId = queryParams.get("member");
-  const orderNumber = queryParams.get("order");
-  const productNumber = queryParams.get("product");
-
-  const state = useContext(ChatContext);
-  const dispatch = useContext(ChatDispatchContext);
-
   const fetchOrderInfo = async (shopId, orderNumber) => {
     try {
       const ordersCollectionRef = collection(db, "orders");
@@ -55,12 +137,9 @@ function Finish() {
         const shopName = shopDoc.data().shopName;
 
         dispatch({ type: "SET_SHOP_NAME", payload: shopName });
-
         const productsCollectionRef = collection(doc(db, "shops", shopDocId), "products");
-
         if (productNumber) {
           const productQuery = query(productsCollectionRef, where("productNumber", "==", productNumber));
-
           const productSnapshot = await getDocs(productQuery);
           if (!productSnapshot.empty) {
             const productDoc = productSnapshot.docs[0];
@@ -71,11 +150,8 @@ function Finish() {
           }
         } else {
           const productSnapshot = await getDocs(productsCollectionRef);
-
           const productList = productSnapshot.docs.map((doc) => doc.data());
-
           const randomIndex = Math.floor(Math.random() * productList.length);
-
           const productDoc = productSnapshot.docs[randomIndex];
           dispatch({ type: "SET_PRODUCT_INFO", payload: productDoc.data() });
         }
@@ -99,6 +175,10 @@ function Finish() {
       });
     }, 500);
   };
+  const queryParams = new URLSearchParams(window.location.search);
+  const shopId = queryParams.get("member");
+  const orderNumber = queryParams.get("order");
+  const productNumber = queryParams.get("product");
 
   useEffect(() => {
     if (shopId) {
@@ -107,10 +187,13 @@ function Finish() {
       if (orderNumber) {
         dispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
         fetchOrderInfo(shopId, orderNumber);
-      } else {
+      } else if (productNumber) {
         dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
         dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
         fetchProductInfo(shopId, productNumber);
+      } else if (!orderNumber && !productNumber) {
+        dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
+        dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
       }
     } else {
       dispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
@@ -201,7 +284,6 @@ function Finish() {
   };
 
   let scrollTimeout;
-
   useEffect(() => {
     if (state.messages.length > 0) {
       const handleScroll = () => {
@@ -257,7 +339,6 @@ function Finish() {
       const firstMessage = state.messages[0];
 
       const messageDate = firstMessage.created_time ? firstMessage.created_time.toDate() : null;
-
       if (messageDate) {
         let label = "";
         const now = new Date();
@@ -293,20 +374,12 @@ function Finish() {
     response: item.response,
   }));
 
-  const addMessage = async (document, content, from) => {
-    await addDoc(document, {
-      content: content,
-      created_time: serverTimestamp(),
-      from: from,
-      isUsefull: "",
-    });
-  };
-
-  const fetchGPT = async (inputText, document) => {
+  const fetchCustomGPTResponse = async (inputText, document) => {
     const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
     const apiUrl = "https://api.openai.com/v1/chat/completions";
 
     try {
+      //complete fetch
       const res = await fetch(apiUrl, {
         method: "POST",
         headers: {
@@ -332,11 +405,18 @@ function Finish() {
 
       if (res.ok) {
         const data = await res.json();
-        await addMessage(document, data.choices[0].message.content, "shop");
+
+        await addDoc(document, {
+          content: data.choices[0].message.content,
+          created_time: serverTimestamp(),
+          from: "shop",
+          isUsefull: "",
+        });
       } else if (res.status === 429) {
         console.error("Too many requests. Please try again later.");
         dispatch({ type: "SET_GPT_ERROR", payload: "Too many requests. Please try again later." });
       } else {
+        console.log(res.json());
         console.error("Error:", res.status, res.statusText);
         dispatch({ type: "SET_GPT_ERROR", payload: "An error occurred. Please try again later." });
       }
@@ -348,33 +428,44 @@ function Finish() {
 
   const sendMessage = async (url) => {
     const queryParams = new URLSearchParams(window.location.search);
-    const shopId = queryParams.get("member");
+    const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
     const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
 
     if (url !== undefined) {
       setTimeout(() => {
-        dispatch({ type: "TOGGLE_IMG_LOADING" });
+        dispatch({ type: "TOGGLE_IMG_LOADING" }); // 3 秒
         dispatch({ type: "TOGGLE_GPT_LOADING" });
         scrollToBottom();
       }, 500);
-
-      await addMessage(messagesCollectionRef, url, "user1");
+      await addDoc(messagesCollectionRef, {
+        content: url,
+        created_time: serverTimestamp(),
+        from: "user1",
+      });
     } else if (state.inputValue.trim() !== "") {
-      await addMessage(messagesCollectionRef, state.inputValue, "user1");
+      await addDoc(messagesCollectionRef, {
+        content: state.inputValue,
+        created_time: serverTimestamp(),
+        from: "user1",
+      });
 
       let response = "";
       const matchedResponse = predefinedResponses.find(({ pattern }) => pattern.test(state.inputValue));
 
       if (matchedResponse) {
         response = matchedResponse.response;
-        await addMessage(messagesCollectionRef, response, "shop");
+        await addDoc(messagesCollectionRef, {
+          content: response,
+          created_time: serverTimestamp(),
+          from: "shop",
+        });
       } else if (url !== undefined) {
-        fetchGPT(labels, messagesCollectionRef);
+        fetchCustomGPTResponse(labels, messagesCollectionRef);
       } else {
-        fetchGPT(state.inputValue, messagesCollectionRef);
+        fetchCustomGPTResponse(state.inputValue, messagesCollectionRef);
       }
 
-      dispatch({ type: "RESET_INPUT_VALUE" });
+      dispatch({ type: "RESET_INPUT_VALUE" }); // 清空輸入框
       scrollToBottom();
     }
   };
@@ -388,9 +479,9 @@ function Finish() {
   const imageFormats = [".jpeg", ".jpg", ".png", ".gif"];
 
   const sendImage = (event) => {
+    console.log(event.target.files);
     dispatch({ type: "TOGGLE_IMG_LOADING" });
     scrollToBottom();
-
     const file = event.target.files[0];
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
     if (!file) return;
@@ -400,6 +491,7 @@ function Finish() {
       return;
     }
     const storageRef = ref(storage, `images/${file.name}`);
+
     const uploadTask = uploadBytesResumable(storageRef, file);
 
     uploadTask.on(
@@ -420,13 +512,14 @@ function Finish() {
       }
     );
   };
-
   useEffect(() => {
     if (labels.length > 0) {
+      const queryParams = new URLSearchParams(window.location.search);
+      const shopId = queryParams.get("member") || "chat1"; // 默认为 chat1
       const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
-      fetchGPT(`圖片相關如下${labels}`, messagesCollectionRef);
+      fetchCustomGPTResponse(`圖片相關如下${labels}`, messagesCollectionRef);
       setTimeout(() => {
-        dispatch({ type: "TOGGLE_GPT_LOADING" });
+        dispatch({ type: "TOGGLE_GPT_LOADING" }); // 3 秒後觸發 dispatch
       }, 1000);
     }
   }, [labels]);
@@ -449,7 +542,6 @@ function Finish() {
       console.log(err);
     }
   }
-
   return (
     <div className="bg-black-200 w-container my-0 mx-auto relative font-sans">
       <div className="bg-black-200 w-container px-3 fixed top-0 left-0 right-0 z-10 my-0 mx-auto">
@@ -461,7 +553,7 @@ function Finish() {
         </div>
       </div>
 
-      {/*拆*/}
+      {/* 這裡要做選擇，hidden or grid */}
       <div className={`${state.showOrderInfo ? "grid" : "hidden"} bg-black-0 w-container py-2 px-3 grid-cols-4 gap-6 top-[68px] mt-[68px] left-0 right-0 z-10 my-0 mx-auto`}>
         <div className="flex flex-col items-center gap-y-2 col-span-1">
           <img
@@ -478,6 +570,7 @@ function Finish() {
         </div>
       </div>
 
+      {/* 這裡要做選擇，hidden or flex */}
       <div className={`w-full product bg-white ${state.showShopInfo && !state.showOrderInfo ? "flex" : "hidden"} justify-center gap-6 py-2 mt-[68px] items-center`}>
         <img src={happy} alt="camera" className="w-20 rounded-full" />
         <div className="w4/6 my-2 flex flex-col py-2 justify-between">
@@ -493,14 +586,11 @@ function Finish() {
           </div>
         </div>
       )}
-
       <div className={`px-3 py-4 space-y-4 ${state.divHeightClass} mb-[56px] min-h-screen`}>
         <div className="bg-accent flex justify-center items-center h-8 px-6 rounded-large">
           <FiAlertTriangle className="w-notice h-notice mr-4" />
           <p className="text-sm leading-normal">提醒您，請勿透露個人資料</p>
         </div>
-
-        {/*拆*/}
         <div>
           <div className={`bg-black-0 p-4 rounded-t-lg ${state.showProductInfo ? "flex" : "hidden"} justify-between border-b-1 border-black-400`}>
             <img src={state.productInfo?.image} alt="product-image" className="w-middle h-middle rounded-lg mr-3" />
@@ -517,8 +607,6 @@ function Finish() {
             </button>
           </div>
         </div>
-
-        {/*拆*/}
         {state.messages.map((message, index) => {
           return (
             <div key={index} id={`message-${index}`}>
@@ -586,7 +674,6 @@ function Finish() {
         </div>
       </div>
 
-      {/*拆*/}
       <div className={`${state.isChoose ? "flex" : "hidden"} justify-center items-center bg-black-800/80 w-container h-full fixed top-0`}>
         <div className="w-64 h-60 bg-white mx-auto py-2 px-4 flex flex-col gap-3 text-sm rounded-xl">
           <h4 className="text-center font-bold leading-normal text-base text-primary-800">請選擇規格數量</h4>
@@ -632,8 +719,7 @@ function Finish() {
         </div>
       </div>
 
-      {/*拆*/}
-      <div className={`${state.isPurchase ? "flex" : "hidden"} justify-center items-center w-container h-full fixed top-0`}>
+      <div className={`${state.isPerchase ? "flex" : "hidden"} justify-center items-center w-container h-full fixed top-0`}>
         <div className="w-64 h-84 bg-white mx-auto py-2 px-4 flex flex-col gap-4 text-sm rounded-xl">
           <h4 className="text-center font-bold leading-normal text-lg text-primary-800 mt-2">訂單即將送出</h4>
           <p className="text-center font-bold">已確認品項、數量並進行結帳嗎？</p>
@@ -676,7 +762,6 @@ function Finish() {
         </div>
       </div>
 
-      {/*拆*/}
       <div className={`${state.isCheckout ? "flex" : "hidden"} justify-center items-center w-container h-full fixed top-0 bg-black-800/80`}>
         <div className="w-64 h-32 bg-white mx-auto py-2 px-4 flex flex-col gap-3 text-sm rounded-xl">
           <h4 className="text-center font-bold leading-normal text-lg text-primary-800 mt-2">付款成功，即將為您出貨</h4>
@@ -688,7 +773,6 @@ function Finish() {
         </div>
       </div>
 
-      {/*拆*/}
       <div className="bg-primary-600 w-container py-3 px-3 flex justify-between gap-x-2 fixed bottom-0 left-0 right-0 z-10 my-0 mx-auto">
         <label className="bg-black-0 rounded-full p-1 cursor-pointer active:outline active:outline-primary active:outline-1 active:outline-offset-0">
           <FiImage className="w-6 h-6 text-primary hover:text-primary-800 active:text-primary" />
