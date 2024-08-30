@@ -207,7 +207,7 @@ function Chat() {
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
+    if (e.keyCode === "Enter") {
       sendMessage();
     }
   };
