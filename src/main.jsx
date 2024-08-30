@@ -6,8 +6,7 @@ import Home from "./pages/Home.jsx";
 import Admin from "./pages/Admin.jsx";
 import Search from "./pages/Search.jsx";
 import Chat from "./pages/Chat";
-import Backend from "./pages/Backend.jsx";
-
+import Console from "./pages/Console.jsx";
 import "./index.css";
 
 createRoot(document.getElementById("root")).render(
@@ -18,7 +17,7 @@ createRoot(document.getElementById("root")).render(
           <Route index element={<Home />} />
           <Route path="search" element={<Search />} />
           <Route path="chat" element={<Chat />} />
-          <Route path="backend" element={<Backend />} />
+          <Route path="console" element={<Console />} />
           <Route path="admin" element={<Admin />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

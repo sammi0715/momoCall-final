@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { db } from "../utils/firebase";
 import { collection, getDocs, updateDoc, addDoc, deleteDoc, doc, orderBy, query } from "../utils/firebase";
 
-function Backend() {
+function Console() {
   const [openId, setOpenId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
@@ -222,4 +222,4 @@ function Backend() {
   );
 }
 
-export default Backend;
+export default Console;
