@@ -17,7 +17,7 @@ createRoot(document.getElementById("root")).render(
         <Route path="/" element={<App />}>
           <Route index element={<Home />} />
           <Route path="search" element={<Search />} />
-          <Route path="chat/:shopId" element={<Chat />} />
+          <Route path="chat" element={<Chat />} />
           <Route path="console" element={<Console />} />
           <Route path="admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
