@@ -1,4 +1,4 @@
-import { ChatContext, ChatDispatchContext } from "../../chatContext";
+import { ChatContext, ChatDispatchContext } from "../../chatContextProvider";
 import { useContext } from "react";
 import { FiImage, FiSend } from "react-icons/fi";
 import PropTypes from "prop-types";

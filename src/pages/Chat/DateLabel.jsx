@@ -1,4 +1,4 @@
-import { ChatContext } from "../../chatContext";
+import { ChatContext } from "../../chatContextProvider";
 import { useContext } from "react";
 
 function DateLabel() {

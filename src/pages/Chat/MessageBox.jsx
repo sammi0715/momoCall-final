@@ -1,4 +1,4 @@
-import { ChatContext, ChatDispatchContext } from "../../chatContext";
+import { ChatContext, ChatDispatchContext } from "../../chatContextProvider";
 import { useContext } from "react";
 import { AiOutlineLike, AiOutlineDislike, AiFillDislike, AiFillLike } from "react-icons/ai";
 import happy from "../img/happy.png";

@@ -1,5 +1,5 @@
 import { useEffect, useContext } from "react";
-import { ChatContext, ChatDispatchContext } from "../../chatContext";
+import { ChatContext, ChatDispatchContext } from "../../chatContextProvider";
 
 import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, ref, uploadBytesResumable, getDownloadURL } from "../../utils/firebase";
 import { fetchOrderInfo, fetchProductInfo, fetchGPT } from "../../utils/fetch";
