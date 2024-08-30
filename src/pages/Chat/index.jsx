@@ -1,6 +1,5 @@
 import { useEffect, useContext } from "react";
 import { ChatContext, ChatDispatchContext } from "../../chatContext";
-
 import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, ref, uploadBytesResumable, getDownloadURL } from "../../utils/firebase";
 import { fetchOrderInfo, fetchProductInfo, fetchGPT } from "../../utils/fetch";
 import useGoogleVisionAPI from "../../utils/useGoogleVisionAPI";
@@ -165,6 +164,8 @@ function Chat() {
   }));
 
   const addMessage = async (document, content, from) => {
+    console.log("test");
+
     await addDoc(document, {
       content: content,
       created_time: serverTimestamp(),
@@ -300,7 +301,7 @@ function Chat() {
       <ChatSection productNumber={productNumber} imageFormats={imageFormats} />
       <Choose />
       <Checkout checkout={checkout} />
-      <Order />
+      <Order addMessage={addMessage} shopId={shopId} />
       <TypeIn sendImage={sendImage} handleKeyDown={handleKeyDown} sendMessage={sendMessage} />
     </div>
   );
