@@ -3,7 +3,7 @@ import { useContext } from "react";
 
 function Order() {
   const state = useContext(ChatContext);
-  const dispatch = useContext(ChatDispatchContext);
+  const { dispatch } = useContext(ChatDispatchContext);
 
   return (
     <div className={`${state.isCheckout ? "flex" : "hidden"} justify-center items-center w-container h-full fixed top-0 bg-black-800/80`}>

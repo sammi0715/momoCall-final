@@ -25,7 +25,7 @@ const initialState = {
   orderInfo: null,
   errorMsg: "",
   dateLabel: "",
-  scrolling: false,
+  faqs: [],
 };
 
 function reducer(state, action) {
@@ -94,6 +94,8 @@ function reducer(state, action) {
       return { ...state, dateLabel: action.payload };
     case "SET_IS_SCROLLING":
       return { ...state, scrolling: action.payload };
+    case "SET_FAQS":
+      return { ...state, faqs: action.payload };
     default:
       return state;
   }

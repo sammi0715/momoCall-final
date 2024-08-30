@@ -47,22 +47,22 @@ function MessageBox({ imageFormats }) {
                 </div>
               )}
             </div>
-
-            <small className={`${message.from === "user1" ? "" : "ml-12 "} h-6`}>{message.created_time?.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "Loading..."}</small>
-            <div className="flex self-center ">
+            <div className={`flex items-center gap-2 ${message.from === "user1" ? "" : "ml-12 "}`}>
+              <small className="text-xs leading-normal">{message.created_time?.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "Loading..."}</small>
               <button
                 onClick={() => dispatch({ type: "TOGGLE_USEFUL", payload: { index, isUseful: "Yes" } })}
-                className={`${message.from === "user1" ? "hidden" : state.messages[index].isUseful === "No" ? "hidden" : "inline"} mx-2`}
+                className={`leading-4 ${message.from === "user1" ? "hidden" : state.messages[index].isUseful === "No" ? "hidden" : "inline"}`}
               >
                 <AiOutlineLike className={`${state.messages[index].isUseful === "Yes" ? "hidden" : "inline"}`} />
-                <AiFillLike className={`${state.messages[index].isUseful == "Yes" ? "inline" : "hidden"}`} />
+                <AiFillLike className={`${state.messages[index].isUseful == "Yes" ? "inline text-primary" : "hidden"}`} />
               </button>
+              {!(state.messages[index].isUseful || message.from === "user1") && <div className="border-1 border-black-600 h-4"></div>}
               <button
                 onClick={() => dispatch({ type: "TOGGLE_USEFUL", payload: { index, isUseful: "No" } })}
-                className={`${message.from === "user1" ? "hidden" : state.messages[index].isUseful === "Yes" ? "hidden" : "inline"} mx-2`}
+                className={`leading-4 ${message.from === "user1" ? "hidden" : state.messages[index].isUseful === "Yes" ? "hidden" : "inline"}`}
               >
                 <AiOutlineDislike className={`${state.messages[index].isUseful === "No" ? "hidden" : "inline"}`} />
-                <AiFillDislike className={`${state.messages[index].isUseful == "No" ? "inline" : "hidden"}`} />
+                <AiFillDislike className={`${state.messages[index].isUseful == "No" ? "inline text-secondary" : "hidden"}`} />
               </button>
             </div>
           </div>

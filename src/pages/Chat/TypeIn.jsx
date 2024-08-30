@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 
 function TypeIn({ sendImage, handleKeyDown, sendMessage }) {
   const state = useContext(ChatContext);
-  const dispatch = useContext(ChatDispatchContext);
+  const { dispatch } = useContext(ChatDispatchContext);
 
   return (
     <div className="bg-primary-600 w-container py-3 px-3 flex justify-between gap-x-2 fixed bottom-0 left-0 right-0 z-10 my-0 mx-auto">

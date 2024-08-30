@@ -3,7 +3,7 @@ import { useContext } from "react";
 
 function Choose() {
   const state = useContext(ChatContext);
-  const dispatch = useContext(ChatDispatchContext);
+  const { dispatch } = useContext(ChatDispatchContext);
 
   return (
     <div className={`${state.isChoose ? "flex" : "hidden"} justify-center items-center bg-black-800/80 w-container h-full fixed top-0`}>

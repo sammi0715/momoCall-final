@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 
 function ProductCard({ productNumber }) {
   const state = useContext(ChatContext);
-  const dispatch = useContext(ChatDispatchContext);
+  const { dispatch } = useContext(ChatDispatchContext);
 
   return (
     <div>

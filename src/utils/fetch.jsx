@@ -56,7 +56,7 @@ export const fetchProductInfo = async (shopId, productNumber, dispatch) => {
     console.error("Error getting product documents:", error);
   }
 };
-export const fetchCustomGPTResponse = async (inputText, document) => {
+export const fetchGPT = async (inputText, document) => {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   const apiUrl = "https://api.openai.com/v1/chat/completions";
 
