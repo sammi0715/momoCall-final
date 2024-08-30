@@ -1,13 +1,13 @@
 import { ChatContext, ChatDispatchContext } from "../../chatContextProvider";
 import { useContext } from "react";
-import { db, collection, addDoc, serverTimestamp } from "./utils/firebase";
+import { db, collection, addDoc, serverTimestamp } from "../../utils/firebase";
 import { AiOutlineLike, AiOutlineDislike, AiFillDislike, AiFillLike } from "react-icons/ai";
-import happy from "../img/happy.png";
+import happy from "../../images/happy.png";
 import { marked } from "marked";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
 import PropTypes from "prop-types";
-import responses from "./pages/responses.json";
+import responses from "../../pages/responses.json";
 
 function MessageBox({ imageFormats }) {
   const state = useContext(ChatContext);

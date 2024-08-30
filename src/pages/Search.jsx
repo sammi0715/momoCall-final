@@ -1,5 +1,5 @@
 import { FiChevronLeft } from "react-icons/fi";
-import momoLogo from "/momocallLogo.png";
+import momoLogo from "../images/momocallLogo.png";
 import { useEffect, useReducer, useState } from "react";
 import { db } from "../utils/firebase";
 import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
