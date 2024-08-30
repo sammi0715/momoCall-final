@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { FiChevronLeft, FiAlertTriangle, FiImage, FiSend } from "react-icons/fi";
 import { AiOutlineLike, AiOutlineDislike, AiFillDislike, AiFillLike } from "react-icons/ai";
 import happy from "./img/happy.png";
-import responses from "./responses.json";
 import loading from "./img/loading.gif";
 import beenEater from "./img/beenEater.gif";
 import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDocs, where } from "../utils/firebase";
@@ -110,6 +109,7 @@ function reducer(state, action) {
 }
 function Finish() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [faqs, setFaqs] = useState([]);
   const { labels, handleAnalyzeImage } = useGoogleVisionAPI();
 
   const scrollToBottom = () => {
@@ -200,7 +200,7 @@ function Finish() {
   }, [state.shopName]);
 
   const handleQAClick = async (pattern) => {
-    const responseItem = responses.find((item) => item.pattern === pattern);
+    const responseItem = faqs.find((item) => item.keyword === pattern);
     const queryParams = new URLSearchParams(window.location.search);
     const shopId = queryParams.get("member");
     const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
@@ -290,8 +290,8 @@ function Finish() {
     scrollToBottom();
   }, [state.messages]);
 
-  const predefinedResponses = responses.map((item) => ({
-    pattern: new RegExp(item.pattern, "i"),
+  const predefinedResponses = faqs.map((item) => ({
+    pattern: new RegExp(item.keyword, "i"),
     response: item.response,
   }));
 
@@ -411,6 +411,20 @@ function Finish() {
       console.log(err);
     }
   }
+
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      const querySnapshot = await getDocs(collection(db, "faq"));
+      const faqList = querySnapshot.docs.map((doc) => ({
+        keyword: doc.data().keyword,
+        response: doc.data().response,
+      }));
+      setFaqs(faqList);
+    };
+
+    fetchFaqs();
+  }, []);
+
   return (
     <div className="bg-black-200 w-container my-0 mx-auto relative font-sans">
       <div className="bg-black-200 w-container px-3 fixed top-0 left-0 right-0 z-10 my-0 mx-auto">
@@ -509,24 +523,22 @@ function Finish() {
                     </div>
                   )}
                 </div>
-
-                <small className={`${message.from === "user1" ? "" : "ml-12 "} h-6`}>
-                  {message.created_time?.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "Loading..."}
-                </small>
-                <div className="flex self-center ">
+                <div className={`flex items-center gap-2 ${message.from === "user1" ? "" : "ml-12 "}`}>
+                  <small className="text-xs leading-normal">{message.created_time?.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) || "Loading..."}</small>
                   <button
                     onClick={() => dispatch({ type: "TOGGLE_USEFUL", payload: { index, isUseful: "Yes" } })}
-                    className={`${message.from === "user1" ? "hidden" : state.messages[index].isUseful === "No" ? "hidden" : "inline"} mx-2`}
+                    className={`leading-4 ${message.from === "user1" ? "hidden" : state.messages[index].isUseful === "No" ? "hidden" : "inline"}`}
                   >
                     <AiOutlineLike className={`${state.messages[index].isUseful === "Yes" ? "hidden" : "inline"}`} />
-                    <AiFillLike className={`${state.messages[index].isUseful == "Yes" ? "inline" : "hidden"}`} />
+                    <AiFillLike className={`${state.messages[index].isUseful == "Yes" ? "inline text-primary" : "hidden"}`} />
                   </button>
+                  {!(state.messages[index].isUseful || message.from === "user1") && <div className="border-1 border-black-600 h-4"></div>}
                   <button
                     onClick={() => dispatch({ type: "TOGGLE_USEFUL", payload: { index, isUseful: "No" } })}
-                    className={`${message.from === "user1" ? "hidden" : state.messages[index].isUseful === "Yes" ? "hidden" : "inline"} mx-2`}
+                    className={`leading-4 ${message.from === "user1" ? "hidden" : state.messages[index].isUseful === "Yes" ? "hidden" : "inline"}`}
                   >
                     <AiOutlineDislike className={`${state.messages[index].isUseful === "No" ? "hidden" : "inline"}`} />
-                    <AiFillDislike className={`${state.messages[index].isUseful == "No" ? "inline" : "hidden"}`} />
+                    <AiFillDislike className={`${state.messages[index].isUseful == "No" ? "inline text-secondary" : "hidden"}`} />
                   </button>
                 </div>
               </div>
