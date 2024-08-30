@@ -8,7 +8,7 @@ function ProductCard({ productNumber }) {
 
   return (
     <div>
-      <div className={`bg-black-0 p-4 rounded-t-lg ${state.showProductInfo ? "flex" : "hidden"} justify-between border-b-1 border-black-400`}>
+      <div className={`bg-black-0 p-4 mt-32 rounded-t-lg ${state.showProductInfo ? "flex" : "hidden"} justify-between border-b-1 border-black-400`}>
         <img src={state.productInfo?.image} alt="product-image" className="w-middle h-middle rounded-lg mr-3" />
         <div className="flex flex-col grow justify-between">
           <p className={`text-xs leading-normal flex justify-between`}>
