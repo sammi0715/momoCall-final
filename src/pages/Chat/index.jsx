@@ -1,22 +1,22 @@
 import { useEffect, useContext } from "react";
-import { ChatContext, ChatDispatchContext } from "../../chatContext";
-import responses from "../responses.json";
-import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDocs, where, ref, uploadBytesResumable, getDownloadURL } from "../../utils/firebase";
-import useGoogleVisionAPI from "../../utils/useGoogleVisionAPI";
-import tappay from "../../utils/tappay";
+import { ChatContext, ChatDispatchContext } from "../chatContext";
+import responses from "./responses.json";
+import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, getDocs, where, ref, uploadBytesResumable, getDownloadURL } from "../utils/firebase";
+import useGoogleVisionAPI from "../utils/useGoogleVisionAPI";
+import tappay from "../utils/tappay";
 import { format, isToday, isYesterday, differenceInMinutes } from "date-fns";
 import { zhTW } from "date-fns/locale";
 import "react-photo-view/dist/react-photo-view.css";
 
-import Header from "./Header";
-import OrderCard from "./OrderCard";
-import ShopCard from "./ShopCard";
-import DateLabel from "./DateLabel";
-import ChatSection from "./ChatSection";
-import Choose from "./Choose";
-import Checkout from "./Checkout";
-import Order from "./Order";
-import TypeIn from "./TypeIn";
+import Header from "./Chat/Header";
+import OrderCard from "./Chat/OrderCard";
+import ShopCard from "./Chat/ShopCard";
+import DateLabel from "./Chat/DateLabel";
+import ChatSection from "./Chat/ChatSection";
+import Choose from "./Chat/Choose";
+import Checkout from "./Chat/Checkout";
+import Order from "./Chat/Order";
+import TypeIn from "./Chat/TypeIn";
 
 function Chat() {
   const { labels, handleAnalyzeImage } = useGoogleVisionAPI();
