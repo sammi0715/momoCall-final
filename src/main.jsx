@@ -2,9 +2,12 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { StrictMode } from "react";
 import App from "./App";
-import SearchPages from "./pages/Search.jsx";
+import Home from "./pages/Home.jsx";
+import Admin from "./pages/Admin.jsx";
+import Search from "./pages/Search.jsx";
 import Chat from "./pages/Chat/index.jsx";
 import Backend from "./pages/Backend.jsx";
+
 import "./index.css";
 
 createRoot(document.getElementById("root")).render(
@@ -12,9 +15,11 @@ createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />}>
-          <Route index element={<SearchPages />} />
+          <Route index element={<Home />} />
+          <Route path="search" element={<Search />} />
           <Route path="chat" element={<Chat />} />
           <Route path="backend" element={<Backend />} />
+          <Route path="admin" element={<Admin />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

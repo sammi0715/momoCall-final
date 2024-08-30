@@ -1,6 +1,5 @@
 import { ChatContext } from "../../chatContext";
 import { useContext } from "react";
-import happy from "../img/happy.png";
 
 function DateLabel() {
   const state = useContext(ChatContext);
