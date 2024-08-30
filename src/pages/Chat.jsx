@@ -29,6 +29,8 @@ const initialState = {
   shopName: "",
   orderInfo: null,
   errorMsg: "",
+  dateLabel: "",
+  scrolling: false,
 };
 
 function reducer(state, action) {
@@ -86,14 +88,16 @@ function reducer(state, action) {
       return { ...state, orderInfo: action.payload };
     case "SET_GPT_ERROR":
       return { ...state, errorMsg: action.payload };
+    case "SET_DATE_LABEL":
+      return { ...state, dateLabel: action.payload };
+    case "SET_IS_SCROLLING":
+      return { ...state, scrolling: action.payload };
     default:
       return state;
   }
 }
 function Finish() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [currentLabel, setCurrentLabel] = useState("");
-  const [isScrolling, setIsScrolling] = useState(false);
   const { labels, handleAnalyzeImage } = useGoogleVisionAPI();
   const fetchOrderInfo = async (shopId, orderNumber) => {
     try {
@@ -268,7 +272,7 @@ function Finish() {
   useEffect(() => {
     if (state.messages.length > 0) {
       const handleScroll = () => {
-        setIsScrolling(true);
+        dispatch({ type: "SET_IS_SCROLLING", payload: true });
         clearTimeout(scrollTimeout);
 
         const scrollPosition = window.scrollY + 10;
@@ -300,11 +304,10 @@ function Finish() {
             break;
           }
         }
-
-        setCurrentLabel(newLabel);
+        dispatch({ type: "SET_DATE_LABEL", payload: newLabel });
 
         scrollTimeout = setTimeout(() => {
-          setIsScrolling(false);
+          dispatch({ type: "SET_IS_SCROLLING", payload: false });
         }, 900);
       };
 
@@ -334,8 +337,7 @@ function Finish() {
         } else {
           label = format(messageDate, "M/d (EEE)", { locale: zhTW });
         }
-
-        setCurrentLabel(label);
+        dispatch({ type: "SET_DATE_LABEL", payload: label });
       }
     }
   }, [state.messages]);
@@ -555,10 +557,10 @@ function Finish() {
         </div>
       </div>
       {/* 在滾動時顯示的日期標籤 */}
-      {isScrolling && currentLabel && (
+      {state.scrolling && state.dateLabel && (
         <div className="fixed flex justify-center  top-[70px] left-0 right-0  z-10 ">
           <div className="bg-gray-300/85 rounded-full px-3 py-1 mb-3 shadow-lg">
-            <p className="text-xs leading-normal">{currentLabel}</p>
+            <p className="text-xs leading-normal">{state.dateLabel}</p>
           </div>
         </div>
       )}
