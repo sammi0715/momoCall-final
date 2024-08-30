@@ -420,9 +420,6 @@ function Finish() {
   const imageFormats = [".jpeg", ".jpg", ".png", ".gif"];
 
   const sendImage = (event) => {
-    dispatch({ type: "TOGGLE_IMG_LOADING" });
-    scrollToBottom();
-
     const file = event.target.files[0];
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
     if (!file) return;
@@ -444,6 +441,8 @@ function Finish() {
         getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
           sendMessage(downloadURL);
           try {
+            dispatch({ type: "TOGGLE_IMG_LOADING" });
+            scrollToBottom();
             await handleAnalyzeImage(downloadURL);
           } catch (error) {
             console.error("handleAnalyzeClick 發生錯誤：", error);
@@ -597,14 +596,12 @@ function Finish() {
             </div>
           );
         })}
-
-        <div className={`items-center flex gap-3 ${state.isImageLoading ? "flex flex-row-reverse" : state.isGPTLoading ? "flex" : "hidden"}`}>
-          <img src={happy} alt="" className={`w-9 h-9 `} />
+        <div className={` items-center gap-3 ${state.isImageLoading ? "flex flex-row-reverse" : state.isGPTLoading ? "flex" : "hidden"}`}>
+          <img src={happy} alt="" className={`w-9 h-9  `} />
           <img src={beenEater} alt="" className="w-14 h-14" />
           <img src={loading} alt="" className="-ml-7" />
         </div>
       </div>
-
       {/*拆*/}
       <div className={`${state.isChoose ? "flex" : "hidden"} justify-center items-center bg-black-800/80 w-container h-full fixed top-0`}>
         <div className="w-64 h-60 bg-white mx-auto py-2 px-4 flex flex-col gap-3 text-sm rounded-xl">
