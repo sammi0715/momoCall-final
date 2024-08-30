@@ -34,6 +34,8 @@ const initialState = {
   shopName: "",
   orderInfo: null,
   errorMsg: "",
+  dateLabel: "",
+  scrolling: false,
 };
 
 function reducer(state, action) {
@@ -98,16 +100,17 @@ function reducer(state, action) {
       return { ...state, orderInfo: action.payload };
     case "SET_GPT_ERROR":
       return { ...state, errorMsg: action.payload };
+    case "SET_DATE_LABEL":
+      return { ...state, dateLabel: action.payload };
+    case "SET_IS_SCROLLING":
+      return { ...state, scrolling: action.payload };
     default:
       return state;
   }
 }
 function Finish() {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [currentLabel, setCurrentLabel] = useState(""); // 用來顯示當前日期標籤
-  const [isScrolling, setIsScrolling] = useState(false); //
   const { labels, handleAnalyzeImage } = useGoogleVisionAPI();
-
   const fetchOrderInfo = async (shopId, orderNumber) => {
     try {
       const ordersCollectionRef = collection(db, "orders");
@@ -225,11 +228,66 @@ function Finish() {
       unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    let hasSentMessage = false;
+
+    const sendQAMessage = async () => {
+      const queryParams = new URLSearchParams(window.location.search);
+      const shopId = queryParams.get("member");
+      const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
+
+      if (!hasSentMessage) {
+        const qaMessage = {
+          content: `歡迎來到${state.shopName}！我是你的 AI 小幫手，你可以先從選單了解我們的服務～`,
+          created_time: serverTimestamp(),
+          from: "shop",
+          isQA: true,
+        };
+        await addDoc(messagesCollectionRef, qaMessage);
+
+        hasSentMessage = true;
+      }
+    };
+
+    if (state.shopName) {
+      sendQAMessage();
+    }
+  }, [state.shopName]);
+
+  const handleQAClick = async (pattern) => {
+    const responseItem = responses.find((item) => item.pattern === pattern);
+    const queryParams = new URLSearchParams(window.location.search);
+    const shopId = queryParams.get("member");
+    const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
+
+    if (responseItem) {
+      const userMessage = {
+        content: pattern,
+        created_time: serverTimestamp(),
+        from: "user1",
+      };
+      await addDoc(messagesCollectionRef, userMessage);
+
+      const shopMessage = {
+        content: responseItem.response,
+        created_time: serverTimestamp(),
+        from: "shop",
+      };
+
+      await addDoc(messagesCollectionRef, shopMessage);
+
+      scrollToBottom();
+    } else {
+      console.error("未找到相應的回覆");
+    }
+  };
+
   let scrollTimeout;
   useEffect(() => {
     if (state.messages.length > 0) {
       const handleScroll = () => {
-        setIsScrolling(true);
+        dispatch({ type: "SET_IS_SCROLLING", payload: true });
         clearTimeout(scrollTimeout);
 
         const scrollPosition = window.scrollY + 10;
@@ -261,11 +319,10 @@ function Finish() {
             break;
           }
         }
-
-        setCurrentLabel(newLabel);
+        dispatch({ type: "SET_DATE_LABEL", payload: newLabel });
 
         scrollTimeout = setTimeout(() => {
-          setIsScrolling(false);
+          dispatch({ type: "SET_IS_SCROLLING", payload: false });
         }, 900);
       };
 
@@ -295,8 +352,7 @@ function Finish() {
         } else {
           label = format(messageDate, "M/d (EEE)", { locale: zhTW });
         }
-
-        setCurrentLabel(label);
+        dispatch({ type: "SET_DATE_LABEL", payload: label });
       }
     }
   }, [state.messages]);
@@ -452,8 +508,6 @@ function Finish() {
           } catch (error) {
             console.error("handleAnalyzeClick 發生錯誤：", error);
           }
-
-          // scrollToBottom();
         });
       }
     );
@@ -525,10 +579,10 @@ function Finish() {
         </div>
       </div>
       {/* 在滾動時顯示的日期標籤 */}
-      {isScrolling && currentLabel && (
+      {state.scrolling && state.dateLabel && (
         <div className="fixed flex justify-center  top-[70px] left-0 right-0  z-10 ">
           <div className="bg-gray-300/85 rounded-full px-3 py-1 mb-3 shadow-lg">
-            <p className="text-xs leading-normal">{currentLabel}</p>
+            <p className="text-xs leading-normal">{state.dateLabel}</p>
           </div>
         </div>
       )}
@@ -573,6 +627,19 @@ function Finish() {
                     </PhotoProvider>
                   ) : (
                     <p dangerouslySetInnerHTML={{ __html: marked(message.content) }}></p>
+                  )}
+                  {message.isQA && (
+                    <div>
+                      <button className="bg-primary text-white text-center w-[182px] h-[24px] mt-[10px] mb-[10px] rounded" onClick={() => handleQAClick("配送問題")}>
+                        配送問題
+                      </button>
+                      <button className="bg-primary text-white text-center w-[182px] h-[24px] mb-[10px] rounded" onClick={() => handleQAClick("運送時間")}>
+                        運送時間
+                      </button>
+                      <button className="bg-primary text-white text-center w-[182px] h-[24px] mb-[10px] rounded" onClick={() => handleQAClick("聯絡方式")}>
+                        聯絡方式
+                      </button>
+                    </div>
                   )}
                 </div>
 
