@@ -10,11 +10,7 @@ function Choose() {
       <div className="w-64 h-60 bg-white mx-auto py-2 px-4 flex flex-col gap-3 text-sm rounded-xl">
         <h4 className="text-center font-bold leading-normal text-base text-primary-800">請選擇規格數量</h4>
         <div className="bg-black-0 p-1 rounded-t-large flex justify-center items-center">
-          <img
-            src="https://images.unsplash.com/photo-1721020693392-e447ac5f52ee?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            alt="product-image"
-            className="w-small h-small rounded-lg mr-3"
-          />
+          <img src={state.productInfo?.image} alt="product-image" className="w-small h-small rounded-lg mr-3" />
           <div className="flex flex-col justify-between">
             <p className="text-xs leading-normal">{state.productInfo?.productNumber}</p>
             <p className="text-xs leading-normal font-bold line-clamp-1">{state.productInfo?.productName || "商品名稱未找到"}</p>
