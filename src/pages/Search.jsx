@@ -3,7 +3,7 @@ import momoLogo from "../images/momocallLogo.png";
 import { useEffect, useReducer, useState } from "react";
 import { db } from "../utils/firebase";
 import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const initialState = {
   searchTerm: "",
@@ -29,7 +29,6 @@ const reducer = (state, action) => {
 const Search = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [latestMessages, setLatestMessages] = useState({});
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchInitialData = async () => {
