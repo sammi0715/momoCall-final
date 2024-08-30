@@ -6,6 +6,7 @@ import ProductChat from "./pages/ProductChat";
 import SearchPages from "./pages/Search.jsx";
 import Finish from "./pages/Finish.jsx";
 import Chat from "./pages/Chat.jsx";
+import Backend from "./pages/Backend.jsx";
 import "./index.css";
 
 createRoot(document.getElementById("root")).render(
@@ -17,6 +18,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="chat" element={<Chat />} />
           <Route path="productChat" element={<ProductChat />} />
           <Route path="finishPage" element={<Finish />} />
+          <Route path="backend" element={<Backend />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
