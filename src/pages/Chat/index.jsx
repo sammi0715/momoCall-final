@@ -81,6 +81,7 @@ function Chat() {
   }, []);
 
   useEffect(() => {
+    scrollToBottom();
     let hasSentMessage = false;
 
     const sendQAMessage = async () => {
@@ -109,7 +110,6 @@ function Chat() {
   let scrollTimeout;
 
   useEffect(() => {
-    scrollToBottom();
     if (state.messages.length > 0) {
       const handleScroll = () => {
         dispatch({ type: "SET_IS_SCROLLING", payload: true });
