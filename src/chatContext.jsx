@@ -22,6 +22,8 @@ const initialState = {
   shopName: "",
   orderInfo: null,
   errorMsg: "",
+  dateLabel: "",
+  scrolling: false,
 };
 
 function reducer(state, action) {
@@ -86,6 +88,10 @@ function reducer(state, action) {
       return { ...state, orderInfo: action.payload };
     case "SET_GPT_ERROR":
       return { ...state, errorMsg: action.payload };
+    case "SET_DATE_LABEL":
+      return { ...state, dateLabel: action.payload };
+    case "SET_IS_SCROLLING":
+      return { ...state, scrolling: action.payload };
     default:
       return state;
   }
