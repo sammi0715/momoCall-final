@@ -665,7 +665,7 @@ function Finish() {
                     <AiOutlineLike className={`${state.messages[index].isUseful === "Yes" ? "hidden" : "inline"}`} />
                     <AiFillLike className={`${state.messages[index].isUseful == "Yes" ? "inline text-primary" : "hidden"}`} />
                   </button>
-                  {!state.messages[index].isUseful && <div className="border-1 border-black-600 h-4"></div>}
+                  {!(state.messages[index].isUseful || message.from === "user1") && <div className="border-1 border-black-600 h-4"></div>}
                   <button
                     onClick={() => dispatch({ type: "TOGGLE_USEFUL", payload: { index, isUseful: "No" } })}
                     className={`leading-4 ${message.from === "user1" ? "hidden" : state.messages[index].isUseful === "Yes" ? "hidden" : "inline"}`}
