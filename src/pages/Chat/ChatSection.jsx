@@ -1,7 +1,7 @@
 import { ChatContext, ChatDispatchContext } from "../../chatContext";
 import { useContext } from "react";
 import PropTypes from "prop-types";
-import happy from "../img/happy.png";
+import happy from "../../images/happy.png";
 import MessageBox from "./MessageBox";
 import ProductCard from "./ProductCard";
 import { FiAlertTriangle } from "react-icons/fi";
