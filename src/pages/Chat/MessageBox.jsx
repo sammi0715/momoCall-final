@@ -1,15 +1,45 @@
-import { ChatContext, ChatDispatchContext } from "../../chatContext";
+import { ChatContext, ChatDispatchContext } from "../../chatContextProvider";
 import { useContext } from "react";
+import { db, collection, addDoc, serverTimestamp } from "./utils/firebase";
 import { AiOutlineLike, AiOutlineDislike, AiFillDislike, AiFillLike } from "react-icons/ai";
 import happy from "../../images/happy.png";
 import { marked } from "marked";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
 import PropTypes from "prop-types";
+import responses from "./pages/responses.json";
 
 function MessageBox({ imageFormats }) {
-  const { state } = useContext(ChatContext);
-  const { dispatch, handleQAClick } = useContext(ChatDispatchContext);
+  const state = useContext(ChatContext);
+  const { dispatch, scrollToBottom } = useContext(ChatDispatchContext);
+
+  const handleQAClick = async (pattern) => {
+    const responseItem = responses.find((item) => item.pattern === pattern);
+    const queryParams = new URLSearchParams(window.location.search);
+    const shopId = queryParams.get("member");
+    const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
+
+    if (responseItem) {
+      const userMessage = {
+        content: pattern,
+        created_time: serverTimestamp(),
+        from: "user1",
+      };
+      await addDoc(messagesCollectionRef, userMessage);
+
+      const shopMessage = {
+        content: responseItem.response,
+        created_time: serverTimestamp(),
+        from: "shop",
+      };
+
+      await addDoc(messagesCollectionRef, shopMessage);
+
+      scrollToBottom();
+    } else {
+      console.error("未找到相應的回覆");
+    }
+  };
 
   {
     return state.messages.map((message, index) => {

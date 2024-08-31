@@ -38,7 +38,7 @@ function reducer(state, action) {
       return state;
   }
 }
-function Backend() {
+function Console() {
   const textareaRef = useRef(null);
   const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -240,4 +240,4 @@ function Backend() {
   );
 }
 
-export default Backend;
+export default Console;

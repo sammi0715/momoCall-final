@@ -26,7 +26,7 @@ const reducer = (state, action) => {
   }
 };
 
-const SearchPages = () => {
+const Search = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [latestMessages, setLatestMessages] = useState({});
   const navigate = useNavigate();
@@ -202,7 +202,7 @@ const SearchPages = () => {
   );
 };
 
-export default SearchPages;
+export default Search;
 
 const fetchAllChatrooms = async () => {
   let results = [];

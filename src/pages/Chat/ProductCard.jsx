@@ -1,4 +1,4 @@
-import { ChatContext, ChatDispatchContext } from "../../chatContext";
+import { ChatContext, ChatDispatchContext } from "../../chatContextProvider";
 import { useContext } from "react";
 import PropTypes from "prop-types";
 

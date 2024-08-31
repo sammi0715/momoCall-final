@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { ChatContextProvider } from "./chatContext";
+import { ChatContextProvider } from "./chatContextProvider";
 
 function App() {
   return (
