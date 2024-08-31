@@ -119,8 +119,8 @@ export function ChatContextProvider({ children }) {
   };
 
   return (
-    <ChatContext.Provider value={state}>
-      <ChatDispatchContext.Provider value={{ dispatch, scrollToBottom }}>{children}</ChatDispatchContext.Provider>
+    <ChatContext.Provider value={{ state, renderState }}>
+      <ChatDispatchContext.Provider value={{ dispatch, scrollToBottom, renderDispatch }}>{children}</ChatDispatchContext.Provider>
     </ChatContext.Provider>
   );
 }
