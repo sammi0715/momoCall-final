@@ -5,8 +5,8 @@ import happy from "../img/happy.png";
 import MessageBox from "./MessageBox";
 import ProductCard from "./ProductCard";
 import { FiAlertTriangle } from "react-icons/fi";
-import loading from "../img/loading.gif";
-import beenEater from "../img/beenEater.gif";
+import loading from "../../images/loading.gif";
+import beenEater from "../../images/beenEater.gif";
 
 function ChatSection({ productNumber, imageFormats }) {
   const { renderState } = useContext(ChatContext);

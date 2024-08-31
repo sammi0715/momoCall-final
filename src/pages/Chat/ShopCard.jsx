@@ -1,6 +1,6 @@
 import { ChatContext } from "../../chatContext";
 import { useContext } from "react";
-import happy from "../img/happy.png";
+import happy from "../../images/happy.png";
 
 function ShopCard() {
   const { state, renderState } = useContext(ChatContext);
