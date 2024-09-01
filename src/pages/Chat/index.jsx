@@ -1,6 +1,6 @@
 import { useEffect, useContext } from "react";
 import { ChatContext, ChatDispatchContext } from "../../chatContextProvider";
-
+import { useNavigate } from "react-router-dom";
 import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, ref, uploadBytesResumable, getDownloadURL } from "../../utils/firebase";
 import { fetchOrderInfo, fetchProductInfo, fetchGPT } from "../../utils/fetch";
 import useGoogleVisionAPI from "../../utils/useGoogleVisionAPI";
@@ -28,8 +28,20 @@ function Chat() {
 
   const state = useContext(ChatContext);
   const { dispatch, scrollToBottom } = useContext(ChatDispatchContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const checkParams = async () => {
+      const chatroomSnapshot = await getDocs(collection(db, "chatroom"));
+      const validShopIds = chatroomSnapshot.docs.map((doc) => doc.id);
+
+      if (!shopId || !validShopIds.includes(shopId)) {
+        navigate("/404");
+      }
+    };
+
+    checkParams();
+
     if (shopId) {
       dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
       fetchProductInfo(shopId, productNumber, dispatch);
