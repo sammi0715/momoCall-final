@@ -59,13 +59,15 @@ const Search = () => {
     fetchLatestMessages();
   }, [state.results]);
 
-  const handleInputChange = (event) => {
-    dispatch({ type: "SET_SEARCH_TERM", payload: event.target.value });
-  };
+  const handleInputChange = async (event) => {
+    const searchTerm = event.target.value;
+    dispatch({ type: "SET_SEARCH_TERM", payload: searchTerm });
 
-  const handleKeyPress = async (event) => {
-    if (event.key === "Enter") {
-      const fetchedResults = await searchFirestore(state.searchTerm);
+    if (searchTerm) {
+      const fetchedResults = await searchFirestore(searchTerm);
+      dispatch({ type: "SET_RESULTS", payload: fetchedResults });
+    } else {
+      const fetchedResults = await fetchAllChatrooms();
       dispatch({ type: "SET_RESULTS", payload: fetchedResults });
     }
   };
@@ -95,7 +97,6 @@ const Search = () => {
         className="leading-normal w-full h-8 text-sm text-black-100 text-center bg-black-200 placeholder-black-600 rounded-full mb-4 hover:bg-black-200 focus:outline outline-black-600 focus:bg-black-200"
         value={state.searchTerm}
         onChange={handleInputChange}
-        onKeyPress={handleKeyPress}
       />
       <div>
         {!state.isSearching &&
