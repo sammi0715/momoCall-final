@@ -27,7 +27,7 @@ function Admin() {
 
   useEffect(() => {
     if (localStorage.getItem("user")) {
-      navigate("/backend");
+      navigate("/console");
     }
   }, []);
 
