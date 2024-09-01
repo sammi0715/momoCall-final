@@ -1,4 +1,4 @@
-import { ChatContext, ChatDispatchContext } from "../../chatContextProvider";
+import { ChatContext } from "../../chatContextProvider";
 import { useContext } from "react";
 import PropTypes from "prop-types";
 import happy from "../../images/happy.png";
@@ -10,7 +10,6 @@ import beenEater from "../../images/beenEater.gif";
 
 function ChatSection({ productNumber, imageFormats }) {
   const { renderState } = useContext(ChatContext);
-  const { handleQAClick } = useContext(ChatDispatchContext);
 
   return (
     <div className={`px-3 py-4 space-y-4 ${renderState.divHeightClass} mb-[56px] min-h-screen`}>
@@ -21,7 +20,7 @@ function ChatSection({ productNumber, imageFormats }) {
 
       <ProductCard productNumber={productNumber} />
 
-      <MessageBox imageFormats={imageFormats} handleQAClick={handleQAClick} />
+      <MessageBox imageFormats={imageFormats} />
 
       <div className={`items-center flex gap-3 ${renderState.isImageLoading ? "flex flex-row-reverse" : renderState.isGPTLoading ? "flex" : "hidden"}`}>
         <img src={happy} alt="" className="w-9 h-9" />
@@ -33,7 +32,7 @@ function ChatSection({ productNumber, imageFormats }) {
 }
 
 ChatSection.propTypes = {
-  productNumber: PropTypes.object.isRequired,
+  productNumber: PropTypes.number,
   imageFormats: PropTypes.array.isRequired,
 };
 

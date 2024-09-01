@@ -27,7 +27,7 @@ function ProductCard({ productNumber }) {
 }
 
 ProductCard.propTypes = {
-  productNumber: PropTypes.object.isRequired,
+  productNumber: PropTypes.number,
 };
 
 export default ProductCard;

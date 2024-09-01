@@ -10,7 +10,7 @@ import PropTypes from "prop-types";
 import responses from "../../pages/responses.json";
 
 function MessageBox({ imageFormats }) {
-  const state = useContext(ChatContext);
+  const { state } = useContext(ChatContext);
   const { dispatch, scrollToBottom } = useContext(ChatDispatchContext);
 
   const handleQAClick = async (pattern) => {
