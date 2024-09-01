@@ -217,9 +217,6 @@ function Chat() {
   const imageFormats = [".jpeg", ".jpg", ".png", ".gif"];
 
   const sendImage = (event) => {
-    renderDispatch({ type: "TOGGLE_IMG_LOADING" });
-    scrollToBottom();
-
     const file = event.target.files[0];
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
     if (!file) return;
@@ -228,6 +225,9 @@ function Chat() {
       event.target.value = "";
       return;
     }
+    renderDispatch({ type: "TOGGLE_IMG_LOADING" });
+    scrollToBottom();
+
     const storageRef = ref(storage, `images/${file.name}`);
     const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -299,7 +299,6 @@ function Chat() {
       <OrderCard />
       <ShopCard />
       <DateLabel />
-
       <ChatSection productNumber={productNumber} imageFormats={imageFormats} />
       <Choose />
       <Checkout checkout={checkout} />
