@@ -7,7 +7,7 @@ import { marked } from "marked";
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
 import PropTypes from "prop-types";
-import responses from "../responses.json";
+import responses from "../../pages/responses.json";
 
 function MessageBox({ imageFormats }) {
   const state = useContext(ChatContext);
