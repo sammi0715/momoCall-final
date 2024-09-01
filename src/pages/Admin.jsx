@@ -44,7 +44,7 @@ function Admin() {
         await updateDoc(doc(db, "admin", accountSnapshot.docs[0].id), { isLogin: true });
 
         localStorage.setItem(`user`, JSON.stringify({ account: user.account, login: user.isLogin }));
-        navigate("/backend");
+        navigate("/console");
       } else {
         dispatch({ type: "LOGIN_STATE", payload: "Password error" });
       }
