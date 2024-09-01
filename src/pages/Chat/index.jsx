@@ -299,6 +299,7 @@ function Chat() {
       <OrderCard />
       <ShopCard />
       <DateLabel />
+
       <ChatSection productNumber={productNumber} imageFormats={imageFormats} />
       <Choose />
       <Checkout checkout={checkout} />

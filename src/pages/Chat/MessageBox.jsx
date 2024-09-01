@@ -104,6 +104,5 @@ function MessageBox({ imageFormats }) {
 
 MessageBox.propTypes = {
   imageFormats: PropTypes.array.isRequired,
-  handleQAClick: PropTypes.func.isRequired,
 };
 export default MessageBox;

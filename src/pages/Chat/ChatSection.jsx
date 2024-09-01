@@ -35,7 +35,6 @@ function ChatSection({ productNumber, imageFormats }) {
 ChatSection.propTypes = {
   productNumber: PropTypes.object.isRequired,
   imageFormats: PropTypes.array.isRequired,
-  handleQAClick: PropTypes.func.isRequired,
 };
 
 export default ChatSection;
