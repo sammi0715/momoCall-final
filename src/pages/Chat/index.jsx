@@ -44,13 +44,15 @@ function Chat() {
 
     if (shopId) {
       renderDispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
-
+      renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
+      fetchShopInfo(shopId, null, productNumber, dispatch, renderDispatch);
       if (orderNumber) {
         renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
-      } else {
-        renderDispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
+        fetchShopInfo(shopId, orderNumber, null, dispatch, renderDispatch);
+      } else if (productNumber) {
+        console.log(productNumber);
         renderDispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
-        fetchShopInfo(shopId, productNumber, orderNumber, dispatch);
+        fetchShopInfo(shopId, null, productNumber, dispatch, renderDispatch);
       }
     } else {
       renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
@@ -90,7 +92,7 @@ function Chat() {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [shopId, orderNumber, productNumber, dispatch]);
 
   useEffect(() => {
     scrollToBottom();
