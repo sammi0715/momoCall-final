@@ -50,7 +50,6 @@ function Chat() {
         renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
         fetchShopInfo(shopId, orderNumber, null, dispatch, renderDispatch);
       } else if (productNumber) {
-        console.log(productNumber);
         renderDispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
         fetchShopInfo(shopId, null, productNumber, dispatch, renderDispatch);
       }
