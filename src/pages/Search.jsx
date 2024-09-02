@@ -1,9 +1,9 @@
 import { FiChevronLeft } from "react-icons/fi";
-import momoLogo from "/momocallLogo.png";
+import momoLogo from "../images/momocallLogo.png";
 import { useEffect, useReducer, useState } from "react";
 import { db } from "../utils/firebase";
 import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const initialState = {
   searchTerm: "",
@@ -29,12 +29,16 @@ const reducer = (state, action) => {
 const Search = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [latestMessages, setLatestMessages] = useState({});
-  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchInitialData = async () => {
+      setIsLoading(true);
       const fetchedResults = await fetchAllChatrooms();
-      dispatch({ type: "SET_RESULTS", payload: fetchedResults });
+      setTimeout(() => {
+        dispatch({ type: "SET_RESULTS", payload: fetchedResults });
+        setIsLoading(false);
+      }, 1000);
     };
 
     fetchInitialData();
@@ -57,16 +61,20 @@ const Search = () => {
       setLatestMessages(updatedMessages);
     };
 
-    fetchLatestMessages();
+    if (state.results.length > 0) {
+      fetchLatestMessages();
+    }
   }, [state.results]);
 
-  const handleInputChange = (event) => {
-    dispatch({ type: "SET_SEARCH_TERM", payload: event.target.value });
-  };
+  const handleInputChange = async (event) => {
+    const searchTerm = event.target.value;
+    dispatch({ type: "SET_SEARCH_TERM", payload: searchTerm });
 
-  const handleKeyPress = async (event) => {
-    if (event.key === "Enter") {
-      const fetchedResults = await searchFirestore(state.searchTerm);
+    if (searchTerm) {
+      const fetchedResults = await searchFirestore(searchTerm);
+      dispatch({ type: "SET_RESULTS", payload: fetchedResults });
+    } else {
+      const fetchedResults = await fetchAllChatrooms();
       dispatch({ type: "SET_RESULTS", payload: fetchedResults });
     }
   };
@@ -75,7 +83,6 @@ const Search = () => {
     dispatch({ type: "CLEAR_SEARCH_TERM" });
     const fetchedResults = await fetchAllChatrooms();
     dispatch({ type: "SET_RESULTS", payload: fetchedResults });
-    navigate("/");
   };
 
   return (
@@ -86,7 +93,7 @@ const Search = () => {
             <FiChevronLeft className="w-6 h-6" />
           </button>
         </Link>
-        <Link to="/" onClick={handleLinkClick}>
+        <Link to="/search" onClick={handleLinkClick}>
           <h1 className="text-2xl leading-normal font-bold text-primary ml-20">momoCall</h1>
         </Link>
       </header>
@@ -97,106 +104,127 @@ const Search = () => {
         className="leading-normal w-full h-8 text-sm text-black-100 text-center bg-black-200 placeholder-black-600 rounded-full mb-4 hover:bg-black-200 focus:outline outline-black-600 focus:bg-black-200"
         value={state.searchTerm}
         onChange={handleInputChange}
-        onKeyPress={handleKeyPress}
       />
       <div>
-        {!state.isSearching &&
-          state.results
-            .filter((result, index, self) => index === self.findIndex((r) => r.shopId === result.shopId))
-            .sort((a, b) => {
-              const aTime = latestMessages[a.id]?.created_time?.seconds || 0;
-              const bTime = latestMessages[b.id]?.created_time?.seconds || 0;
-              return bTime - aTime;
-            })
-            .map((result, index) => {
-              let urlParam = "";
-              if (result.type === "member") {
-                urlParam = "member";
-              } else if (result.type === "order") {
-                urlParam = "order";
-              } else if (result.type === "product") {
-                urlParam = "product";
-              }
-
-              return (
-                <Link
-                  to={`/chat?${urlParam}`}
-                  key={result.id}
-                  className={`w-full py-4 flex items-center border-t border-gray-300 cursor-pointer ${index === state.results.length - 1 ? "border-b border-gray-300" : ""}`}
-                >
-                  <img className="w-large h-large rounded-full" src={momoLogo}></img>
-
-                  <div className="flex ml-4 flex-col py-2 justify-between w-full">
-                    <div className="flex justify-between items-center">
-                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent line-clamp-2">{result.shopName}</h2>
-                      <p className="text-xs text-gray-500 leading-normal">
-                        {latestMessages[result.id]?.created_time
-                          ? new Date(latestMessages[result.id].created_time.seconds * 1000).toLocaleDateString("zh-TW", {
-                              month: "2-digit",
-                              day: "2-digit",
-                            })
-                          : " "}
-                      </p>
-                    </div>
-                    <div className="flex justify-between">
-                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-[42px] line-clamp-2">{latestMessages[result.id]?.content || ""}</p>
-                      {latestMessages[result.id] && result.unreadCount > 0 && (
-                        <div className="bg-primary-800 text-black-0 text-base w-6 h-6 rounded-full flex items-center justify-center ml-2">{result.unreadCount}</div>
-                      )}
-                    </div>
+        {isLoading ? (
+          <div className="animate-pulse">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="w-full py-4 flex items-center border-t border-gray-300">
+                <div className="w-large h-large bg-gray-300 rounded-full"></div>
+                <div className="flex ml-4 flex-col py-2 justify-between w-full">
+                  <div className="flex justify-between items-center mb-1">
+                    <div className="w-1/2 h-4 bg-gray-300 rounded"></div>
+                    <div className="w-1/6 h-4 bg-gray-300 rounded"></div>
                   </div>
-                </Link>
-              );
-            })}
-        {state.isSearching && state.results.length === 0 && <p className="text-base leading-normal text-black text-center">找不到您搜尋的內容</p>}
-        {state.isSearching &&
-          state.results
-            .filter((result) => result.collectionName === "chatroom")
-            .sort((a, b) => {
-              const aTime = latestMessages[a.id]?.created_time?.seconds || 0;
-              const bTime = latestMessages[b.id]?.created_time?.seconds || 0;
-              return bTime - aTime;
-            })
-            .map((result, index) => {
-              let urlParam = `member=${result.id}`;
-              if (result.type === "member") {
-                urlParam = `member=${result.id}`;
-              } else if (result.type === "order") {
-                urlParam = `member=${result.id}&order=${result.myOrderNumber}`;
-              } else if (result.type === "product") {
-                urlParam = `member=${result.id}&product=${result.myProductNumber}`;
-              }
-
-              return (
-                <Link
-                  to={`/chat?${urlParam}`}
-                  key={result.id}
-                  className={`w-full py-4 flex items-center border-t border-gray-300 cursor-pointer ${index === state.results.length - 1 ? "border-b border-gray-300" : ""}`}
-                >
-                  <img className="w-large h-large rounded-full" src={momoLogo}></img>
-
-                  <div className="flex ml-4 flex-col py-2 justify-between w-full">
-                    <div className="flex justify-between items-center">
-                      <h2 className="text-base font-bold text-primary leading-normal w-messageContent line-clamp-2">{result.shopName}</h2>
-                      <p className="text-xs text-gray-500 leading-normal">
-                        {latestMessages[result.id]?.created_time
-                          ? new Date(latestMessages[result.id].created_time.seconds * 1000).toLocaleDateString("zh-TW", {
-                              month: "2-digit",
-                              day: "2-digit",
-                            })
-                          : " "}
-                      </p>
-                    </div>
-                    <div className="flex justify-between">
-                      <p className="text-sm text-gray-500 leading-normal w-messageContent h-[42px] line-clamp-2">{latestMessages[result.id]?.content || ""}</p>
-                      {latestMessages[result.id] && result.unreadCount > 0 && (
-                        <div className="bg-primary-800 text-black-0 text-base w-6 h-6 rounded-full flex items-center justify-center ml-2">{result.unreadCount}</div>
-                      )}
-                    </div>
+                  <div className="flex flex-col gap-1">
+                    <div className="w-3/4 h-4 bg-gray-300 rounded"></div>
+                    <div className="w-1/2 h-4 bg-gray-300 rounded"></div>
                   </div>
-                </Link>
-              );
-            })}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            {!state.isSearching &&
+              state.results
+                .filter((result, index, self) => index === self.findIndex((r) => r.shopId === result.shopId))
+                .sort((a, b) => {
+                  const aTime = latestMessages[a.id]?.created_time?.seconds || 0;
+                  const bTime = latestMessages[b.id]?.created_time?.seconds || 0;
+                  return bTime - aTime;
+                })
+                .map((result, index) => {
+                  let urlParam = "";
+                  if (result.type === "member") {
+                    urlParam = "member";
+                  } else if (result.type === "order") {
+                    urlParam = "order";
+                  } else if (result.type === "product") {
+                    urlParam = "product";
+                  }
+
+                  return (
+                    <Link
+                      to={`/chat?${urlParam}`}
+                      key={result.id}
+                      className={`w-full py-4 flex items-center border-t border-gray-300 cursor-pointer ${index === state.results.length - 1 ? "border-b border-gray-300" : ""}`}
+                    >
+                      <img className="w-large h-large rounded-full" src={momoLogo}></img>
+
+                      <div className="flex ml-4 flex-col py-2 justify-between w-full">
+                        <div className="flex justify-between items-center">
+                          <h2 className="text-base font-bold text-primary leading-normal w-messageContent line-clamp-2">{result.shopName}</h2>
+                          <p className="text-xs text-gray-500 leading-normal">
+                            {latestMessages[result.id]?.created_time
+                              ? new Date(latestMessages[result.id].created_time.seconds * 1000).toLocaleDateString("zh-TW", {
+                                  month: "2-digit",
+                                  day: "2-digit",
+                                })
+                              : " "}
+                          </p>
+                        </div>
+                        <div className="flex justify-between">
+                          <p className="text-sm text-gray-500 leading-normal w-messageContent h-[42px] line-clamp-2">{latestMessages[result.id]?.content || ""}</p>
+                          {latestMessages[result.id] && result.unreadCount > 0 && (
+                            <div className="bg-primary-800 text-black-0 text-base w-6 h-6 rounded-full flex items-center justify-center ml-2">{result.unreadCount}</div>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+            {state.isSearching && state.results.length === 0 && <p className="text-base leading-normal text-black text-center">找不到您搜尋的內容</p>}
+            {state.isSearching &&
+              state.results
+                .filter((result) => result.collectionName === "chatroom")
+                .sort((a, b) => {
+                  const aTime = latestMessages[a.id]?.created_time?.seconds || 0;
+                  const bTime = latestMessages[b.id]?.created_time?.seconds || 0;
+                  return bTime - aTime;
+                })
+                .map((result, index) => {
+                  let urlParam = `member=${result.id}`;
+                  if (result.type === "member") {
+                    urlParam = `member=${result.id}`;
+                  } else if (result.type === "order") {
+                    urlParam = `member=${result.id}&order=${result.myOrderNumber}`;
+                  } else if (result.type === "product") {
+                    urlParam = `member=${result.id}&product=${result.myProductNumber}`;
+                  }
+
+                  return (
+                    <Link
+                      to={`/chat?${urlParam}`}
+                      key={result.id}
+                      className={`w-full py-4 flex items-center border-t border-gray-300 cursor-pointer ${index === state.results.length - 1 ? "border-b border-gray-300" : ""}`}
+                    >
+                      <img className="w-large h-large rounded-full" src={momoLogo}></img>
+
+                      <div className="flex ml-4 flex-col py-2 justify-between w-full">
+                        <div className="flex justify-between items-center">
+                          <h2 className="text-base font-bold text-primary leading-normal w-messageContent line-clamp-2">{result.shopName}</h2>
+                          <p className="text-xs text-gray-500 leading-normal">
+                            {latestMessages[result.id]?.created_time
+                              ? new Date(latestMessages[result.id].created_time.seconds * 1000).toLocaleDateString("zh-TW", {
+                                  month: "2-digit",
+                                  day: "2-digit",
+                                })
+                              : " "}
+                          </p>
+                        </div>
+                        <div className="flex justify-between">
+                          <p className="text-sm text-gray-500 leading-normal w-messageContent h-[42px] line-clamp-2">{latestMessages[result.id]?.content || ""}</p>
+                          {latestMessages[result.id] && result.unreadCount > 0 && (
+                            <div className="bg-primary-800 text-black-0 text-base w-6 h-6 rounded-full flex items-center justify-center ml-2">{result.unreadCount}</div>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+          </>
+        )}
       </div>
     </div>
   );

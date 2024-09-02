@@ -1,12 +1,12 @@
 import { ChatContext, ChatDispatchContext } from "../../chatContextProvider";
 import { useContext } from "react";
 import PropTypes from "prop-types";
-import happy from "../img/happy.png";
+import happy from "../../images/happy.png";
 import MessageBox from "./MessageBox";
 import ProductCard from "./ProductCard";
 import { FiAlertTriangle } from "react-icons/fi";
-import loading from "../img/loading.gif";
-import beenEater from "../img/beenEater.gif";
+import loading from "../../images/loading.gif";
+import beenEater from "../../images/beenEater.gif";
 
 function ChatSection({ productNumber, imageFormats }) {
   const state = useContext(ChatContext);
