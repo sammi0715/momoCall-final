@@ -55,10 +55,13 @@ export const fetchShopInfo = async (shopId, orderNumber, productNumber, dispatch
   }
 };
 
-export const fetchGPT = async (inputText, document) => {
+export const fetchGPT = async (inputText, document, shopId) => {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   const apiUrl = "https://api.openai.com/v1/chat/completions";
-
+  const shopQuery = query(collection(db, "shops"), where("shopId", "==", shopId));
+  const shopSnapshot = await getDocs(shopQuery);
+  const shopDoc = shopSnapshot.docs[0];
+  const shopName = shopDoc.data().shopName;
   try {
     const res = await fetch(apiUrl, {
       method: "POST",
@@ -72,7 +75,7 @@ export const fetchGPT = async (inputText, document) => {
         messages: [
           {
             role: "system",
-            content: "你是一個全程使用繁體中文並且非常人性化回覆「已登入」的使用者提問MOMO電商客服相關問題的富邦媒體電商客服人員",
+            content: `你是一個全程使用繁體中文並且非常人性化回覆「已登入」的使用者提問MOMO電商${shopName}客服相關問題的富邦媒體電商客服人員`,
           },
           {
             role: "user",

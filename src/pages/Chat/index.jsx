@@ -18,6 +18,7 @@ import Choose from "./Choose";
 import Checkout from "./Checkout";
 import Order from "./Order";
 import TypeIn from "./TypeIn";
+import { object } from "prop-types";
 
 function Chat() {
   const { labels, handleAnalyzeImage } = useGoogleVisionAPI();
@@ -194,6 +195,8 @@ function Chat() {
     const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
 
     if (url !== undefined) {
+      console.log(typeof typeof url);
+
       setTimeout(() => {
         renderDispatch({ type: "TOGGLE_IMG_LOADING" });
         renderDispatch({ type: "TOGGLE_GPT_LOADING" });
@@ -218,9 +221,9 @@ function Chat() {
         response = matchedResponse.response;
         await addMessage(messagesCollectionRef, response, "shop");
       } else if (url !== undefined) {
-        fetchGPT(messagesList + labels, messagesCollectionRef);
+        fetchGPT(messagesList + labels, messagesCollectionRef, shopId);
       } else {
-        fetchGPT(messagesList, messagesCollectionRef);
+        fetchGPT(messagesList, messagesCollectionRef, shopId);
       }
 
       dispatch({ type: "RESET_INPUT_VALUE" });
@@ -245,7 +248,9 @@ function Chat() {
       event.target.value = "";
       return;
     }
-    renderDispatch({ type: "TOGGLE_IMG_LOADING" });
+    if (state.inputValue === "") {
+      renderDispatch({ type: "TOGGLE_IMG_LOADING" });
+    }
     scrollToBottom();
 
     const storageRef = ref(storage, `images/${file.name}`);
@@ -273,7 +278,7 @@ function Chat() {
   useEffect(() => {
     if (labels.length > 0) {
       const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
-      fetchGPT(`圖片相關如下${labels}`, messagesCollectionRef);
+      fetchGPT(`圖片相關如下${labels}`, messagesCollectionRef, shopId);
       setTimeout(() => {
         renderDispatch({ type: "TOGGLE_GPT_LOADING" });
       }, 1000);
@@ -323,7 +328,7 @@ function Chat() {
       <Choose />
       <Checkout checkout={checkout} />
       <Order addMessage={addMessage} shopId={shopId} />
-      <TypeIn sendImage={sendImage} handleKeyDown={handleKeyDown} sendMessage={sendMessage} />
+      <TypeIn sendImage={sendImage} handleKeyDown={handleKeyDown} sendMessage={() => sendMessage()} />
     </div>
   );
 }
