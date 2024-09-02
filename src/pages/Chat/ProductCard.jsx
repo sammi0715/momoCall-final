@@ -14,7 +14,8 @@ function ProductCard({ productNumber }) {
           <p className={`text-xs leading-normal flex justify-between`}>
             商品編號 {state.productInfo?.productNumber} <span className={`${productNumber === null ? "inline" : "hidden"} text-primary-800 font-bold `}>推薦</span>
           </p>
-          <p className="w-full h-[36px] text-xs leading-normal font-bold line-clamp-2">{state.productInfo?.productName || "商品名稱未找到"}</p>
+          <p className="w-full h-auto text-xs leading-normal font-bold line-clamp-2">{state.productInfo?.productName || "商品名稱未找到"}</p>
+          <p className="w-ful text-xs leading-normal font-bold line-clamp-2">${state.productInfo?.price || "商品價錢未找到"}</p>
         </div>
       </div>
       <div className={`bg-black-0 rounded-b-lg  ${renderState.showProductInfo ? "flex" : "hidden"} justify-center`}>
