@@ -33,7 +33,7 @@ function Choose() {
           </div>
           <div className="flex justify-around items-center">
             <p>總金額：</p>
-            <p className="text-black-600 w-2/4 text-center">{state.productInfo?.price * state.count}</p>
+            <p className="text-black-600 w-2/4 text-center">${state.productInfo?.price * state.count}</p>
           </div>
         </div>
         <div className="flex justify-around items-center">
