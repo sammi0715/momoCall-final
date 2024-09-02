@@ -48,7 +48,6 @@ export const fetchShopInfo = async (shopId, orderNumber, productNumber, dispatch
     } else {
       console.log("No matching shop found for the given shopId!");
       dispatch({ type: "SET_SHOP_NAME", payload: "商家名稱未找到" });
-      dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
     }
   } catch (error) {
     console.error("Error fetching shop documents:", error);
