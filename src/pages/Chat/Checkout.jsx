@@ -3,11 +3,11 @@ import { useContext } from "react";
 import PropTypes from "prop-types";
 
 function Checkout({ checkout }) {
-  const state = useContext(ChatContext);
-  const { dispatch } = useContext(ChatDispatchContext);
+  const { state, renderState } = useContext(ChatContext);
+  const { renderDispatch } = useContext(ChatDispatchContext);
 
   return (
-    <div className={`${state.isPerchase ? "flex" : "hidden"} justify-center items-center w-container h-full fixed top-0`}>
+    <div className={`${renderState.isPerchase ? "flex" : "hidden"} justify-center items-center w-container h-full fixed top-0`}>
       <div className="w-64 h-84 bg-white mx-auto py-2 px-4 flex flex-col gap-4 text-sm rounded-xl">
         <h4 className="text-center font-bold leading-normal text-lg text-primary-800 mt-2">訂單即將送出</h4>
         <p className="text-center font-bold">已確認品項、數量並進行結帳嗎？</p>
@@ -40,7 +40,7 @@ function Checkout({ checkout }) {
         </div>
 
         <div className="flex justify-around items-center ">
-          <button className="block w-full h-9 text-black-600" onClick={() => dispatch({ type: "TO_CHECKOUT" })}>
+          <button className="block w-full h-9 text-black-600" onClick={() => renderDispatch({ type: "TO_CHECKOUT" })}>
             上一步
           </button>
           <button onClick={checkout} className="block w-full h-9 text-primary-800 font-bold ">

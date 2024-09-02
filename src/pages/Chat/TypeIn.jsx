@@ -4,7 +4,7 @@ import { FiImage, FiSend } from "react-icons/fi";
 import PropTypes from "prop-types";
 
 function TypeIn({ sendImage, handleKeyDown, sendMessage }) {
-  const state = useContext(ChatContext);
+  const { state } = useContext(ChatContext);
   const { dispatch } = useContext(ChatDispatchContext);
 
   return (

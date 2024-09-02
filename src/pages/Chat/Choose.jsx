@@ -2,11 +2,11 @@ import { ChatContext, ChatDispatchContext } from "../../chatContextProvider";
 import { useContext } from "react";
 
 function Choose() {
-  const state = useContext(ChatContext);
-  const { dispatch } = useContext(ChatDispatchContext);
+  const { state, renderState } = useContext(ChatContext);
+  const { dispatch, renderDispatch } = useContext(ChatDispatchContext);
 
   return (
-    <div className={`${state.isChoose ? "flex" : "hidden"} justify-center items-center bg-black-800/80 w-container h-full fixed top-0`}>
+    <div className={`${renderState.isChoose ? "flex" : "hidden"} justify-center items-center bg-black-800/80 w-container h-full fixed top-0`}>
       <div className="w-64 h-60 bg-white mx-auto py-2 px-4 flex flex-col gap-3 text-sm rounded-xl">
         <h4 className="text-center font-bold leading-normal text-base text-primary-800">請選擇規格數量</h4>
         <div className="bg-black-0 p-1 rounded-t-large flex justify-center items-center">
@@ -37,10 +37,10 @@ function Choose() {
           </div>
         </div>
         <div className="flex justify-around items-center">
-          <button className="block w-full h-8" onClick={() => dispatch({ type: "TO_PURCHASE" })}>
+          <button className="block w-full h-8" onClick={() => renderDispatch({ type: "TO_PURCHASE" })}>
             取消
           </button>
-          <button onClick={() => dispatch({ type: "TO_CHECKOUT" })} className="text-primary-800 font-bold block w-full h-8">
+          <button onClick={() => renderDispatch({ type: "TO_CHECKOUT" })} className="text-primary-800 font-bold block w-full h-8">
             下一步
           </button>
         </div>

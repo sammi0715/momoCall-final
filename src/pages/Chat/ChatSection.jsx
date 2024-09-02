@@ -1,4 +1,4 @@
-import { ChatContext, ChatDispatchContext } from "../../chatContextProvider";
+import { ChatContext } from "../../chatContextProvider";
 import { useContext } from "react";
 import PropTypes from "prop-types";
 import happy from "../../images/happy.png";
@@ -9,11 +9,10 @@ import loading from "../../images/loading.gif";
 import beenEater from "../../images/beenEater.gif";
 
 function ChatSection({ productNumber, imageFormats }) {
-  const state = useContext(ChatContext);
-  const { handleQAClick } = useContext(ChatDispatchContext);
+  const { renderState } = useContext(ChatContext);
 
   return (
-    <div className={`px-3 py-4 space-y-4 ${state.divHeightClass} mb-[56px] min-h-screen`}>
+    <div className={`px-3 py-4 space-y-4 ${renderState.divHeightClass} mb-[56px] min-h-screen`}>
       <div className="bg-accent flex justify-center items-center h-8 px-6 rounded-large">
         <FiAlertTriangle className="w-notice h-notice mr-4" />
         <p className="text-sm leading-normal">提醒您，請勿透露個人資料</p>
@@ -21,9 +20,9 @@ function ChatSection({ productNumber, imageFormats }) {
 
       <ProductCard productNumber={productNumber} />
 
-      <MessageBox imageFormats={imageFormats} handleQAClick={handleQAClick} />
+      <MessageBox imageFormats={imageFormats} />
 
-      <div className={`items-center flex gap-3 ${state.isImageLoading ? "flex flex-row-reverse" : state.isGPTLoading ? "flex" : "hidden"}`}>
+      <div className={`items-center flex gap-3 ${renderState.isImageLoading ? "flex flex-row-reverse" : renderState.isGPTLoading ? "flex" : "hidden"}`}>
         <img src={happy} alt="" className="w-9 h-9" />
         <img src={beenEater} alt="" className="w-14 h-14" />
         <img src={loading} alt="" className="-ml-7" />
@@ -33,9 +32,8 @@ function ChatSection({ productNumber, imageFormats }) {
 }
 
 ChatSection.propTypes = {
-  productNumber: PropTypes.object.isRequired,
+  productNumber: PropTypes.number,
   imageFormats: PropTypes.array.isRequired,
-  handleQAClick: PropTypes.func.isRequired,
 };
 
 export default ChatSection;
