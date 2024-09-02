@@ -1,7 +1,7 @@
 import { useEffect, useContext } from "react";
 import { ChatContext, ChatDispatchContext } from "../../chatContextProvider";
 import { useNavigate } from "react-router-dom";
-import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, ref, uploadBytesResumable, getDownloadURL } from "../../utils/firebase";
+import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, ref, uploadBytesResumable, getDownloadURL, where } from "../../utils/firebase";
 import { fetchShopInfo, fetchGPT } from "../../utils/fetch";
 import useGoogleVisionAPI from "../../utils/useGoogleVisionAPI";
 import tappay from "../../utils/tappay";
@@ -34,7 +34,6 @@ function Chat() {
     const checkParams = async () => {
       const chatroomSnapshot = await getDocs(collection(db, "chatroom"));
       const validShopIds = chatroomSnapshot.docs.map((doc) => doc.id);
-
       if (!shopId || !validShopIds.includes(shopId)) {
         navigate("/404");
       }
@@ -44,15 +43,17 @@ function Chat() {
 
     if (shopId) {
       renderDispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
-      renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
-      renderDispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
       fetchShopInfo(shopId, null, productNumber, dispatch, renderDispatch);
       if (orderNumber) {
         renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
+        renderDispatch({ type: "TOGGLE_PRODUCT_INFO", payload: false });
         fetchShopInfo(shopId, orderNumber, null, dispatch, renderDispatch);
       } else if (productNumber) {
         renderDispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
         fetchShopInfo(shopId, null, productNumber, dispatch, renderDispatch);
+      } else {
+        renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
+        renderDispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
       }
     } else {
       renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
@@ -92,7 +93,7 @@ function Chat() {
     return () => {
       unsubscribe();
     };
-  }, [shopId, orderNumber, productNumber, dispatch]);
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -103,9 +104,13 @@ function Chat() {
       const shopId = queryParams.get("member");
       const messagesCollectionRef = collection(db, "chatroom", shopId, "messages");
 
+      const shopQuery = query(collection(db, "shops"), where("shopId", "==", shopId));
+      const shopSnapshot = await getDocs(shopQuery);
+      const shopName = shopSnapshot.docs[0].data().shopName;
+
       if (!hasSentMessage) {
         const qaMessage = {
-          content: `歡迎來到${state.shopName}！我是你的 AI 小幫手，你可以先從選單了解我們的服務～`,
+          content: `歡迎來到${shopName}！我是你的 AI 小幫手，你可以先從選單了解我們的服務～`,
           created_time: serverTimestamp(),
           from: "shop",
           isQA: true,
