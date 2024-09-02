@@ -39,7 +39,7 @@ function Chat() {
         navigate("/404");
       }
     };
-
+    dispatch({ type: "SET_MESSAGE_SENT", payload: false });
     checkParams();
 
     if (shopId) {
@@ -107,6 +107,8 @@ function Chat() {
       const shopName = shopSnapshot.docs[0].data().shopName;
 
       if (!state.messageSent) {
+        console.log(state.shopName);
+
         const qaMessage = {
           content: `歡迎來到${shopName}！我是你的 AI 小幫手，你可以先從選單了解我們的服務～`,
           created_time: serverTimestamp(),
@@ -114,14 +116,14 @@ function Chat() {
           isQA: true,
         };
         await addDoc(messagesCollectionRef, qaMessage);
-        dispatch({ type: "SET_MESSAGE_SENT" });
+        dispatch({ type: "SET_MESSAGE_SENT", payload: true });
       }
     };
 
     if (state.shopName) {
       sendQAMessage();
     }
-  }, []);
+  }, [state.shopName]);
 
   let scrollTimeout;
 

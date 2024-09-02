@@ -51,7 +51,7 @@ function reducer(state, action) {
     case "SET_FAQS":
       return { ...state, faqs: action.payload };
     case "SET_MESSAGE_SENT":
-      return { ...state, messageSent: true };
+      return { ...state, messageSent: action.payload };
     default:
       return state;
   }
