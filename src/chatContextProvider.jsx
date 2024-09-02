@@ -13,6 +13,7 @@ const initialState = {
   spec: "",
   dateLabel: "",
   faqs: [],
+  messageSent: false,
 };
 
 function reducer(state, action) {
@@ -49,6 +50,8 @@ function reducer(state, action) {
       return { ...state, scrolling: action.payload };
     case "SET_FAQS":
       return { ...state, faqs: action.payload };
+    case "SET_MESSAGE_SENT":
+      return { ...state, messageSent: true };
     default:
       return state;
   }

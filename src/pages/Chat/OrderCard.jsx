@@ -4,7 +4,7 @@ import { useContext } from "react";
 function OrderCard() {
   const { state, renderState } = useContext(ChatContext);
   return (
-    <div className={`${renderState.showOrderInfo ? "grid" : "hidden"} fixed mt-0 bg-black-0 w-container py-2 px-3 grid-cols-4 gap-6 top-[68px]  left-0 right-0 z-10 my-0 mx-auto`}>
+    <div className={`${renderState.showOrderInfo ? "grid" : "hidden"} fixed bg-black-0 w-container py-2 px-3 grid-cols-4 gap-6 mt-[68px]  left-0 right-0 z-10 my-0 mx-auto `}>
       <div className="flex flex-col items-center gap-y-2 col-span-1">
         <img
           src="https://images.unsplash.com/photo-1635865933730-e5817b5680cd?q=80&w=2864&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"

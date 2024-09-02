@@ -13,7 +13,7 @@ function ChatSection({ productNumber, imageFormats }) {
 
   return (
     <div className={`px-3 py-4 space-y-4 ${renderState.divHeightClass} mb-[56px] min-h-screen`}>
-      <div className="bg-accent flex justify-center items-center h-8 px-6 rounded-large">
+      <div className="bg-accent flex justify-center items-center h-8 px-6 rounded-large mt-44 ">
         <FiAlertTriangle className="w-notice h-notice mr-4" />
         <p className="text-sm leading-normal">提醒您，請勿透露個人資料</p>
       </div>

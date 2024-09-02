@@ -48,12 +48,10 @@ function Chat() {
         renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
         renderDispatch({ type: "TOGGLE_PRODUCT_INFO", payload: false });
         fetchShopInfo(shopId, orderNumber, null, dispatch, renderDispatch);
-      } else if (productNumber) {
-        renderDispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
-        fetchShopInfo(shopId, null, productNumber, dispatch, renderDispatch);
       } else {
         renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
         renderDispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
+        productNumber ? fetchShopInfo(shopId, null, productNumber, dispatch, renderDispatch) : "";
       }
     } else {
       renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
@@ -97,7 +95,6 @@ function Chat() {
 
   useEffect(() => {
     scrollToBottom();
-    let hasSentMessage = false;
 
     const sendQAMessage = async () => {
       const queryParams = new URLSearchParams(window.location.search);
@@ -108,7 +105,7 @@ function Chat() {
       const shopSnapshot = await getDocs(shopQuery);
       const shopName = shopSnapshot.docs[0].data().shopName;
 
-      if (!hasSentMessage) {
+      if (!state.messageSent) {
         const qaMessage = {
           content: `歡迎來到${shopName}！我是你的 AI 小幫手，你可以先從選單了解我們的服務～`,
           created_time: serverTimestamp(),
@@ -116,15 +113,14 @@ function Chat() {
           isQA: true,
         };
         await addDoc(messagesCollectionRef, qaMessage);
-
-        hasSentMessage = true;
+        dispatch({ type: "SET_MESSAGE_SENT" });
       }
     };
 
     if (state.shopName) {
       sendQAMessage();
     }
-  }, [state.shopName]);
+  }, []);
 
   let scrollTimeout;
 
