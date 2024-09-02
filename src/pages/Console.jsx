@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { FiLogOut, FiPenTool, FiPlus, FiX } from "react-icons/fi";
 import { useRef, useEffect, useReducer } from "react";
+import { useNavigate } from "react-router-dom";
 import { db } from "../utils/firebase";
 import { collection, getDocs, updateDoc, addDoc, deleteDoc, doc, orderBy, query } from "../utils/firebase";
 
@@ -41,6 +42,7 @@ function reducer(state, action) {
 function Console() {
   const textareaRef = useRef(null);
   const [state, dispatch] = useReducer(reducer, initialState);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -135,17 +137,20 @@ function Console() {
   const clearSearch = () => {
     dispatch({ type: "SET_SEARCH_TERM", payload: "" });
   };
+  const logout = () => {
+    localStorage.removeItem("user");
+    navigate("/");
+  };
 
   const filteredFaqs = state.faqs.filter((faq) => faq.keyword.includes(state.searchTerm) || faq.response.includes(state.searchTerm));
 
   return (
     <div className="w-container max-w-screen h-screen m-[auto] bg-white flex flex-col p-3 pt-0 font-sans relative">
       <header className="flex items-center py-4">
-        <Link to="/">
-          <button className="mr-3">
-            <FiLogOut className="w-6 h-6 transform -scale-x-100" />
-          </button>
-        </Link>
+        <button className="mr-3" onClick={logout}>
+          <FiLogOut className="w-6 h-6 transform -scale-x-100" />
+        </button>
+
         <Link to="/">
           <h1 className="text-2xl leading-normal font-bold text-primary ml-12">momoCallback</h1>
         </Link>
