@@ -61,7 +61,7 @@ const renderInitialState = {
   isGPTLoading: false,
   isImageLoading: false,
   isChoose: false,
-  isPerchase: false,
+  isPurchase: false,
   isCheckout: false,
   divHeightClass: "h-screen",
 };
@@ -85,14 +85,14 @@ function renderReducer(state, action) {
         alert("請選擇數量");
         return state;
       }
-      return { ...state, isPerchase: !state.isPerchase };
+      return { ...state, isPurchase: !state.isPurchase };
     case "FINISH_CHECKOUT":
       if (state.isCheckout == true) window.location.reload();
       return {
         ...state,
         isCheckout: !state.isCheckout,
         isChoose: false,
-        isPerchase: false,
+        isPurchase: false,
         count: 0,
       };
     case "SET_DIV_HEIGHT":

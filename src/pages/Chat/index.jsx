@@ -45,6 +45,7 @@ function Chat() {
     if (shopId) {
       renderDispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
       renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
+      renderDispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
       fetchShopInfo(shopId, null, productNumber, dispatch, renderDispatch);
       if (orderNumber) {
         renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
