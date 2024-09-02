@@ -69,11 +69,11 @@ export const fetchGPT = async (inputText, document) => {
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        max_tokens: 150,
+        max_tokens: 300,
         messages: [
           {
             role: "system",
-            content: "你是一個全程使用繁體中文並且非常人性化回覆「已登入」的使用者提問MOMO電商客服相關問題，且不會提到「關鍵字」三個字的富邦媒體電商客服人員",
+            content: "你是一個全程使用繁體中文並且非常人性化回覆「已登入」的使用者提問MOMO電商客服相關問題的富邦媒體電商客服人員",
           },
           {
             role: "user",

@@ -55,6 +55,7 @@ function Chat() {
       });
 
       dispatch({ type: "SET_MESSAGES", payload: msgs });
+      scrollToBottom();
     });
 
     const handleScroll = () => {
@@ -165,8 +166,6 @@ function Chat() {
   }));
 
   const addMessage = async (document, content, from) => {
-    console.log("test");
-
     await addDoc(document, {
       content: content,
       created_time: serverTimestamp(),
@@ -194,13 +193,20 @@ function Chat() {
       let response = "";
       const matchedResponse = predefinedResponses.find(({ pattern }) => pattern.test(state.inputValue));
 
+      const chatroomName = shopId || " ";
+      const q = query(collection(db, "chatroom", chatroomName, "messages"), orderBy("created_time"));
+      const messages = await getDocs(q);
+      const messagesList = messages.docs
+        .map((message) => (message.data().content === `歡迎來到${state.shopName}！我是你的 AI 小幫手，你可以先從選單了解我們的服務～` ? "" : message.data().content))
+        .toString();
+
       if (matchedResponse) {
         response = matchedResponse.response;
         await addMessage(messagesCollectionRef, response, "shop");
       } else if (url !== undefined) {
-        fetchGPT(labels, messagesCollectionRef);
+        fetchGPT(messagesList + labels, messagesCollectionRef);
       } else {
-        fetchGPT(state.inputValue, messagesCollectionRef);
+        fetchGPT(messagesList, messagesCollectionRef);
       }
 
       dispatch({ type: "RESET_INPUT_VALUE" });
@@ -209,7 +215,7 @@ function Chat() {
   };
 
   const handleKeyDown = (e) => {
-    if (e.keyCode === "Enter") {
+    if (e.keyCode === 13) {
       sendMessage();
     }
   };
