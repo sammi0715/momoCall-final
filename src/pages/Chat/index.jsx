@@ -2,7 +2,7 @@ import { useEffect, useContext } from "react";
 import { ChatContext, ChatDispatchContext } from "../../chatContextProvider";
 
 import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, ref, uploadBytesResumable, getDownloadURL } from "../../utils/firebase";
-import { fetchOrderInfo, fetchProductInfo, fetchGPT } from "../../utils/fetch";
+import { fetchShopInfo, fetchGPT } from "../../utils/fetch";
 import useGoogleVisionAPI from "../../utils/useGoogleVisionAPI";
 import tappay from "../../utils/tappay";
 import { format, isToday, isYesterday, differenceInMinutes } from "date-fns";
@@ -32,14 +32,13 @@ function Chat() {
   useEffect(() => {
     if (shopId) {
       dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
-      fetchProductInfo(shopId, productNumber, dispatch);
+
       if (orderNumber) {
         dispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
-        fetchOrderInfo(shopId, orderNumber, dispatch);
       } else {
         dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
         dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
-        fetchProductInfo(shopId, productNumber, dispatch);
+        fetchShopInfo(shopId, productNumber, orderNumber, dispatch);
       }
     } else {
       dispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
