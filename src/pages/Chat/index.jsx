@@ -32,13 +32,13 @@ function Chat() {
   useEffect(() => {
     if (shopId) {
       dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
-
+      fetchShopInfo(shopId, orderNumber, null, dispatch);
       if (orderNumber) {
         dispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
-      } else {
-        dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
+        fetchShopInfo(shopId, orderNumber, null, dispatch);
+      } else if (productNumber) {
         dispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
-        fetchShopInfo(shopId, productNumber, orderNumber, dispatch);
+        fetchShopInfo(shopId, null, productNumber, dispatch);
       }
     } else {
       dispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
@@ -77,7 +77,7 @@ function Chat() {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [shopId, orderNumber, productNumber, dispatch]);
 
   useEffect(() => {
     let hasSentMessage = false;
