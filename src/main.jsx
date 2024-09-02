@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { StrictMode } from "react";
 import App from "./App";
 import Home from "./pages/Home.jsx";
@@ -7,6 +7,7 @@ import Admin from "./pages/Admin.jsx";
 import Search from "./pages/Search.jsx";
 import Chat from "./pages/Chat";
 import Console from "./pages/Console.jsx";
+import NotFound from "./pages/NotFound.jsx";
 import "./index.css";
 
 createRoot(document.getElementById("root")).render(
@@ -19,7 +20,7 @@ createRoot(document.getElementById("root")).render(
           <Route path="chat" element={<Chat />} />
           <Route path="console" element={<Console />} />
           <Route path="admin" element={<Admin />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>

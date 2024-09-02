@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FiChevronLeft, FiPenTool, FiPlus, FiX } from "react-icons/fi";
+import { FiLogOut, FiPenTool, FiPlus, FiX } from "react-icons/fi";
 import { useRef, useEffect, useReducer } from "react";
 import { db } from "../utils/firebase";
 import { collection, getDocs, updateDoc, addDoc, deleteDoc, doc, orderBy, query } from "../utils/firebase";
@@ -143,7 +143,7 @@ function Console() {
       <header className="flex items-center py-4">
         <Link to="/">
           <button className="mr-3">
-            <FiChevronLeft className="w-6 h-6" />
+            <FiLogOut className="w-6 h-6 transform -scale-x-100" />
           </button>
         </Link>
         <Link to="/">

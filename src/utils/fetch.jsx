@@ -1,36 +1,33 @@
-// utils.js
 import { db, collection, query, where, getDocs, doc, addDoc, serverTimestamp } from "../utils/firebase";
 
-export const fetchOrderInfo = async (shopId, orderNumber, dispatch) => {
-  try {
-    const ordersCollectionRef = collection(db, "orders");
-    const orderQuery = query(ordersCollectionRef, where("shopId", "==", shopId), where("orderNumber", "==", orderNumber));
-    const querySnapshot = await getDocs(orderQuery);
-    if (!querySnapshot.empty) {
-      const orderDoc = querySnapshot.docs[0];
-      dispatch({ type: "SET_ORDER_INFO", payload: orderDoc.data() });
-    } else {
-      console.log("No matching order found!");
-    }
-  } catch (error) {
-    console.error("Error getting order documents:", error);
-  }
-};
-
-export const fetchProductInfo = async (shopId, productNumber, dispatch) => {
+export const fetchShopInfo = async (shopId, orderNumber, productNumber, dispatch) => {
   try {
     const shopQuery = query(collection(db, "shops"), where("shopId", "==", shopId));
     const shopSnapshot = await getDocs(shopQuery);
+
     if (!shopSnapshot.empty) {
       const shopDoc = shopSnapshot.docs[0];
       const shopDocId = shopDoc.id;
       const shopName = shopDoc.data().shopName;
 
       dispatch({ type: "SET_SHOP_NAME", payload: shopName });
-      const productsCollectionRef = collection(doc(db, "shops", shopDocId), "products");
-      if (productNumber) {
+
+      if (orderNumber) {
+        const ordersCollectionRef = collection(db, "orders");
+        const orderQuery = query(ordersCollectionRef, where("shopId", "==", shopId), where("orderNumber", "==", orderNumber));
+        const querySnapshot = await getDocs(orderQuery);
+
+        if (!querySnapshot.empty) {
+          const orderDoc = querySnapshot.docs[0];
+          dispatch({ type: "SET_ORDER_INFO", payload: orderDoc.data() });
+        } else {
+          console.log("No matching order found!");
+        }
+      } else if (productNumber) {
+        const productsCollectionRef = collection(doc(db, "shops", shopDocId), "products");
         const productQuery = query(productsCollectionRef, where("productNumber", "==", productNumber));
         const productSnapshot = await getDocs(productQuery);
+
         if (!productSnapshot.empty) {
           const productDoc = productSnapshot.docs[0];
           dispatch({ type: "SET_PRODUCT_INFO", payload: productDoc.data() });
@@ -39,6 +36,7 @@ export const fetchProductInfo = async (shopId, productNumber, dispatch) => {
           dispatch({ type: "SET_PRODUCT_INFO", payload: null });
         }
       } else {
+        const productsCollectionRef = collection(doc(db, "shops", shopDocId), "products");
         const productSnapshot = await getDocs(productsCollectionRef);
         const productList = productSnapshot.docs.map((doc) => doc.data());
         const randomIndex = Math.floor(Math.random() * productList.length);
@@ -53,9 +51,10 @@ export const fetchProductInfo = async (shopId, productNumber, dispatch) => {
       dispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
     }
   } catch (error) {
-    console.error("Error getting product documents:", error);
+    console.error("Error fetching shop documents:", error);
   }
 };
+
 export const fetchGPT = async (inputText, document) => {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   const apiUrl = "https://api.openai.com/v1/chat/completions";

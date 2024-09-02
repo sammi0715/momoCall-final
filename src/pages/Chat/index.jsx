@@ -1,8 +1,8 @@
 import { useEffect, useContext } from "react";
 import { ChatContext, ChatDispatchContext } from "../../chatContextProvider";
-
+import { useNavigate } from "react-router-dom";
 import { db, storage, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, getDocs, ref, uploadBytesResumable, getDownloadURL } from "../../utils/firebase";
-import { fetchOrderInfo, fetchProductInfo, fetchGPT } from "../../utils/fetch";
+import { fetchShopInfo, fetchGPT } from "../../utils/fetch";
 import useGoogleVisionAPI from "../../utils/useGoogleVisionAPI";
 import tappay from "../../utils/tappay";
 import { format, isToday, isYesterday, differenceInMinutes } from "date-fns";
@@ -28,18 +28,29 @@ function Chat() {
 
   const { state } = useContext(ChatContext);
   const { dispatch, renderDispatch, scrollToBottom } = useContext(ChatDispatchContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
+    const checkParams = async () => {
+      const chatroomSnapshot = await getDocs(collection(db, "chatroom"));
+      const validShopIds = chatroomSnapshot.docs.map((doc) => doc.id);
+
+      if (!shopId || !validShopIds.includes(shopId)) {
+        navigate("/404");
+      }
+    };
+
+    checkParams();
+
     if (shopId) {
       renderDispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
-      fetchProductInfo(shopId, productNumber, dispatch);
+
       if (orderNumber) {
         renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: true });
-        fetchOrderInfo(shopId, orderNumber, dispatch);
       } else {
         renderDispatch({ type: "TOGGLE_SHOP_INFO", payload: true });
         renderDispatch({ type: "TOGGLE_PRODUCT_INFO", payload: true });
-        fetchProductInfo(shopId, productNumber, dispatch);
+        fetchShopInfo(shopId, productNumber, orderNumber, dispatch);
       }
     } else {
       renderDispatch({ type: "TOGGLE_ORDER_INFO", payload: false });
